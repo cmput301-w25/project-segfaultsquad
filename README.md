@@ -2,13 +2,13 @@
 
 ## Team Members
 
-| Name | CCID   | GitHub Username |
-|  | ------ | --------------- |
-| Manraj Singh | Manraj6 | Manraj6     |
-| Ayaan Merchant | amercha1 | AyaanM    |
-| Mengyang Liu | mengyan4 | theOldSheep     |
-| Botsian Liu | boqian1 | BotsianLio     |
-| Suryansh Khranger | skhrange | SuryanshK |
+| Full Name         | CCID     | GitHub Username |
+|-------------------|----------|-----------------|
+| Manraj Singh      | Manraj6  | Manraj6         |
+| Ayaan Merchant    | amercha1 | AyaanM          |
+| Mengyang Liu      | mengyan4 | theOldSheep     |
+| Botsian Liu       | boqian1  | BotsianLio      |
+| Suryansh Khranger | skhrange | SuryanshK       |
 
 ## Project Description
 
