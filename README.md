@@ -7,7 +7,7 @@
 | Manraj Singh | Manraj6 | Manraj6     |
 | Ayaan Merchant | amercha1 | AyaanM    |
 | Mengyang Liu | mengyan4 | theOldSheep     |
-| [Full Name] | [CCID] | [@username]     |
+| Botsian Liu | boqian1 | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 
