@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="TopHeaderBackground">#FFFFFF</color>
+    <!-- Base colors -->
+    <color name="color_primary">#2196F3</color>  <!-- Material Blue 500 -->
+    <color name="TopHeaderBackground">#FFFFFF</color>  <!-- White -->
+    
+    <!-- Chip colors -->
+    <color name="chip_selected_background">#2196F3</color>  <!-- Same as primary -->
+    <color name="chip_unselected_background">#FFFFFF</color>  <!-- White -->
+    <color name="chip_selected_text">#FFFFFF</color>  <!-- White -->
+    <color name="chip_unselected_text">#2196F3</color>  <!-- Same as primary -->
+    <color name="chip_stroke">#2196F3</color>  <!-- Same as primary -->
 </resources>

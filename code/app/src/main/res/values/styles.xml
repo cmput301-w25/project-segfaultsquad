@@ -1,0 +1,20 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- ... other theme attributes ... -->
+    </style>
+
+    <!-- Custom Chip styles -->
+    <style name="CustomChipChoice" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background_color</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStrokeColor">@color/chip_stroke_color</item>
+        <item name="android:textSize">14sp</item>
+        <item name="chipMinHeight">36dp</item>
+        <item name="chipStartPadding">8dp</item>
+        <item name="chipEndPadding">8dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="chipCornerRadius">16dp</item>
+    </style>
+</resources> 

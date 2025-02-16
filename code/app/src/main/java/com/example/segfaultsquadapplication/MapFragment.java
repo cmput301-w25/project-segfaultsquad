@@ -30,21 +30,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.example.segfaultsquadapplication.MoodEvent;
 import com.google.firebase.firestore.QuerySnapshot;
+import android.util.Log;
+import com.google.android.material.chip.ChipGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
 import java.util.Map;
+import android.graphics.Color;
 
 public class MapFragment extends Fragment {
     // Attributes
     private GoogleMap mMap;
-    private TabLayout tabLayout;
     private FusedLocationProviderClient fusedLocationClient;
     private Location currentLocation;
     private FirebaseFirestore db;
-
 
     // MoodEvent Lists
     private List<MoodEvent> userMoods;
@@ -59,14 +60,17 @@ public class MapFragment extends Fragment {
     // distance in km for local moods
     private static final float LOCAL_RADIUS_KM = 5f;
 
-
+    private MapPlaceholderView mapView;
 
     // permissions handling
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-        if (isGranted) {
-            enableMyLocation();
-        }
-    });
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    enableMyLocation();
+                }
+            });
+
+    private ChipGroup mapChipGroup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,55 +83,34 @@ public class MapFragment extends Fragment {
         localMoods = new ArrayList<>();
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
+        mapChipGroup = view.findViewById(R.id.map_chip_group);
 
-        initializeViews(view);          // Initialize UI components
-        // TODO: comment this back in once the google maps api stuff is figured out
-        setupMap();                     // Setup map
-        // loadDummyData();                // Load dummy data
+        // Set default selection
+        mapChipGroup.check(R.id.chip_my_moods);
 
+        mapChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.chip_my_moods) {
+                // Handle My Mood History selection
+                updateMapMarkers(TAB_MY_MOODS);
+            } else if (checkedId == R.id.chip_followed_moods) {
+                // Handle Followed Moods selection
+                updateMapMarkers(TAB_FOLLOWED);
+            } else if (checkedId == R.id.chip_local_moods) {
+                // Handle Local Moods selection
+                updateMapMarkers(TAB_LOCAL);
+            }
+        });
+
+        setupPlaceholderMap(view);
         return view;
     }
 
-    private void initializeViews(View view) {
-        tabLayout = view.findViewById(R.id.tab_layout);
-
-        // Setup tabs
-        tabLayout.addTab(tabLayout.newTab().setText("My Mood History"));
-        tabLayout.addTab(tabLayout.newTab().setText("Followed Moods"));
-        tabLayout.addTab(tabLayout.newTab().setText("Local Moods"));
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                updateMapMarkers(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        });
-    }
-
-    private void setupMap() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(googleMap -> {
-            mMap = googleMap;
-            // Enable my location button if permission is granted
-            enableMyLocation();
-            // Set initial camera position to Edmonton (default if permissions not granted)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(53.5461, -113.4937), 12));
-            // Show initial tab's markers
-            loadMoodData();
-        });
+    private void setupPlaceholderMap(View view) {
+        mapView = view.findViewById(R.id.map_placeholder);
     }
 
     private void loadMoodData() {
@@ -156,11 +139,10 @@ public class MapFragment extends Fragment {
                 userMoods.add(mood);
             }
         }
-        if (tabLayout.getSelectedTabPosition() == TAB_MY_MOODS) {
+        if (mapChipGroup.getCheckedChipId() == R.id.chip_my_moods) {
             updateMapMarkers(TAB_MY_MOODS);
         }
     }
-
 
     private void loadFollowedUsersMoods() {
         // First get list of followed users
@@ -188,7 +170,7 @@ public class MapFragment extends Fragment {
                                         MoodEvent mood = moodSnapshot.getDocuments().get(0).toObject(MoodEvent.class);
                                         if (mood != null) {
                                             followedMoods.put(userId, mood);
-                                            if (tabLayout.getSelectedTabPosition() == TAB_FOLLOWED) {
+                                            if (mapChipGroup.getCheckedChipId() == R.id.chip_followed_moods) {
                                                 updateMapMarkers(TAB_FOLLOWED);
                                             }
                                         }
@@ -198,9 +180,9 @@ public class MapFragment extends Fragment {
                 });
     }
 
-
     private void loadLocalMoods() {
-        if (currentLocation == null) return;
+        if (currentLocation == null || mapChipGroup == null)
+            return;
 
         // Create a GeoPoint for the current location
         GeoPoint center = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -217,12 +199,11 @@ public class MapFragment extends Fragment {
                             localMoods.add(mood);
                         }
                     }
-                    if (tabLayout.getSelectedTabPosition() == TAB_LOCAL) {
+                    if (mapChipGroup.getCheckedChipId() == R.id.chip_local_moods) {
                         updateMapMarkers(TAB_LOCAL);
                     }
                 });
     }
-
 
     private boolean isWithinRadius(GeoPoint point1, GeoPoint point2, float radiusKm) {
         float[] results = new float[1];
@@ -234,9 +215,10 @@ public class MapFragment extends Fragment {
     }
 
     private void updateMapMarkers(int tabPosition) {
-        if (mMap == null) return;
+        if (mapView == null)
+            return;
 
-        mMap.clear();
+        mapView.clearMarkers();
         List<MoodEvent> moodsToShow = new ArrayList<>();
 
         switch (tabPosition) {
@@ -251,39 +233,39 @@ public class MapFragment extends Fragment {
                 break;
         }
 
+        // Add markers for each mood
         for (MoodEvent mood : moodsToShow) {
             if (mood.getLocation() != null) {
-                MarkerOptions markerOptions = new MarkerOptions()
-                        .position(new LatLng(
-                                mood.getLocation().getLatitude(),
-                                mood.getLocation().getLongitude()))
-                        .title(mood.getUserId())
-                        .snippet(mood.getReasonText());
+                // Convert GeoPoint to relative position (0-1 range)
+                float x = (float) ((mood.getLocation().getLongitude() + 180) / 360);
+                float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(getMoodColor(mood.getMoodType())));
-                mMap.addMarker(markerOptions);
+                int color = getMoodColor(mood.getMoodType());
+                mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }
     }
 
-    private float getMoodColor(MoodEvent.MoodType moodType) {
+    private int getMoodColor(MoodEvent.MoodType moodType) {
         switch (moodType) {
-            case HAPPY: return BitmapDescriptorFactory.HUE_GREEN;
-            case SAD: return BitmapDescriptorFactory.HUE_BLUE;
-            case ANGRY: return BitmapDescriptorFactory.HUE_RED;
-            case EXCITED: return BitmapDescriptorFactory.HUE_YELLOW;
-            case TIRED: return BitmapDescriptorFactory.HUE_ORANGE;
-            case SCARED: return BitmapDescriptorFactory.HUE_VIOLET;
-            case SURPRISED: return BitmapDescriptorFactory.HUE_AZURE;
-            default: return BitmapDescriptorFactory.HUE_ROSE;
+            case HAPPY:
+                return Color.GREEN;
+            case SAD:
+                return Color.BLUE;
+            case ANGRY:
+                return Color.RED;
+            case EXCITED:
+                return Color.YELLOW;
+            case TIRED:
+                return Color.rgb(255, 165, 0); // Orange
+            case SCARED:
+                return Color.rgb(148, 0, 211); // Violet
+            case SURPRISED:
+                return Color.CYAN;
+            default:
+                return Color.GRAY;
         }
     }
-
-
-
-
-
-
 
     // The method to get the current user's ID
     private String getCurrentUserId() {
@@ -296,10 +278,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-
-
-
-
     private void updateCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -307,20 +285,20 @@ public class MapFragment extends Fragment {
         }
 
         fusedLocationClient.getLastLocation()
-            .addOnSuccessListener(location -> {
-                if (location != null) {
-                    currentLocation = location;
-                    updateMapMarkers(tabLayout.getSelectedTabPosition());
-                }
-            });
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        currentLocation = location;
+                        updateMapMarkers(mapChipGroup.getCheckedChipId() == R.id.chip_local_moods ? TAB_LOCAL : -1);
+                    }
+                });
     }
 
     private void enableMyLocation() {
-        if (mMap == null) return;
+        if (mMap == null)
+            return;
 
         if (ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             updateCurrentLocation();
         } else {
@@ -330,8 +308,7 @@ public class MapFragment extends Fragment {
 
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED) {
+                requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             enableMyLocation();
         } else if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
             // Show an explanation to the user
@@ -345,7 +322,8 @@ public class MapFragment extends Fragment {
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
-                .setMessage("The app needs location permission to show nearby moods and attach location to your mood events.")
+                .setMessage(
+                        "The app needs location permission to show nearby moods and attach location to your mood events.")
                 .setPositiveButton("Grant Permission", (dialog, which) -> {
                     requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                 })
@@ -356,10 +334,6 @@ public class MapFragment extends Fragment {
                 })
                 .show();
     }
-
-
-
-
 
     @Override
     public void onResume() {

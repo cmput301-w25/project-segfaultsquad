@@ -1,18 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
+    <TextView
+        android:id="@+id/headingText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        app:tabMode="fixed"
-        app:tabGravity="fill"/>
+        android:background="@color/TopHeaderBackground"
+        android:text="Map"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.example.segfaultsquadapplication.MapPlaceholderView
+            android:id="@+id/map_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/map_chip_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/transparent"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_my_moods"
+                style="@style/CustomChipChoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/my_mood_history" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_followed_moods"
+                style="@style/CustomChipChoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/followed_moods" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_local_moods"
+                style="@style/CustomChipChoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/local_moods" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </FrameLayout>
 
     <!--TODO: this should work after you put in the google maps API key-->
     <!--<fragment-->
@@ -21,48 +64,48 @@
     <!--    android:layout_width="match_parent"-->
     <!--    android:layout_height="0dp"-->
     <!--    android:layout_weight="1"/>-->
-    <ImageView
+    <!--<ImageView
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/map_placeholder" />
+        android:src="@drawable/map_placeholder" />-->
 
 
-<!--    Duplicacy-->
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:padding="16dp"-->
-<!--        android:background="@color/white">-->
+    <!--    Duplicacy-->
+    <!--    <LinearLayout-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:orientation="horizontal"-->
+    <!--        android:padding="16dp"-->
+    <!--        android:background="@color/white">-->
 
-<!--        <ImageButton-->
-<!--            android:id="@+id/btn_home"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:src="@drawable/ic_home"-->
-<!--            android:background="?attr/selectableItemBackground"-->
-<!--            android:contentDescription="Home"/>-->
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/btn_home"-->
+    <!--            android:layout_width="0dp"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_weight="1"-->
+    <!--            android:src="@drawable/ic_home"-->
+    <!--            android:background="?attr/selectableItemBackground"-->
+    <!--            android:contentDescription="Home"/>-->
 
-<!--        <ImageButton-->
-<!--            android:id="@+id/btn_follow_requests"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:src="@drawable/ic_person"-->
-<!--            android:background="?attr/selectableItemBackground"-->
-<!--            android:contentDescription="Follow Requests"/>-->
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/btn_follow_requests"-->
+    <!--            android:layout_width="0dp"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_weight="1"-->
+    <!--            android:src="@drawable/ic_person"-->
+    <!--            android:background="?attr/selectableItemBackground"-->
+    <!--            android:contentDescription="Follow Requests"/>-->
 
-<!--        <ImageButton-->
-<!--            android:id="@+id/btn_following"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:src="@drawable/ic_star"-->
-<!--            android:background="?attr/selectableItemBackground"-->
-<!--            android:contentDescription="Following"/>-->
+    <!--        <ImageButton-->
+    <!--            android:id="@+id/btn_following"-->
+    <!--            android:layout_width="0dp"-->
+    <!--            android:layout_height="wrap_content"-->
+    <!--            android:layout_weight="1"-->
+    <!--            android:src="@drawable/ic_star"-->
+    <!--            android:background="?attr/selectableItemBackground"-->
+    <!--            android:contentDescription="Following"/>-->
 
-<!--    </LinearLayout>-->
+    <!--    </LinearLayout>-->
 
 </LinearLayout>

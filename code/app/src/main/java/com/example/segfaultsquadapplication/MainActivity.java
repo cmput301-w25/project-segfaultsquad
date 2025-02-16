@@ -3,6 +3,7 @@ package com.example.segfaultsquadapplication;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -15,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
+    // attributes
     private BottomNavigationView bottomNavigationView;
     private NavController navController;
     private FirebaseAuth mAuth;
@@ -36,12 +38,13 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 navController = navHostFragment.getNavController();
                 NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-                // Hide bottom navigation on login screen
+                // Hide bottom navigation on login screen and update menu based on destination
                 navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                     if (destination.getId() == R.id.navigation_login) {
-                        bottomNavigationView.setVisibility(android.view.View.GONE);
+                        bottomNavigationView.setVisibility(View.GONE);
                     } else {
-                        bottomNavigationView.setVisibility(android.view.View.VISIBLE);
+                        bottomNavigationView.setVisibility(View.VISIBLE);
+                        updateBottomNavMenu(destination.getId());
                     }
                 });
             } else {
@@ -53,6 +56,27 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         // Bottom navigation item selection
         bottomNavigationView.setOnItemSelectedListener(this);
+    }
+
+    /**
+     * method to update the bottom nav bar based upon the destination
+     * 
+     * @param destinationId the id of the view/activity user is navigating to
+     */
+    private void updateBottomNavMenu(int destinationId) {
+        if (destinationId == R.id.navigation_my_mood_history) {
+            bottomNavigationView.getMenu().clear();
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_home);
+        } else if (destinationId == R.id.navigation_map) {
+            bottomNavigationView.getMenu().clear();
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_map);
+        } else if (destinationId == R.id.navigation_following) {
+            bottomNavigationView.getMenu().clear();
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_following);
+        } else if (destinationId == R.id.navigation_follow_requests) {
+            bottomNavigationView.getMenu().clear();
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_requests);
+        }
     }
 
     @Override
