@@ -24,30 +24,45 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.example.segfaultsquadapplication.MoodEvent;
+import com.google.firebase.firestore.QuerySnapshot;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
+import java.util.Map;
 
 public class MapFragment extends Fragment {
+    // Attributes
     private GoogleMap mMap;
     private TabLayout tabLayout;
     private FusedLocationProviderClient fusedLocationClient;
     private Location currentLocation;
+    private FirebaseFirestore db;
 
-    private List<MoodEvent> myMoods;
-    private List<MoodEvent> followedMoods;
+
+    // MoodEvent Lists
+    private List<MoodEvent> userMoods;
+    private Map<String, MoodEvent> followedMoods; // Key: userId, Value: most recent mood
     private List<MoodEvent> localMoods;
 
-    private static final int TAB_MY_HISTORY = 0;
+    // Tabs
+    private static final int TAB_MY_MOODS = 0;
     private static final int TAB_FOLLOWED = 1;
     private static final int TAB_LOCAL = 2;
 
+    // distance in km for local moods
+    private static final float LOCAL_RADIUS_KM = 5f;
+
+
 
     // permissions handling
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-    registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
             enableMyLocation();
         }
@@ -57,6 +72,11 @@ public class MapFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        db = FirebaseFirestore.getInstance();
+        // init mood lists
+        userMoods = new ArrayList<>();
+        followedMoods = new HashMap<>();
+        localMoods = new ArrayList<>();
     }
 
 
@@ -67,8 +87,8 @@ public class MapFragment extends Fragment {
 
         initializeViews(view);          // Initialize UI components
         // TODO: comment this back in once the google maps api stuff is figured out
-        // setupMap();                     // Setup map
-        loadDummyData();                // Load dummy data
+        setupMap();                     // Setup map
+        // loadDummyData();                // Load dummy data
 
         return view;
     }
@@ -102,17 +122,183 @@ public class MapFragment extends Fragment {
             mMap = googleMap;
             // Enable my location button if permission is granted
             enableMyLocation();
-            // Set initial camera position to Edmonton
+            // Set initial camera position to Edmonton (default if permissions not granted)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(53.5461, -113.4937), 12));
             // Show initial tab's markers
-            updateMapMarkers(TAB_MY_HISTORY);
+            loadMoodData();
         });
     }
 
-    private Location getCurrentLocation() {
-        return currentLocation;
+    private void loadMoodData() {
+        String currentUserId = getCurrentUserId(); // TODO: Implement this method to get current user's ID
+
+        // Load user's moods
+        db.collection("moods")
+                .whereEqualTo("userId", currentUserId)
+                .get()
+                .addOnSuccessListener(this::handleUserMoods);
+
+        // Load followed users' moods
+        loadFollowedUsersMoods();
+
+        // Load local moods (if location available)
+        if (currentLocation != null) {
+            loadLocalMoods();
+        }
     }
+
+    private void handleUserMoods(QuerySnapshot snapshot) {
+        userMoods.clear();
+        for (var doc : snapshot.getDocuments()) {
+            MoodEvent mood = doc.toObject(MoodEvent.class);
+            if (mood != null) {
+                userMoods.add(mood);
+            }
+        }
+        if (tabLayout.getSelectedTabPosition() == TAB_MY_MOODS) {
+            updateMapMarkers(TAB_MY_MOODS);
+        }
+    }
+
+
+    private void loadFollowedUsersMoods() {
+        // First get list of followed users
+        String currentUserId = getCurrentUserId();
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<String> followedUsers = new ArrayList<>();
+                    for (var doc : snapshot.getDocuments()) {
+                        String followedId = doc.getString("followedId");
+                        if (followedId != null) {
+                            followedUsers.add(followedId);
+                        }
+                    }
+                    // Then get their most recent moods
+                    for (String userId : followedUsers) {
+                        db.collection("moods")
+                                .whereEqualTo("userId", userId)
+                                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                                .limit(1)
+                                .get()
+                                .addOnSuccessListener(moodSnapshot -> {
+                                    if (!moodSnapshot.isEmpty()) {
+                                        MoodEvent mood = moodSnapshot.getDocuments().get(0).toObject(MoodEvent.class);
+                                        if (mood != null) {
+                                            followedMoods.put(userId, mood);
+                                            if (tabLayout.getSelectedTabPosition() == TAB_FOLLOWED) {
+                                                updateMapMarkers(TAB_FOLLOWED);
+                                            }
+                                        }
+                                    }
+                                });
+                    }
+                });
+    }
+
+
+    private void loadLocalMoods() {
+        if (currentLocation == null) return;
+
+        // Create a GeoPoint for the current location
+        GeoPoint center = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+
+        // Get all moods and filter by distance
+        db.collection("moods")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    localMoods.clear();
+                    for (var doc : snapshot.getDocuments()) {
+                        MoodEvent mood = doc.toObject(MoodEvent.class);
+                        if (mood != null && mood.getLocation() != null &&
+                                isWithinRadius(mood.getLocation(), center, LOCAL_RADIUS_KM)) {
+                            localMoods.add(mood);
+                        }
+                    }
+                    if (tabLayout.getSelectedTabPosition() == TAB_LOCAL) {
+                        updateMapMarkers(TAB_LOCAL);
+                    }
+                });
+    }
+
+
+    private boolean isWithinRadius(GeoPoint point1, GeoPoint point2, float radiusKm) {
+        float[] results = new float[1];
+        Location.distanceBetween(
+                point1.getLatitude(), point1.getLongitude(),
+                point2.getLatitude(), point2.getLongitude(),
+                results);
+        return results[0] <= radiusKm * 1000; // Convert km to meters
+    }
+
+    private void updateMapMarkers(int tabPosition) {
+        if (mMap == null) return;
+
+        mMap.clear();
+        List<MoodEvent> moodsToShow = new ArrayList<>();
+
+        switch (tabPosition) {
+            case TAB_MY_MOODS:
+                moodsToShow.addAll(userMoods);
+                break;
+            case TAB_FOLLOWED:
+                moodsToShow.addAll(followedMoods.values());
+                break;
+            case TAB_LOCAL:
+                moodsToShow.addAll(localMoods);
+                break;
+        }
+
+        for (MoodEvent mood : moodsToShow) {
+            if (mood.getLocation() != null) {
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(new LatLng(
+                                mood.getLocation().getLatitude(),
+                                mood.getLocation().getLongitude()))
+                        .title(mood.getUserId())
+                        .snippet(mood.getReasonText());
+
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(getMoodColor(mood.getMoodType())));
+                mMap.addMarker(markerOptions);
+            }
+        }
+    }
+
+    private float getMoodColor(MoodEvent.MoodType moodType) {
+        switch (moodType) {
+            case HAPPY: return BitmapDescriptorFactory.HUE_GREEN;
+            case SAD: return BitmapDescriptorFactory.HUE_BLUE;
+            case ANGRY: return BitmapDescriptorFactory.HUE_RED;
+            case EXCITED: return BitmapDescriptorFactory.HUE_YELLOW;
+            case TIRED: return BitmapDescriptorFactory.HUE_ORANGE;
+            case SCARED: return BitmapDescriptorFactory.HUE_VIOLET;
+            case SURPRISED: return BitmapDescriptorFactory.HUE_AZURE;
+            default: return BitmapDescriptorFactory.HUE_ROSE;
+        }
+    }
+
+
+
+
+
+
+
+    // The method to get the current user's ID
+    private String getCurrentUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return user.getUid(); // Return the unique ID of the current user
+        } else {
+            // No user is logged in
+            return null;
+        }
+    }
+
+
+
+
 
     private void updateCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(),
@@ -171,95 +357,7 @@ public class MapFragment extends Fragment {
                 .show();
     }
 
-    private void loadDummyData() {
-        myMoods = new ArrayList<>();
-        followedMoods = new ArrayList<>();
-        localMoods = new ArrayList<>();
 
-        // Add dummy mood events for current user (My Mood History)
-        myMoods.add(createDummyMood(53.5461, -113.4937, MoodEvent.MoodType.HAPPY, "Me", "At the park"));
-        myMoods.add(createDummyMood(53.5433, -113.4947, MoodEvent.MoodType.EXCITED, "Me", "Shopping"));
-
-        // Add dummy mood events for followed users
-        followedMoods.add(createDummyMood(53.5451, -113.4957, MoodEvent.MoodType.HAPPY, "John", "Coffee"));
-        followedMoods.add(createDummyMood(53.5441, -113.4967, MoodEvent.MoodType.SAD, "Alice", "Rain"));
-        followedMoods.add(createDummyMood(53.5481, -113.4917, MoodEvent.MoodType.ANGRY, "Bob", "Traffic"));
-
-        // Add dummy local mood events (within 5km)
-        localMoods.add(createDummyMood(53.5471, -113.4927, MoodEvent.MoodType.HAPPY, "Local1", "Park"));
-        localMoods.add(createDummyMood(53.5465, -113.4940, MoodEvent.MoodType.EXCITED, "Local2", "Mall"));
-    }
-
-    private MoodEvent createDummyMood(double lat, double lng, MoodEvent.MoodType moodType,
-                                      String username, String reason) {
-        MoodEvent mood = new MoodEvent(username, moodType, reason);
-        mood.setLocation(new GeoPoint(lat, lng));
-        mood.setTimestamp(new Date());
-        return mood;
-    }
-
-    private void updateMapMarkers(int tabPosition) {
-        if (mMap == null) return;
-
-        mMap.clear();
-        List<MoodEvent> moodsToShow;
-
-        switch (tabPosition) {
-            case TAB_MY_HISTORY:
-                moodsToShow = myMoods;
-                break;
-            case TAB_FOLLOWED:
-                moodsToShow = followedMoods;
-                break;
-            case TAB_LOCAL:
-                moodsToShow = localMoods;
-                break;
-            default:
-                return;
-        }
-
-        for (MoodEvent mood : moodsToShow) {
-            // Skip if mood is outside 5km radius (for local moods)
-            if (tabPosition == TAB_LOCAL && !isWithin5Km(mood.getLocation())) {
-                continue;
-            }
-
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(new LatLng(
-                            mood.getLocation().getLatitude(),
-                            mood.getLocation().getLongitude()))
-                    .title(mood.getUserId())
-                    .snippet(mood.getReasonText());
-
-            // Set marker color based on mood type
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(getMoodColor(mood.getMoodType())));
-            mMap.addMarker(markerOptions);
-        }
-    }
-
-    private float getMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case HAPPY: return BitmapDescriptorFactory.HUE_GREEN;
-            case SAD: return BitmapDescriptorFactory.HUE_BLUE;
-            case ANGRY: return BitmapDescriptorFactory.HUE_RED;
-            case EXCITED: return BitmapDescriptorFactory.HUE_YELLOW;
-            default: return BitmapDescriptorFactory.HUE_AZURE;
-        }
-    }
-
-    private boolean isWithin5Km(GeoPoint location) {
-        // Get current location
-        Location currentLocation = getCurrentLocation();
-        if (currentLocation == null) return true; // Show all if location unavailable
-
-        float[] results = new float[1];
-        Location.distanceBetween(
-                currentLocation.getLatitude(), currentLocation.getLongitude(),
-                location.getLatitude(), location.getLongitude(),
-                results);
-
-        return results[0] <= 5000; // 5000 meters = 5km
-    }
 
 
 

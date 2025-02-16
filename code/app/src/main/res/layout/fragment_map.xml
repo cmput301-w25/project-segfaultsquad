@@ -28,40 +28,41 @@
         android:src="@drawable/map_placeholder" />
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@color/white">
+<!--    Duplicacy-->
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:padding="16dp"-->
+<!--        android:background="@color/white">-->
 
-        <ImageButton
-            android:id="@+id/btn_home"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/ic_home"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Home"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btn_home"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:src="@drawable/ic_home"-->
+<!--            android:background="?attr/selectableItemBackground"-->
+<!--            android:contentDescription="Home"/>-->
 
-        <ImageButton
-            android:id="@+id/btn_follow_requests"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/ic_person"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Follow Requests"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btn_follow_requests"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:src="@drawable/ic_person"-->
+<!--            android:background="?attr/selectableItemBackground"-->
+<!--            android:contentDescription="Follow Requests"/>-->
 
-        <ImageButton
-            android:id="@+id/btn_following"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/ic_star"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Following"/>
+<!--        <ImageButton-->
+<!--            android:id="@+id/btn_following"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:src="@drawable/ic_star"-->
+<!--            android:background="?attr/selectableItemBackground"-->
+<!--            android:contentDescription="Following"/>-->
 
-    </LinearLayout>
+<!--    </LinearLayout>-->
 
 </LinearLayout>

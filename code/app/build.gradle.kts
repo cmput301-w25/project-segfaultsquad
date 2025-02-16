@@ -49,14 +49,27 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    // Testing dependencies
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
+
     // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation("com.google.firebase:firebase-firestore:25.1.1")
     // TODO: Add the dependencies for Firebase products you want to use
+    // Firebase user auth
+    implementation("com.google.firebase:firebase-auth:21.0.1")
+    implementation("com.google.firebase:firebase-database:20.0.3")
 
     // Android Navigation Components
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.5")
 
+    // Google Play services dependencies
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+
 
 }
+
