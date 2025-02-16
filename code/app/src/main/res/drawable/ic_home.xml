@@ -1,0 +1,5 @@
+<!-- res/drawable/ic_figma_icon.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#4A4459" /> <!-- Background color from Figma -->
+    <size android:width="64dp" android:height="32dp" /> <!-- Adjust size as needed -->
+</shape>

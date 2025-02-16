@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_map">
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.example.segfaultsquadapplication.MapFragment"
+        android:label="Map">
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_follow_requests"
+        android:name="com.example.segfaultsquadapplication.FollowingRequestsFragment"
+        android:label="Follow Requests">
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_following"
+        android:name="com.example.segfaultsquadapplication.FollowingFragment"
+        android:label="Following">
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+    </fragment>
+</navigation>

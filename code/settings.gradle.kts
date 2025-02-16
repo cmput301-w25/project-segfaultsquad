@@ -19,6 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "SegFaultSquad"
+rootProject.name = "Segfault Squad Application"
 include(":app")
- 
