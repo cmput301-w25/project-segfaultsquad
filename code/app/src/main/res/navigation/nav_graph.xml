@@ -14,7 +14,6 @@
             app:destination="@+id/navigation_my_mood_history" />
     </fragment>
 
-
     <fragment
         android:id="@+id/navigation_my_mood_history"
         android:name="com.example.segfaultsquadapplication.MyMoodHistoryFragment"
@@ -28,6 +27,24 @@
         <action
             android:id="@+id/action_to_following"
             app:destination="@+id/navigation_following" />
+        <action
+            android:id="@+id/action_myMoodHistory_to_addMood"
+            app:destination="@id/navigation_add_mood"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_add_mood"
+        android:name="com.example.segfaultsquadapplication.AddMoodFragment"
+        android:label="Add Mood">
+        <action
+            android:id="@+id/action_addMood_to_myMoodHistory"
+            app:destination="@id/navigation_my_mood_history"
+            app:popUpTo="@id/navigation_my_mood_history"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

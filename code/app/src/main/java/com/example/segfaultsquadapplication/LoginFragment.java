@@ -60,23 +60,23 @@ public class LoginFragment extends Fragment {
         }
 
         // Set click listeners
-        forgotPasswordText.setOnClickListener(v -> {
+        forgotPasswordText.setOnClickListener(v -> { // TODO: ask TA what to do in this situation
             // TODO: Implement forgot password functionality
         });
 
-        signUpText.setOnClickListener(v -> {
+        signUpText.setOnClickListener(v -> { // TODO: ask TA if this is necessary
             // TODO: Navigate to sign up screen
         });
 
-        googleLoginButton.setOnClickListener(v -> {
+        googleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
             // TODO: Implement Google sign-in
         });
 
-        appleLoginButton.setOnClickListener(v -> {
+        appleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
             // TODO: Implement Apple sign-in
         });
 
-        loginButton.setOnClickListener(v -> loginUser());
+        loginButton.setOnClickListener(v -> loginUser()); // login button listener
 
         return rootView;
     }
@@ -121,7 +121,7 @@ public class LoginFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-                        // Create new user document
+                        // Create new user document (probably shouldnt have to do this, but anyways)
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("username", firebaseUser.getEmail().split("@")[0]);
 
@@ -135,6 +135,7 @@ public class LoginFragment extends Fragment {
                                             Toast.LENGTH_SHORT).show();
                                 });
                     } else {
+                        // user document was already there, navigate to MyMoodFragment
                         navigateToHome();
                     }
                 })
@@ -149,7 +150,7 @@ public class LoginFragment extends Fragment {
         // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation
         // component
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-        navController.navigate(R.id.navigation_my_mood_history); // Replace with your fragment's ID
+        navController.navigate(R.id.navigation_my_mood_history);
     }
 
 }

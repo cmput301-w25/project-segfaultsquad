@@ -10,4 +10,14 @@
     <color name="chip_selected_text">#FFFFFF</color>  <!-- White -->
     <color name="chip_unselected_text">#2196F3</color>  <!-- Same as primary -->
     <color name="chip_stroke">#2196F3</color>  <!-- Same as primary -->
+
+    <!-- Mood colors -->
+    <color name="mood_happy">#FFD700</color>     <!-- Gold -->
+    <color name="mood_sad">#4682B4</color>       <!-- Steel Blue -->
+    <color name="mood_angry">#FF4500</color>     <!-- Red Orange -->
+    <color name="mood_excited">#32CD32</color>   <!-- Lime Green -->
+    <color name="mood_tired">#8B4513</color>     <!-- Saddle Brown -->
+    <color name="mood_scared">#800080</color>    <!-- Purple -->
+    <color name="mood_surprised">#FF69B4</color> <!-- Hot Pink -->
+    <color name="mood_default">#808080</color>   <!-- Gray -->
 </resources>

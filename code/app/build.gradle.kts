@@ -70,6 +70,9 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
 
+    // firebase storage
+    implementation("com.google.firebase:firebase-storage:20.3.0")
+
 
 }
 
