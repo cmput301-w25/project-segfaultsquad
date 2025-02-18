@@ -1,111 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/headingText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/TopHeaderBackground"
-        android:text="Map"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <com.example.segfaultsquadapplication.MapPlaceholderView
-            android:id="@+id/map_placeholder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/map_chip_group"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginTop="16dp"
-            android:background="@android:color/transparent"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_my_moods"
-                style="@style/CustomChipChoice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/my_mood_history" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_followed_moods"
-                style="@style/CustomChipChoice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/followed_moods" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chip_local_moods"
-                style="@style/CustomChipChoice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/local_moods" />
-
-        </com.google.android.material.chip.ChipGroup>
-    </FrameLayout>
-
-    <!--TODO: this should work after you put in the google maps API key-->
-    <!--<fragment-->
-    <!--    android:id="@+id/map"-->
-    <!--    android:name="com.google.android.gms.maps.SupportMapFragment"-->
-    <!--    android:layout_width="match_parent"-->
-    <!--    android:layout_height="0dp"-->
-    <!--    android:layout_weight="1"/>-->
-    <!--<ImageView
-        android:id="@+id/map"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/map_placeholder" />-->
+        android:orientation="vertical">
 
+        <!-- Header section with title and filter button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/TopHeaderBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
 
-    <!--    Duplicacy-->
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:orientation="horizontal"-->
-    <!--        android:padding="16dp"-->
-    <!--        android:background="@color/white">-->
+            <TextView
+                android:id="@+id/headingText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Map"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
-    <!--        <ImageButton-->
-    <!--            android:id="@+id/btn_home"-->
-    <!--            android:layout_width="0dp"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_weight="1"-->
-    <!--            android:src="@drawable/ic_home"-->
-    <!--            android:background="?attr/selectableItemBackground"-->
-    <!--            android:contentDescription="Home"/>-->
+            <ImageButton
+                android:id="@+id/filterButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/filter_icon" />
 
-    <!--        <ImageButton-->
-    <!--            android:id="@+id/btn_follow_requests"-->
-    <!--            android:layout_width="0dp"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_weight="1"-->
-    <!--            android:src="@drawable/ic_person"-->
-    <!--            android:background="?attr/selectableItemBackground"-->
-    <!--            android:contentDescription="Follow Requests"/>-->
+        </LinearLayout>
 
-    <!--        <ImageButton-->
-    <!--            android:id="@+id/btn_following"-->
-    <!--            android:layout_width="0dp"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_weight="1"-->
-    <!--            android:src="@drawable/ic_star"-->
-    <!--            android:background="?attr/selectableItemBackground"-->
-    <!--            android:contentDescription="Following"/>-->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-    <!--    </LinearLayout>-->
+            <com.example.segfaultsquadapplication.MapPlaceholderView
+                android:id="@+id/map_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-</LinearLayout>
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/map_chip_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@android:color/transparent"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_my_moods"
+                    style="@style/CustomChipChoice"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/my_mood_history" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_followed_moods"
+                    style="@style/CustomChipChoice"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/followed_moods" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_local_moods"
+                    style="@style/CustomChipChoice"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/local_moods" />
+
+            </com.google.android.material.chip.ChipGroup>
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Filter Menu Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/filterMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/filter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Last Week" />
+
+            <TextView
+                android:id="@+id/filter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Mood" />
+
+            <TextView
+                android:id="@+id/filter3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Reason" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</FrameLayout>

@@ -16,6 +16,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import java.util.HashMap;
 import java.util.Map;
+import android.widget.CheckBox;
+import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 
 public class LoginFragment extends Fragment {
 
@@ -23,6 +26,11 @@ public class LoginFragment extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private AppCompatButton loginButton;
+    private CheckBox rememberMeCheckbox;
+    private TextView forgotPasswordText;
+    private TextView signUpText;
+    private MaterialButton googleLoginButton;
+    private MaterialButton appleLoginButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,6 +46,11 @@ public class LoginFragment extends Fragment {
         emailEditText = rootView.findViewById(R.id.editTextEmail);
         passwordEditText = rootView.findViewById(R.id.editTextPassword);
         loginButton = rootView.findViewById(R.id.buttonLogin);
+        rememberMeCheckbox = rootView.findViewById(R.id.checkboxRememberMe);
+        forgotPasswordText = rootView.findViewById(R.id.textForgotPassword);
+        signUpText = rootView.findViewById(R.id.textSignUp);
+        googleLoginButton = rootView.findViewById(R.id.buttonGoogleLogin);
+        appleLoginButton = rootView.findViewById(R.id.buttonAppleLogin);
 
         // Check if user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -45,6 +58,23 @@ public class LoginFragment extends Fragment {
             navigateToHome();
             return rootView;
         }
+
+        // Set click listeners
+        forgotPasswordText.setOnClickListener(v -> {
+            // TODO: Implement forgot password functionality
+        });
+
+        signUpText.setOnClickListener(v -> {
+            // TODO: Navigate to sign up screen
+        });
+
+        googleLoginButton.setOnClickListener(v -> {
+            // TODO: Implement Google sign-in
+        });
+
+        appleLoginButton.setOnClickListener(v -> {
+            // TODO: Implement Apple sign-in
+        });
 
         loginButton.setOnClickListener(v -> loginUser());
 

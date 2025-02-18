@@ -32,6 +32,8 @@ import com.example.segfaultsquadapplication.MoodEvent;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.util.Log;
 import com.google.android.material.chip.ChipGroup;
+import android.widget.ImageButton;
+import androidx.cardview.widget.CardView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,6 +64,13 @@ public class MapFragment extends Fragment {
 
     private MapPlaceholderView mapView;
 
+    private ChipGroup mapChipGroup;
+
+    // Add these as class members for filtering on map screen
+    private ImageButton filterButton;
+    private CardView filterMenu;
+    private boolean isFilterMenuVisible = false;
+
     // permissions handling
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -69,8 +78,6 @@ public class MapFragment extends Fragment {
                     enableMyLocation();
                 }
             });
-
-    private ChipGroup mapChipGroup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,11 +94,10 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        mapChipGroup = view.findViewById(R.id.map_chip_group);
-
-        // Set default selection
-        mapChipGroup.check(R.id.chip_my_moods);
-
+        // chip group view
+        mapChipGroup = view.findViewById(R.id.map_chip_group); // find it
+        mapChipGroup.check(R.id.chip_my_moods); // Set default selection
+        // chip click listener
         mapChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chip_my_moods) {
                 // Handle My Mood History selection
@@ -105,10 +111,37 @@ public class MapFragment extends Fragment {
             }
         });
 
+        // setup map
+        // TODO: get the actual map working and replace this
         setupPlaceholderMap(view);
+
+        // Initialize filter views
+        filterButton = view.findViewById(R.id.filterButton);
+        filterMenu = view.findViewById(R.id.filterMenu);
+
+        // Setup filter button click listener
+        filterButton.setOnClickListener(v -> toggleFilterMenu());
+
+        // Setup filter option click listeners
+        view.findViewById(R.id.filter1).setOnClickListener(v -> {
+            applyFilter("Last Week");
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter2).setOnClickListener(v -> {
+            applyFilter("By Mood");
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter3).setOnClickListener(v -> {
+            applyFilter("By Reason");
+            toggleFilterMenu();
+        });
+
         return view;
     }
 
+    // TODO: get the actual map working and refactor this bit
     private void setupPlaceholderMap(View view) {
         mapView = view.findViewById(R.id.map_placeholder);
     }
@@ -339,5 +372,25 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateCurrentLocation();
+    }
+
+    private void toggleFilterMenu() {
+        isFilterMenuVisible = !isFilterMenuVisible;
+        filterMenu.setVisibility(isFilterMenuVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void applyFilter(String filterType) {
+        // TODO: Implement filter logic
+        switch (filterType) {
+            case "Last Week":
+                // Filter moods from last week
+                break;
+            case "By Mood":
+                // Show mood type selector
+                break;
+            case "By Reason":
+                // Show reason selector
+                break;
+        }
     }
 }
