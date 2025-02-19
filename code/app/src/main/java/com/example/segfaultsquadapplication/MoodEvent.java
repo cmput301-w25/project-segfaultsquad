@@ -3,14 +3,12 @@ package com.example.segfaultsquadapplication;
 // imports
 import com.google.firebase.firestore.GeoPoint;
 import java.util.Date;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.PropertyName;
 
 public class MoodEvent {
     // attributes
     private String moodId;
     private String userId;
-    private Timestamp timestamp;
+    private Date timestamp;
     private MoodType moodType;
     private String reasonText;
     private String reasonImageUrl;
@@ -35,15 +33,9 @@ public class MoodEvent {
         this.userId = userId;
         this.moodType = moodType;
         this.reasonText = reasonText;
-        this.timestamp = new Timestamp(new Date());
+        this.timestamp = new Date();
     }
 
-    // Add a no-argument constructor for Firestore
-    public MoodEvent() {
-        // Required empty constructor for Firestore
-    }
-
-    // Other Methods
     // Getters and setters
     public String getMoodId() {
         return moodId;
@@ -57,20 +49,12 @@ public class MoodEvent {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public Timestamp getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Date getTimestampDate() {
-        return timestamp != null ? timestamp.toDate() : null;
+    public void setTimestamp(Date date) {
+        this.timestamp = date;
     }
 
     public MoodType getMoodType() {
@@ -116,5 +100,4 @@ public class MoodEvent {
     public void setLocation(GeoPoint location) {
         this.location = location;
     }
-
 }
