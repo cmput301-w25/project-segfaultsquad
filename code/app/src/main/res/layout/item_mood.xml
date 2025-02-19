@@ -2,11 +2,13 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/moodCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="4dp"
     app:cardElevation="2dp"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="8dp"
+    app:strokeWidth="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,13 +16,14 @@
         android:padding="16dp"
         android:orientation="horizontal">
 
-        <!-- Mood Icon/Color -->
-        <View
-            android:id="@+id/moodIndicator"
+        <!-- Mood Emoji -->
+        <TextView
+            android:id="@+id/moodEmoji"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="center_vertical"
-            android:background="@drawable/circle_background"/>
+            android:gravity="center"
+            android:textSize="18sp"/>
 
         <LinearLayout
             android:layout_width="0dp"

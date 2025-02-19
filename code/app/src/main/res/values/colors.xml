@@ -20,4 +20,13 @@
     <color name="mood_scared">#800080</color>    <!-- Purple -->
     <color name="mood_surprised">#FF69B4</color> <!-- Hot Pink -->
     <color name="mood_default">#808080</color>   <!-- Gray -->
+
+    <!-- Light mood colors (30% opacity) -->
+    <color name="mood_happy_light">#4DFFD700</color>
+    <color name="mood_sad_light">#4D4682B4</color>
+    <color name="mood_angry_light">#4DFF4500</color>
+    <color name="mood_excited_light">#4D32CD32</color>
+    <color name="mood_tired_light">#4D8B4513</color>
+    <color name="mood_scared_light">#4D800080</color>
+    <color name="mood_surprised_light">#4DFF69B4</color>
 </resources>

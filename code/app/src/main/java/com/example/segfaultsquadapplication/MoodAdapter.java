@@ -6,10 +6,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
     private List<MoodEvent> moodList;
@@ -49,15 +51,27 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     }
 
     class MoodViewHolder extends RecyclerView.ViewHolder {
-        private View moodIndicator;
+        private MaterialCardView moodCard;
+        private TextView moodEmoji;
         private TextView textMoodType;
         private TextView textReason;
         private TextView textTimestamp;
         private TextView textSocialSituation;
 
+        // Map of mood types to emojis
+        private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
+                MoodEvent.MoodType.ANGRY, "😡",
+                MoodEvent.MoodType.SAD, "😭",
+                MoodEvent.MoodType.HAPPY, "😀",
+                MoodEvent.MoodType.EXCITED, "😆",
+                MoodEvent.MoodType.TIRED, "😴",
+                MoodEvent.MoodType.SCARED, "😱",
+                MoodEvent.MoodType.SURPRISED, "🤯");
+
         public MoodViewHolder(@NonNull View itemView) {
             super(itemView);
-            moodIndicator = itemView.findViewById(R.id.moodIndicator);
+            moodCard = (MaterialCardView) itemView;
+            moodEmoji = itemView.findViewById(R.id.moodEmoji);
             textMoodType = itemView.findViewById(R.id.textMoodType);
             textReason = itemView.findViewById(R.id.textReason);
             textTimestamp = itemView.findViewById(R.id.textTimestamp);
@@ -72,6 +86,9 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         }
 
         public void bind(MoodEvent mood) {
+            // Set mood emoji
+            moodEmoji.setText(moodEmojis.get(mood.getMoodType()));
+
             textMoodType.setText(mood.getMoodType().name());
             textReason.setText(mood.getReasonText());
 
@@ -85,8 +102,12 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
                 textSocialSituation.setVisibility(View.GONE);
             }
 
-            // Set mood indicator color based on mood type
-            moodIndicator.setBackgroundColor(getMoodColor(mood.getMoodType()));
+            // Set mood colors
+            int moodColor = getMoodColor(mood.getMoodType());
+            int backgroundColor = getLightMoodColor(mood.getMoodType());
+
+            moodCard.setStrokeColor(moodColor);
+            moodCard.setCardBackgroundColor(backgroundColor);
         }
 
         private int getMoodColor(MoodEvent.MoodType moodType) {
@@ -105,6 +126,27 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
                     return itemView.getContext().getColor(R.color.mood_scared);
                 case SURPRISED:
                     return itemView.getContext().getColor(R.color.mood_surprised);
+                default:
+                    return itemView.getContext().getColor(R.color.mood_default);
+            }
+        }
+
+        private int getLightMoodColor(MoodEvent.MoodType moodType) {
+            switch (moodType) {
+                case HAPPY:
+                    return itemView.getContext().getColor(R.color.mood_happy_light);
+                case SAD:
+                    return itemView.getContext().getColor(R.color.mood_sad_light);
+                case ANGRY:
+                    return itemView.getContext().getColor(R.color.mood_angry_light);
+                case EXCITED:
+                    return itemView.getContext().getColor(R.color.mood_excited_light);
+                case TIRED:
+                    return itemView.getContext().getColor(R.color.mood_tired_light);
+                case SCARED:
+                    return itemView.getContext().getColor(R.color.mood_scared_light);
+                case SURPRISED:
+                    return itemView.getContext().getColor(R.color.mood_surprised_light);
                 default:
                     return itemView.getContext().getColor(R.color.mood_default);
             }

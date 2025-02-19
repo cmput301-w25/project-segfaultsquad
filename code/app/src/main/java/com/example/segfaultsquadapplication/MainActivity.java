@@ -13,6 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import androidx.navigation.Navigation;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
@@ -38,9 +39,12 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 navController = navHostFragment.getNavController();
                 NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-                // Hide bottom navigation on login screen and update menu based on destination
+                // Hide bottom navigation on login screen and landing screen and update menu
+                // based on destination
                 navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                     if (destination.getId() == R.id.navigation_login) {
+                        bottomNavigationView.setVisibility(View.GONE);
+                    } else if (destination.getId() == R.id.navigation_splash) {
                         bottomNavigationView.setVisibility(View.GONE);
                     } else {
                         bottomNavigationView.setVisibility(View.VISIBLE);
