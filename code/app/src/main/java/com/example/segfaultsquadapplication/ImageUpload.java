@@ -1,5 +1,7 @@
 package com.example.segfaultsquadapplication;
 
+import static androidx.activity.result.ActivityResultCallerKt.registerForActivityResult;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.media.Image;
@@ -11,32 +13,36 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-public class ImageUpload {
-    private View view;
+public class ImageUpload extends AppCompatActivity {
     private ImageView gallery;
     private Button btnGallery;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
-    public ImageUpload(View view) {
-        this.view = view;
-    }
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.pic_upload);
 
-    public void view() {
-        gallery = view.findViewById(R.id.uploaded_img);
-        btnGallery = view.findViewById(R.id.upload_button);
+        gallery = findViewById(R.id.uploaded_img);
+        btnGallery = findViewById(R.id.upload_button);
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(ImageUpload.this,"Gallery Opened", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI); //action pick image fro m external content data source
-                imagePickerLauncher.launch(intent); // Launch image picker
+                imagePickerLauncher.launch(intent); // launch image picker
             }
         });
     }
+
 }
+
