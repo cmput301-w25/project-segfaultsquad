@@ -25,7 +25,7 @@ public class ImageUploadFragment extends Fragment {
         View view = inflater.inflate(R.layout.pic_upload, container, false);
 
         gallery = view.findViewById(R.id.uploaded_img);
-        btnGallery = view.findViewById(R.id.upload_button);
+        btnGallery = view.findViewById(R.id.gallery_btn);
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
