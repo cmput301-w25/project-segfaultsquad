@@ -5,3 +5,14 @@ plugins {
     // Add the dependency for the Google services Gradle plugin (For Firebase/Google Maps API)
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Add the classpath for Firebase and Google services
+        classpath("com.google.gms:google-services:4.4.2")
+    }
+}

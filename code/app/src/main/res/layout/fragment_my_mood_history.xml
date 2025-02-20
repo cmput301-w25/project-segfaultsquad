@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -23,7 +24,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Map"
+                android:text="Mood History"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
             <ImageButton
@@ -36,52 +37,14 @@
 
         </LinearLayout>
 
-        <FrameLayout
+        <!-- RecyclerView for mood list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/moodRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:padding="8dp"/>
 
-            <com.example.segfaultsquadapplication.MapPlaceholderView
-                android:id="@+id/map_placeholder"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/map_chip_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:layout_marginTop="16dp"
-                android:background="@android:color/transparent"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_my_moods"
-                    style="@style/CustomChipChoice"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/my_mood_history" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_followed_moods"
-                    style="@style/CustomChipChoice"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/followed_moods" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_local_moods"
-                    style="@style/CustomChipChoice"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/local_moods" />
-
-            </com.google.android.material.chip.ChipGroup>
-        </FrameLayout>
     </LinearLayout>
 
     <!-- Filter Menu Card -->
@@ -91,7 +54,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|top"
         android:layout_marginTop="64dp"
-        android:layout_marginEnd="8dp"
         android:visibility="gone"
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true">
@@ -107,22 +69,31 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Last Week" />
+                android:text="Last Week"/>
 
             <TextView
                 android:id="@+id/filter2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="By Mood" />
+                android:text="By Mood"/>
 
             <TextView
                 android:id="@+id/filter3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="By Reason" />
+                android:text="By Reason"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+    <!-- FAB for adding new mood -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAddMood"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:fabSize="normal"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="TopHeaderBackground">#FFFFFF</color>
+    <!-- Base colors -->
+    <color name="color_primary">#2196F3</color>  <!-- Material Blue 500 -->
+    <color name="TopHeaderBackground">#FFFFFF</color>  <!-- White -->
+    
+    <!-- Chip colors -->
+    <color name="chip_selected_background">#2196F3</color>  <!-- Same as primary -->
+    <color name="chip_unselected_background">#FFFFFF</color>  <!-- White -->
+    <color name="chip_selected_text">#FFFFFF</color>  <!-- White -->
+    <color name="chip_unselected_text">#2196F3</color>  <!-- Same as primary -->
+    <color name="chip_stroke">#2196F3</color>  <!-- Same as primary -->
+
+    <!-- Mood colors -->
+    <color name="mood_happy">#FFD700</color>     <!-- Gold -->
+    <color name="mood_sad">#4682B4</color>       <!-- Steel Blue -->
+    <color name="mood_angry">#FF4500</color>     <!-- Red Orange -->
+    <color name="mood_excited">#32CD32</color>   <!-- Lime Green -->
+    <color name="mood_tired">#8B4513</color>     <!-- Saddle Brown -->
+    <color name="mood_scared">#800080</color>    <!-- Purple -->
+    <color name="mood_surprised">#FF69B4</color> <!-- Hot Pink -->
+    <color name="mood_default">#808080</color>   <!-- Gray -->
+
+    <!-- Light mood colors (30% opacity) -->
+    <color name="mood_happy_light">#4DFFD700</color>
+    <color name="mood_sad_light">#4D4682B4</color>
+    <color name="mood_angry_light">#4DFF4500</color>
+    <color name="mood_excited_light">#4D32CD32</color>
+    <color name="mood_tired_light">#4D8B4513</color>
+    <color name="mood_scared_light">#4D800080</color>
+    <color name="mood_surprised_light">#4DFF69B4</color>
 </resources>
