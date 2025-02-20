@@ -26,8 +26,9 @@ public class MoodEvent {
     public enum SocialSituation {
         ALONE,
         WITH_ONE_PERSON,
-        WITH_GROUP,
-        IN_CROWD
+        WITH_TWO_OR_SEVERAL_PEOPLE,
+        WITH_A_CROWD,
+        OTHER
     }
 
     // Constructor(s)
