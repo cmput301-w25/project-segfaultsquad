@@ -12,15 +12,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public class ImageUploadFragment extends Fragment {
     private ImageView gallery;
     private Button btnGallery;
     private ActivityResultLauncher<Intent> imagePickerLauncher;
-
-    public ImageUploadFragment() {}
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -34,11 +32,13 @@ public class ImageUploadFragment extends Fragment {
             public void onClick(View v) {
                 Toast.makeText(getContext(), "Gallery Opened", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, 1);
+                imagePickerLauncher.launch(intent); //launch image picker
             }
         });
 
         return view;
     }
+
+    //find a way to choose image, check if under 65536mb, and store
 }
 
