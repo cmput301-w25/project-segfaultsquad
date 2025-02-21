@@ -3,12 +3,14 @@ package com.example.segfaultsquadapplication;
 // imports
 import com.google.firebase.firestore.GeoPoint;
 import java.util.Date;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.PropertyName;
 
 public class MoodEvent {
     // attributes
     private String moodId;
     private String userId;
-    private Date timestamp;
+    private Timestamp timestamp;
     private MoodType moodType;
     private String reasonText;
     private String reasonImageUrl;
@@ -24,9 +26,8 @@ public class MoodEvent {
     public enum SocialSituation {
         ALONE,
         WITH_ONE_PERSON,
-        WITH_TWO_OR_SEVERAL_PEOPLE,
-        WITH_A_CROWD,
-        OTHER
+        WITH_GROUP,
+        IN_CROWD
     }
 
     // Constructor(s)
@@ -34,9 +35,15 @@ public class MoodEvent {
         this.userId = userId;
         this.moodType = moodType;
         this.reasonText = reasonText;
-        this.timestamp = new Date();
+        this.timestamp = new Timestamp(new Date());
     }
 
+    // Add a no-argument constructor for Firestore
+    public MoodEvent() {
+        // Required empty constructor for Firestore
+    }
+
+    // Other Methods
     // Getters and setters
     public String getMoodId() {
         return moodId;
@@ -50,12 +57,20 @@ public class MoodEvent {
         return userId;
     }
 
-    public Date getTimestamp() {
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date date) {
-        this.timestamp = date;
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public Date getTimestampDate() {
+        return timestamp != null ? timestamp.toDate() : null;
     }
 
     public MoodType getMoodType() {
@@ -101,4 +116,5 @@ public class MoodEvent {
     public void setLocation(GeoPoint location) {
         this.location = location;
     }
+
 }
