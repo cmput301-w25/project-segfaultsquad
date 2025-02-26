@@ -1,3 +1,6 @@
+# THIS BRANCH IS NO LONGER IN USE - MARKED AS ARCHIVED - REFRAIN FROM PULLING, MERGING, OR COMMITING
+### It only exists to show commits were performed but is no longer used
+
 # CMPUT 301 W25 - Team SegfaultSquad
 
 ## Team Members
