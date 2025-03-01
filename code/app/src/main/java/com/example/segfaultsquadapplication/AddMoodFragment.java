@@ -36,6 +36,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.GeoPoint;
 import android.widget.LinearLayout;
+import android.util.Log;
 
 public class AddMoodFragment extends Fragment {
     // attributes
@@ -180,6 +181,8 @@ public class AddMoodFragment extends Fragment {
      * helper method to setup image upload for mood reason (picture)
      */
     private void setupImageUpload() {
+        // debugging
+        Log.d("AddMoodFragment", "entered setupImageUpload()");
         // click listener on the imageUplaod view section
         imageUpload.setOnClickListener(v -> {
             // setup intents to carry to uplaoding area / devidce gallery
@@ -189,6 +192,8 @@ public class AddMoodFragment extends Fragment {
             // start uplaod image request
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
         });
+        // debugging
+        Log.d("AddMoodFragment", "completed setupImageUpload()");
     }
 
     /**
@@ -207,6 +212,8 @@ public class AddMoodFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // debugging
+        Log.d("AddMoodFragment", "entered onActivityRequest()");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
             selectedImageUri = data.getData();
@@ -214,6 +221,7 @@ public class AddMoodFragment extends Fragment {
             imageUpload.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageUpload.setPadding(0, 0, 0, 0);
         }
+        Log.d("AddMoodFragment", "completed onActivityRequest()");
     }
 
     /**
@@ -247,6 +255,7 @@ public class AddMoodFragment extends Fragment {
      * confirm button for mood event creation
      */
     private void saveMood() {
+        Log.d("AddMoodFragment", "entered saveMood()");
         if (selectedMoodType == null) {
             Toast.makeText(getContext(), "Please select a mood", Toast.LENGTH_SHORT).show();
             return;
@@ -258,6 +267,8 @@ public class AddMoodFragment extends Fragment {
         } else {
             requestLocationPermission();
         }
+
+        Log.d("AddMoodFragment", "completed saveMood()");
     }
 
     /**
@@ -363,6 +374,9 @@ public class AddMoodFragment extends Fragment {
      *             the moodEvent being saved
      */
     private void uploadImageAndSaveMood(MoodEvent mood) {
+        // debugging
+        Log.d("AddMoodFragment", "entered uploadImageAndSaveMood()");
+
         String imageFileName = "mood_images/" + UUID.randomUUID().toString();
         StorageReference imageRef = storageRef.child(imageFileName);
 
@@ -375,6 +389,8 @@ public class AddMoodFragment extends Fragment {
                 })
                 .addOnFailureListener(
                         e -> Toast.makeText(getContext(), "Failed to upload image", Toast.LENGTH_SHORT).show());
+
+        Log.d("AddMoodFragment", "completed uploadImageAndSaveMood()");
     }
 
     /**
