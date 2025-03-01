@@ -2,8 +2,10 @@ package com.example.segfaultsquadapplication;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +22,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import android.widget.EditText;
 import android.widget.ArrayAdapter;
@@ -374,23 +384,81 @@ public class AddMoodFragment extends Fragment {
      *             the moodEvent being saved
      */
     private void uploadImageAndSaveMood(MoodEvent mood) {
-        // debugging
-        Log.d("AddMoodFragment", "entered uploadImageAndSaveMood()");
+        // Debugging
+        Log.d("AddMoodFragment", "Entered uploadImageAndSaveMood()");
 
-        String imageFileName = "mood_images/" + UUID.randomUUID().toString();
-        StorageReference imageRef = storageRef.child(imageFileName);
+        // Check if selectedImageUri is valid
+        if (selectedImageUri == null) {
+            Log.e("AddMoodFragment", "Selected image URI is null");
+            Toast.makeText(getContext(), "No image selected", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            // debugging
+            Log.d("AddMoodFragment", "Selected image URI: " + selectedImageUri.toString());
+        }
 
-        imageRef.putFile(selectedImageUri)
-                .addOnSuccessListener(taskSnapshot -> {
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        mood.setReasonImageUrl(uri.toString());
-                        saveMoodToFirestore(mood);
-                    });
-                })
-                .addOnFailureListener(
-                        e -> Toast.makeText(getContext(), "Failed to upload image", Toast.LENGTH_SHORT).show());
+        // Get the image size
+        try {
+            InputStream inputStream = getContext().getContentResolver().openInputStream(selectedImageUri);
+            int imageSize = inputStream.available(); // Get the size in bytes
 
-        Log.d("AddMoodFragment", "completed uploadImageAndSaveMood()");
+            // debugging (basically i dont know how to take an image on the emulator thats
+            // not the built in default, but i know that default images size is 30kb ===
+            // 30,000bytes)
+            Log.d("uploadImageAndSaveMood", "imagesize" + imageSize);
+            // Yep, works as expected
+
+            // Check if the image size exceeds the limit
+            if (imageSize > 65536) { // 65,536 bytes limit
+                Toast.makeText(getContext(), "Image size exceeds the limit of 64 KB", Toast.LENGTH_SHORT).show();
+                Log.e("AddMoodFragment", "Image size exceeds the limit: " + imageSize + " bytes");
+                return;
+            }
+        } catch (IOException e) {
+            Log.e("AddMoodFragment", "Error getting image size", e);
+            Toast.makeText(getContext(), "Error processing image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Convert the image into a bitarray
+        Bitmap bitmap;
+        try {
+            bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImageUri);
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+
+            // Convert byte array to List<Byte> because apparetly firestore doesnt support
+            // serializing bytearrays directly and so we need lists for storing arrays.
+            // PREV ERROR: java.lang.IllegalArgumentException: Could not serialize object.
+            // Serializing Arrays is not supported, please use Lists instead (found in field
+            // 'imageData')
+            // List<Byte> byteList = new ArrayList<>();
+            // for (byte b : byteArray) {
+            // byteList.add(b);
+            // }
+            // NOPE
+
+            // Apparently firestore also donest allow serializing Byte objects directly, so
+            // need to cast to numeric types (int, long, float, etc)
+            // Convert byte array to List<Integer>
+            List<Integer> byteList = new ArrayList<>();
+            for (byte b : byteArray) {
+                byteList.add((int) b); // Convert byte to int
+            }
+
+            mood.setImageData(byteList); // Set the List<Integer> in the MoodEvent
+
+        } catch (IOException e) {
+            Log.e("AddMoodFragment", "Error converting image to byte array", e);
+            Toast.makeText(getContext(), "Error processing image", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // save image to firestore
+        saveMoodToFirestore(mood);
+
+        Log.d("AddMoodFragment", "Completed uploadImageAndSaveMood()");
     }
 
     /**
@@ -400,8 +468,21 @@ public class AddMoodFragment extends Fragment {
      *             the mood event being saved
      */
     private void saveMoodToFirestore(MoodEvent mood) {
+        // Create a map to store the mood data
+        Map<String, Object> moodData = new HashMap<>();
+        moodData.put("userId", mood.getUserId());
+        moodData.put("moodType", mood.getMoodType().name());
+        moodData.put("reasonText", mood.getReasonText());
+        moodData.put("timestamp", mood.getTimestamp());
+
+        // Add the image data as a BLOB (if image reason)
+        if (mood.getImageData() != null) {
+            moodData.put("imageData", mood.getImageData());
+        }
+
+        // save to firestore db
         db.collection("moods")
-                .add(mood)
+                .add(moodData)
                 .addOnSuccessListener(documentReference -> {
                     Toast.makeText(getContext(), "Mood saved successfully", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(getView()).navigateUp();
@@ -411,4 +492,5 @@ public class AddMoodFragment extends Fragment {
                             Toast.LENGTH_SHORT).show();
                 });
     }
+
 }
