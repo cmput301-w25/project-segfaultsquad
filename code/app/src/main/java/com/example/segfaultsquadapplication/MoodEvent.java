@@ -3,6 +3,8 @@ package com.example.segfaultsquadapplication;
 // imports
 import com.google.firebase.firestore.GeoPoint;
 import java.util.Date;
+import java.util.List;
+
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 
@@ -16,6 +18,16 @@ public class MoodEvent {
     private String reasonImageUrl;
     private SocialSituation socialSituation;
     private GeoPoint location;
+    // since firestore made the Storage thing private recently, im gonna store
+    // images as BLOBs in the db itself and de-construct and reconstruct as
+    // necessary
+    // private List<Byte> imageData; // For storing the image as a byte array
+    // Change from byte[] to List<Byte> cuz firestore doesn allow serializing of
+    // byte arrays directly
+    // NOPE
+    private List<Integer> imageData; // For storing the image as a integer array
+    // apparetnly firestore also doesnt support serializing Byte objects, so using
+    // numeric objects (int) now
 
     // Enum for mood types
     public enum MoodType {
@@ -117,4 +129,25 @@ public class MoodEvent {
         this.location = location;
     }
 
+    // image data methods
+    // getter and setters for imageData
+    /**
+     * gets the image data from int array to deconstruct images
+     * 
+     * @return
+     *         returns the int array constructed
+     */
+    public List<Integer> getImageData() {
+        return imageData;
+    }
+
+    /**
+     * * gets the image data from int array to reconstruct images
+     * 
+     * @param imageData
+     *                  the gotten int array imageData
+     */
+    public void setImageData(List<Integer> imageData) {
+        this.imageData = imageData;
+    }
 }

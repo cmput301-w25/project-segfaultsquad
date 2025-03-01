@@ -19,6 +19,10 @@ import java.util.Collections;
 import java.util.List;
 import androidx.navigation.Navigation;
 import android.util.Log;
+import android.app.AlertDialog;
+import android.widget.EditText;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
@@ -28,6 +32,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     private MoodAdapter moodAdapter;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private List<MoodEvent> allMoods = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,12 +90,17 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         });
 
         view.findViewById(R.id.filter2).setOnClickListener(v -> {
-            applyFilter("By Mood");
+            showMoodFilterDialog();
             toggleFilterMenu();
         });
 
         view.findViewById(R.id.filter3).setOnClickListener(v -> {
-            applyFilter("By Reason");
+            showReasonFilterDialog();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.clearFilters).setOnClickListener(v -> {
+            clearAllFilters();
             toggleFilterMenu();
         });
     }
@@ -116,7 +126,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
                     }
 
                     // construct moods arraylist
-                    List<MoodEvent> moods = new ArrayList<>();
+                    allMoods.clear(); // Clear previous moods
                     if (value != null) {
                         // debugging
                         Log.d("MoodHistory", "Number of moods retrieved: " + value.size());
@@ -126,7 +136,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
                                 MoodEvent mood = doc.toObject(MoodEvent.class); // make MoodEvent object per fetched
                                                                                 // mood
                                 mood.setMoodId(doc.getId());
-                                moods.add(mood); // add to arraylist
+                                allMoods.add(mood); // add to arraylist
                                 Log.d("MoodHistory",
                                         "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getMoodId());
                             } catch (Exception e) {
@@ -135,9 +145,9 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
                         }
 
                         // Sort the moods in memory instead
-                        Collections.sort(moods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+                        Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
                     }
-                    moodAdapter.updateMoods(moods);
+                    moodAdapter.updateMoods(allMoods);
                 });
     }
 
@@ -184,22 +194,101 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         }
     }
 
-    // TODO: Filter implementation methods to be added later
     /**
      * filter functionality for filtering by last week
      */
     private void filterLastWeek() {
+        // Get the current date and time
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1); // Subtract one week
+        Date lastWeekDate = calendar.getTime();
+
+        // Filter moods
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : allMoods) { // Assuming allMoods is your complete list of moods
+            if (mood.getTimestamp().toDate().after(lastWeekDate)) { // Convert Timestamp to Date
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods); // Update the RecyclerView
     }
 
     /**
-     * filter functionality for filtering by specified mood
+     * the dialog fragment for the filter functionality for filtering by specified
+     * mood
      */
     private void showMoodFilterDialog() {
+        String[] moods = { "HAPPY", "SAD", "ANGRY", "EXCITED", "TIRED", "SCARED", "SURPRISED" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Select Mood")
+                .setItems(moods, (dialog, which) -> {
+                    String selectedMood = moods[which];
+                    filterByMood(selectedMood);
+                });
+        builder.show();
     }
 
     /**
-     * filter functionality for filtering by specified word inside mood desc/reason
+     * filter functionality for filtering by mood type
+     *
+     * @param moodType
+     *                 the mood user seleected to see through filter
+     */
+    private void filterByMood(String moodType) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+
+        // then filter the mood events
+        for (MoodEvent mood : allMoods) {
+            // .name() gets the actual name value instead of the whole moodType enum
+            if (mood.getMoodType().name().equals(moodType)) {
+                filteredMoods.add(mood);
+            }
+        }
+
+        // alert adapter
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    /**
+     * the dialog fragment for the filter functionality for filtering by specified
+     * mood
      */
     private void showReasonFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Enter Reason Keyword");
+
+        final EditText input = new EditText(getContext());
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String keyword = input.getText().toString();
+            filterByReason(keyword);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    /**
+     * * filter functionality for filtering by specified word inside mood
+     * desc/reason
+     * 
+     * @param keyword
+     *                the keyword to filter by
+     */
+    private void filterByReason(String keyword) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : allMoods) {
+            if (mood.getReasonText() != null && mood.getReasonText().toLowerCase().contains(keyword.toLowerCase())) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    /**
+     * method to clear all applied filters
+     */
+    private void clearAllFilters() {
+        moodAdapter.updateMoods(allMoods); // Reset to show all moods
     }
 }

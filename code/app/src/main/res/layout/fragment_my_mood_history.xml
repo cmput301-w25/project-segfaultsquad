@@ -84,6 +84,13 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="By Reason"/>
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear All Filters"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -94,6 +101,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        app:fabSize="normal"/>
+        app:fabSize="normal"
+        app:srcCompat="@android:drawable/ic_menu_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
