@@ -230,20 +230,20 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * filter functionality for filtering by mood type
-     * 
+     *
      * @param moodType
      *                 the mood user seleected to see through filter
      */
     private void filterByMood(String moodType) {
         List<MoodEvent> filteredMoods = new ArrayList<>();
+
+        // then filter the mood events
         for (MoodEvent mood : allMoods) {
-            if (mood.getMoodType().equals(moodType)) {
+            // .name() gets the actual name value instead of the whole moodType enum
+            if (mood.getMoodType().name().equals(moodType)) {
                 filteredMoods.add(mood);
             }
         }
-
-        // debugging
-        Log.d("MyMoodHistoryFragment", "Filtered moods count for " + moodType + ": " + filteredMoods.size());
 
         // alert adapter
         moodAdapter.updateMoods(filteredMoods);
@@ -285,6 +285,9 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         moodAdapter.updateMoods(filteredMoods);
     }
 
+    /**
+     * method to clear all applied filters
+     */
     private void clearAllFilters() {
         moodAdapter.updateMoods(allMoods); // Reset to show all moods
     }
