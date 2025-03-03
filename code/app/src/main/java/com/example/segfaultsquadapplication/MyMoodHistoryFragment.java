@@ -23,6 +23,9 @@ import android.app.AlertDialog;
 import android.widget.EditText;
 import java.util.Calendar;
 import java.util.Date;
+import android.widget.Button;
+import androidx.navigation.NavController;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
@@ -55,9 +58,16 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         // Setup filter options
         setupFilterOptions(view);
 
-        // Setup FAB
+        // Setup FAB for adding new mood
         view.findViewById(R.id.fabAddMood).setOnClickListener(
                 v -> Navigation.findNavController(v).navigate(R.id.action_myMoodHistory_to_addMood));
+
+        // Setup FAB for viewing mood analytics
+        FloatingActionButton fabViewAnalytics = view.findViewById(R.id.fabViewAnalytics);
+        fabViewAnalytics.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(view);
+            navController.navigate(R.id.action_to_mood_analytics);
+        });
 
         // Load moods
         loadMoods();

@@ -94,6 +94,18 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+
+    <!-- FloatingActionButton to navigate to Mood Analytics -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabViewAnalytics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="80dp"
+        android:layout_marginEnd="16dp"
+        app:fabSize="normal"
+        app:srcCompat="@android:drawable/ic_menu_view" />
+
     <!-- FAB for adding new mood -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddMood"

@@ -10,6 +10,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        // for the graphing in AnalyticsFragment
+        maven("https://jitpack.io")
     }
     dependencies {
         // Add the classpath for Firebase and Google services
