@@ -30,6 +30,7 @@
             app:destination="@+id/navigation_my_mood_history" />
     </fragment>
 
+    <!-- My Mood History -->
     <fragment
         android:id="@+id/navigation_my_mood_history"
         android:name="com.example.segfaultsquadapplication.MyMoodHistoryFragment"
@@ -50,8 +51,12 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_to_mood_analytics"
+            app:destination="@id/navigation_mood_analytics" />
     </fragment>
 
+    <!-- Add Mood -->
     <fragment
         android:id="@+id/navigation_add_mood"
         android:name="com.example.segfaultsquadapplication.AddMoodFragment"
@@ -63,6 +68,7 @@
             app:popUpToInclusive="true" />
     </fragment>
 
+    <!-- Map -->
     <fragment
         android:id="@+id/navigation_map"
         android:name="com.example.segfaultsquadapplication.MapFragment"
@@ -78,6 +84,7 @@
             app:destination="@id/navigation_following" />
     </fragment>
 
+    <!-- Follow Requests -->
     <fragment
         android:id="@+id/navigation_follow_requests"
         android:name="com.example.segfaultsquadapplication.FollowingRequestsFragment"
@@ -93,6 +100,7 @@
             app:destination="@id/navigation_following" />
     </fragment>
 
+    <!-- Following -->
     <fragment
         android:id="@+id/navigation_following"
         android:name="com.example.segfaultsquadapplication.FollowingFragment"
@@ -107,4 +115,16 @@
             android:id="@+id/action_to_follow_requests"
             app:destination="@id/navigation_follow_requests" />
     </fragment>
+
+
+    <!-- Mood Analytics -->
+    <fragment
+        android:id="@+id/navigation_mood_analytics"
+        android:name="com.example.segfaultsquadapplication.MoodAnalyticsFragment"
+        android:label="Mood Analytics">
+        <action
+            android:id="@+id/action_to_my_mood_history"
+            app:destination="@+id/MyMoodHistory" />
+    </fragment>
+
 </navigation>
