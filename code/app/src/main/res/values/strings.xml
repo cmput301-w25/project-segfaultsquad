@@ -3,5 +3,5 @@
     <string name="my_mood_history">My Mood History</string>
     <string name="followed_moods">Followed Moods</string>
     <string name="local_moods">Local Moods</string>
-    <string name="following_text">Following</string>
+    <string name="following_text">Mood Following</string>
 </resources>

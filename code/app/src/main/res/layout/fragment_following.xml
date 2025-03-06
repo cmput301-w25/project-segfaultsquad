@@ -5,22 +5,103 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/following_title"
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Header section with title and filter button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/TopHeaderBackground"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/headingText"
+                android:layout_width="300dp"
+                android:layout_height="55dp"
+                android:text="@string/following_text"
+                android:textColor="#000000"
+                android:textSize="40sp" />
+
+            <ImageButton
+                android:id="@+id/follow_new_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/add_user"/>
+
+            <ImageButton
+                android:id="@+id/filterButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/filter_icon" />
+
+        </LinearLayout>
+
+        <!-- RecyclerView for mood list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/followingRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp"/>
+
+    </LinearLayout>
+
+    <!-- Filter Menu Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/filterMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/following_text"
-        android:textSize="24sp"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:layout_gravity="end|top"
+        android:layout_marginTop="64dp"
+        android:visibility="gone"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/following_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/following_title"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/filter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Last Week"/>
+
+            <TextView
+                android:id="@+id/filter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Mood"/>
+
+            <TextView
+                android:id="@+id/filter3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Reason"/>
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear All Filters"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout> 
