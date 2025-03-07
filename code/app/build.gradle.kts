@@ -73,6 +73,10 @@ dependencies {
     // firebase storage
     implementation("com.google.firebase:firebase-storage:20.3.0")
 
+    // for the MoodAnalytics graphs
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+
 
 }
 
