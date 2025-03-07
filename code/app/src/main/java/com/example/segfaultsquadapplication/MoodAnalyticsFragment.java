@@ -26,6 +26,12 @@ import com.github.mikephil.charting.data.LineDataSet;
 import android.graphics.Color;
 import com.github.mikephil.charting.data.Entry;
 import android.widget.FrameLayout;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.LinearLayout;
 
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private TextView mostCommonMoodText;
@@ -50,13 +56,22 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         moodDistributionChart = view.findViewById(R.id.moodDistributionChart);
         moodTrendChart = view.findViewById(R.id.moodTrendChart);
 
+        // Set initial transparency for smooth fade-in
+        mostCommonMoodText.setAlpha(0f);
+        averageMoodText.setAlpha(0f);
+        moodDistributionChart.setAlpha(0f);
+        moodTrendChart.setAlpha(0f);
+
         // Load and display analytics data
         loadAnalyticsData();
 
-        // Set up back button
+        // Set up back button with animation
         ImageButton buttonBack = view.findViewById(R.id.buttonBack);
         buttonBack.setOnClickListener(v -> {
-            requireActivity().onBackPressed(); // Navigate back to MyMoodHistoryFragment
+            v.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction(() -> {
+                v.animate().scaleX(1f).scaleY(1f).setDuration(100);
+                requireActivity().onBackPressed();
+            }).start();
         });
 
         return view;
@@ -73,7 +88,6 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
                         moodEvents.add(mood);
                     }
                     displayAnalytics(moodEvents);
-                    // Start emoji rain animation after data is loaded
                     startEmojiRain();
                 })
                 .addOnFailureListener(e -> {
@@ -82,13 +96,11 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void displayAnalytics(List<MoodEvent> moodEvents) {
-        // Calculate mood distribution
         Map<MoodEvent.MoodType, Integer> moodCountMap = new HashMap<>();
         for (MoodEvent mood : moodEvents) {
             moodCountMap.put(mood.getMoodType(), moodCountMap.getOrDefault(mood.getMoodType(), 0) + 1);
         }
 
-        // Find the most common mood
         MoodEvent.MoodType mostCommonMood = null;
         int maxCount = 0;
         for (Map.Entry<MoodEvent.MoodType, Integer> entry : moodCountMap.entrySet()) {
@@ -98,22 +110,60 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
             }
         }
 
-        // Calculate average mood
         int totalMoodValue = 0;
         for (MoodEvent mood : moodEvents) {
-            totalMoodValue += mood.getMoodType().ordinal() + 1; // Assuming ordinal gives a value from 1 to 8
+            totalMoodValue += mood.getMoodType().ordinal() + 1;
         }
         double averageMood = moodEvents.size() > 0 ? (double) totalMoodValue / moodEvents.size() : 0;
 
-        // Update UI
         mostCommonMoodText.setText("Most Common Mood: " + (mostCommonMood != null ? mostCommonMood.name() : "None"));
         averageMoodText.setText("Average Mood: " + String.format("%.2f", averageMood));
 
-        // Set up PieChart
         setupPieChart(moodCountMap);
-
-        // Set up LineChart
         setupLineChart(moodEvents);
+
+        fadeInViews();
+    }
+
+    private void fadeInViews() {
+        mostCommonMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
+        averageMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
+        moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator()).start();
+        moodTrendChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator()).start();
+    }
+
+    private void startEmojiRain() {
+        final String[] emojis = { "😡", "😭", "😀", "😆", "😴", "😱", "🤯" };
+        FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
+        if (emojiRainContainer == null) return;
+
+        for (int i = 0; i < 50; i++) {
+            final TextView emojiView = new TextView(getContext());
+            emojiView.setText(emojis[(int) (Math.random() * emojis.length)]);
+            emojiView.setTextSize(32);
+            emojiView.setTranslationX((float) (Math.random() * emojiRainContainer.getWidth()));
+            emojiView.setTranslationY(-100);
+            emojiRainContainer.addView(emojiView);
+
+            float rotation = (float) (Math.random() * 360);
+            float scale = 0.8f + (float) Math.random() * 0.5f;
+            emojiView.setScaleX(scale);
+            emojiView.setScaleY(scale);
+            emojiView.setRotation(rotation);
+
+            ObjectAnimator fallAnimation = ObjectAnimator.ofFloat(emojiView, "translationY", emojiRainContainer.getHeight() + 100);
+            fallAnimation.setDuration(3000 + (long) (Math.random() * 2000));
+            fallAnimation.setInterpolator(new AccelerateInterpolator());
+            fallAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(android.animation.Animator animation) {
+                    emojiRainContainer.removeView(emojiView);
+                }
+            });
+
+            fallAnimation.setStartDelay(i * 50);
+            fallAnimation.start();
+        }
     }
 
     private void setupPieChart(Map<MoodEvent.MoodType, Integer> moodCountMap) {
@@ -176,44 +226,10 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         moodTrendChart.invalidate(); // refresh
     }
 
-    private void startEmojiRain() {
-        final String[] emojis = {
-                "😡", // ANGRY
-                "😭", // SAD
-                "😀", // HAPPY
-                "😆", // EXCITED
-                "😴", // TIRED
-                "😱", // SCARED
-                "🤯" // SURPRISED
-        };
-
-        // Ensure you are using the correct view reference
-        FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
-        if (emojiRainContainer == null) {
-            Toast.makeText(getContext(), "Emoji rain container not found!", Toast.LENGTH_SHORT).show();
-            return; // Exit if the container is not found
-        }
-
-        for (int i = 0; i < 60; i++) { // Number of emojis to rain
-            final TextView emojiView = new TextView(getContext());
-            emojiView.setText(emojis[(int) (Math.random() * emojis.length)]); // Directly set the emoji string
-            emojiView.setTextSize(32);
-            emojiView.setTranslationX((float) (Math.random() * emojiRainContainer.getWidth() - 60));
-            emojiView.setTranslationY(-100); // Start above the screen
-            emojiRainContainer.addView(emojiView);
-
-            // Animate falling
-            emojiView.animate()
-                    .translationY(emojiRainContainer.getHeight() + 100) // Fall to the bottom
-                    .setDuration(3000 + (long) (Math.random() * 2000)) // Random duration
-                    .withEndAction(() -> emojiRainContainer.removeView(emojiView)) // Remove after animation
-                    .start();
-        }
-    }
-
     @Override
     public void onMoodClick(MoodEvent mood) {
-        // Handle mood click event
         Toast.makeText(getContext(), "Clicked on mood: " + mood.getMoodType().name(), Toast.LENGTH_SHORT).show();
     }
 }
+
+
