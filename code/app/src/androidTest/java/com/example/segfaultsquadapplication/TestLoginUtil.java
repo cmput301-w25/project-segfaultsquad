@@ -1,73 +1,55 @@
 package com.example.segfaultsquadapplication;
 
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
-import android.view.View;
+import static org.junit.Assert.assertTrue;
 
+import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.test.core.app.ActivityScenario;
-import androidx.test.espresso.UiController;
-import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
-import org.hamcrest.Matcher;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
+/**
+ * Contains misc navigation features that can be used during fragment test
+ */
 public class TestLoginUtil {
-    public static void handleSplashAndLogin(ActivityScenarioRule<MainActivity> scenario, String email, String pwd, int timeoutSec) throws InterruptedException {
-        // Wait for splash
-        AtomicBoolean shouldWait = new AtomicBoolean(true);
-        System.out.println("Start handling splash and login");
-        while (shouldWait.get()) {
-            System.out.println("Still in splash");
+    public static boolean waitUntil(ActivityScenarioRule<MainActivity> scenario,
+                                    Predicate<Fragment> cond, int loopTimes, int loopIntervalMs) {
+        AtomicBoolean ended = new AtomicBoolean(false);
+        for (int i = 0; i <= loopTimes; i ++) {
+            System.out.println("Waiting...");
             scenario.getScenario().onActivity(activity -> {
                 NavHostFragment navHost = (NavHostFragment) activity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-                if (! (navHost.getChildFragmentManager().getFragments().get(0) instanceof SplashFragment) )
-                    shouldWait.set(false);
+                if (cond.test(navHost.getChildFragmentManager().getFragments().get(0)) )
+                    ended.set(true);
             });
-            Thread.sleep(200);
-        }
-        // Find if login is needed
-        shouldWait.set(true);
-        scenario.getScenario().onActivity(activity -> {
-                    NavHostFragment navHost = (NavHostFragment) activity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-                    System.out.println("Check for login frag");
-                    if (! (navHost.getChildFragmentManager().getFragments().get(0) instanceof LoginFragment)) {
-                        shouldWait.set(false);
-                    }
-                });
-        // If no need to login
-        if (! shouldWait.get())
-            return;
-        // Enter login info
-        onView(withId(R.id.editTextEmail)).perform(ViewActions.typeText(email));
-        onView(withId(R.id.editTextPassword)).perform(ViewActions.typeText(pwd));
-        onView(withId(R.id.buttonLogin)).perform(ViewActions.click());
-        System.out.println("Login clicked");
-        // Timeout; NOTE: some data entering time should be reserved.
-        for (int i = 0; i < timeoutSec; i ++) {
-            int finalI = i;
-            scenario.getScenario().onActivity(activity -> {
-                NavHostFragment navHost = (NavHostFragment) activity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-                System.out.println("Check for login frag - " + finalI + "/" + timeoutSec);
-                if (! (navHost.getChildFragmentManager().getFragments().get(0) instanceof LoginFragment)) {
-                    shouldWait.set(false);
-                }
-            });
-            if (! shouldWait.get())
+            try {
+                Thread.sleep(loopIntervalMs);
+            } catch (Exception ignored) {}
+            if (ended.get())
                 break;
-            Thread.sleep(1000);
         }
-        // Final check: did we finish login?
-        scenario.getScenario().onActivity(activity -> {
-            NavHostFragment navHost = (NavHostFragment) activity.getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
-            if (navHost.getChildFragmentManager().getFragments().get(0) instanceof LoginFragment) {
-                throw new RuntimeException("Login failed");
-            }
-        });
+        return ended.get();
+    }
+    public static boolean isCurrFragInstanceof(ActivityScenarioRule<MainActivity> scenario, Class<? extends Fragment> cls) {
+        return waitUntil(scenario, cls::isInstance, 1, 1 );
+    }
+    public static void handleSplashAndLogin(ActivityScenarioRule<MainActivity> scenario, String email, String pwd) throws InterruptedException {
+        // Wait for splash
+        assertTrue(waitUntil(scenario, (f) -> !(f instanceof SplashFragment), 20, 500));
+        // Find if login is needed
+        if (isCurrFragInstanceof(scenario, LoginFragment.class)) {
+            // Enter login info
+            onView(withId(R.id.editTextEmail)).perform(ViewActions.typeText(email));
+            onView(withId(R.id.editTextPassword)).perform(ViewActions.typeText(pwd));
+            onView(withId(R.id.buttonLogin)).perform(ViewActions.click());
+            System.out.println("Login clicked");
+            // Timeout; NOTE: some data entering time should be reserved.
+            assertTrue( waitUntil(scenario, (f) -> !(f instanceof LoginFragment), 20, 500) );
+        }
     }
 }

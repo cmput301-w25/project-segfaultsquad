@@ -51,6 +51,7 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation("androidx.navigation:navigation-testing:2.8.8")
+    androidTestImplementation("androidx.test:rules:1.4.0")
 
     // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
