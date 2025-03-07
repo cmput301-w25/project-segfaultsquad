@@ -1,3 +1,10 @@
+/**
+ * Classname: MoodEvent
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 // imports
@@ -51,6 +58,10 @@ public class MoodEvent {
     }
 
     // Add a no-argument constructor for Firestore
+    /**
+     * Constructor. Was needed in earlier iteration of code. Not being used
+     * anywhere.
+     */
     public MoodEvent() {
         // Required empty constructor for Firestore
     }
