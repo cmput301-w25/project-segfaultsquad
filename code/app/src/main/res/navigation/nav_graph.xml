@@ -127,4 +127,73 @@
             app:destination="@+id/MyMoodHistory" />
     </fragment>
 
+
+    <!-- Profile Fragment -->
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.segfaultsquadapplication.ProfileFragment"
+        android:label="Profile">
+        <!-- bottom nav -->
+        <action
+            android:id="@+id/action_to_my_mood_history"
+            app:destination="@+id/MyMoodHistory" />
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+        <!-- inner nav -->
+        <action
+            android:id="@+id/action_to_followers_list"
+            app:destination="@+id/navigation_FollowersListFragment" />
+        <action
+            android:id="@+id/action_to_following_list"
+            app:destination="@+id/navigation_FollowingListFragment" />
+    </fragment>
+
+    <!-- Profile Page Followers List Fragment -->
+    <fragment
+        android:id="@+id/navigation_FollowersListFragment"
+        android:name="com.example.segfaultsquadapplication.FollowersListFragment"
+        android:label="FollowersList">
+        <!-- bottom nav -->
+        <action
+            android:id="@+id/action_to_my_mood_history"
+            app:destination="@+id/MyMoodHistory" />
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+    </fragment>
+
+    <!-- Profile Page Following List Fragment -->
+    <fragment
+        android:id="@+id/navigation_FollowingListFragment"
+        android:name="com.example.segfaultsquadapplication.FollowingListFragment"
+        android:label="FollowingList">
+        <!-- bottom nav -->
+        <action
+            android:id="@+id/action_to_my_mood_history"
+            app:destination="@+id/MyMoodHistory" />
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+    </fragment>
+    
+
 </navigation>

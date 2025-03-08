@@ -1,5 +1,7 @@
 /**
  * Classname: AddMoodFragment
+ * Purpose: Allow user to add a mood event to thier history
+ * Current Issues: N/A
  * Version Info: Initial
  * Date: Feb 16, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025

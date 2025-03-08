@@ -77,6 +77,14 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
+    // testing libraries
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("androidx.test.ext:junit:1.1.3")
+    testImplementation("androidx.test:core:1.4.0")
+    testImplementation("androidx.test:runner:1.4.0")
+    testImplementation("androidx.test:rules:1.4.0")
 
 }
 

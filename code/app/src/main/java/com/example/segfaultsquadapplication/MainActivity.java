@@ -1,3 +1,9 @@
+/**
+ * Classname: MainActivity
+ * Version Info: Initial
+ * Date: Feb 18, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
 package com.example.segfaultsquadapplication;
 
 import android.os.Bundle;
@@ -68,18 +74,25 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
      * @param destinationId the id of the view/activity user is navigating to
      */
     private void updateBottomNavMenu(int destinationId) {
+        bottomNavigationView.getMenu().clear(); // Clear existing menu items
         if (destinationId == R.id.navigation_my_mood_history) {
-            bottomNavigationView.getMenu().clear();
             bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_home);
         } else if (destinationId == R.id.navigation_map) {
-            bottomNavigationView.getMenu().clear();
             bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_map);
         } else if (destinationId == R.id.navigation_following) {
-            bottomNavigationView.getMenu().clear();
             bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_following);
         } else if (destinationId == R.id.navigation_follow_requests) {
-            bottomNavigationView.getMenu().clear();
             bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_requests);
+        } else if (destinationId == R.id.navigation_profile) {
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile);
+        } else if (destinationId == R.id.navigation_FollowersListFragment) {
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile); // im not going to make seperate
+                                                                              // navigations for this... just have the
+                                                                              // same as its parent profile fragment
+        } else if (destinationId == R.id.navigation_FollowingListFragment) {
+            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile); // im not going to make seperate
+                                                                              // navigations for this... just have the
+                                                                              // same as its parent profile fragment
         }
     }
 
