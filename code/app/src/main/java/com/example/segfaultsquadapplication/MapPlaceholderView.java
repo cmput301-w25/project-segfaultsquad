@@ -1,3 +1,10 @@
+/**
+ * Classname: MapPlaceholderView
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 import android.content.Context;
@@ -15,6 +22,9 @@ public class MapPlaceholderView extends View {
     private Paint textPaint;
     private List<MoodMarker> markers;
 
+    /**
+     * 
+     */
     public static class MoodMarker {
         float x, y;
         int color;

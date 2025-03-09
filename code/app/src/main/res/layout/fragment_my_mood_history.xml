@@ -69,28 +69,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Last Week"/>
+                android:text="Last Week" />
 
             <TextView
                 android:id="@+id/filter2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="By Mood"/>
+                android:text="By Mood" />
 
             <TextView
                 android:id="@+id/filter3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="By Reason"/>
+                android:text="By Reason" />
 
             <TextView
                 android:id="@+id/clearFilters"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Clear All Filters"/>
+                android:text="Clear All Filters" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

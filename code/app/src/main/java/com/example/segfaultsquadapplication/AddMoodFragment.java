@@ -1,3 +1,12 @@
+/**
+ * Classname: AddMoodFragment
+ * Purpose: Allow user to add a mood event to thier history
+ * Current Issues: N/A
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 import android.app.Activity;
@@ -116,17 +125,18 @@ public class AddMoodFragment extends Fragment {
     private void setupMoodGrid() {
         // Pair each mood type with its emoji
         String[] moodEmojis = {
-                "😡", // ANGRY
-                "😭", // SAD
-                "😀", // HAPPY
-                "😆", // EXCITED
-                "😴", // TIRED
-                "😱", // SCARED
-                "🤯" // SURPRISED
+                "😡", // ANGER
+                "😵‍💫", // CONFUSION
+                "🤢", // DISGUST
+                "😱", // FEAR
+                "😀", // HAPPINESS
+                "😭", // SADNESS
+                "😳", // SHAME
+                "🤯" // SURPRISE
         };
 
         String[] moodNames = {
-                "ANGRY", "SAD", "HAPPY", "EXCITED", "TIRED", "SCARED", "SURPRISED"
+                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
         };
 
         for (int i = 0; i < moodNames.length; i++) {
@@ -220,6 +230,17 @@ public class AddMoodFragment extends Fragment {
         view.findViewById(R.id.buttonCancel).setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
     }
 
+    /**
+     * method to handle completion of this fragment
+     * NOTE: NOT BEING USED ANYMORE
+     * 
+     * @param requestCode
+     *                    the request code (e.g. 200, 404, 201, etc)
+     * @param resultCode
+     *                    the result code
+     * @param data
+     *                    the data transmitted as intent
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // debugging

@@ -1,3 +1,9 @@
+/**
+ * Classname: AddMoodFragment
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
 package com.example.segfaultsquadapplication;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -34,6 +40,7 @@ import android.util.Log;
 import com.google.android.material.chip.ChipGroup;
 import android.widget.ImageButton;
 import androidx.cardview.widget.CardView;
+import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -141,11 +148,19 @@ public class MapFragment extends Fragment {
         return view;
     }
 
+    /**
+     * method to setup placeholder map view
+     * 
+     * @param view
+     */
     // TODO: get the actual map working and refactor this bit
     private void setupPlaceholderMap(View view) {
         mapView = view.findViewById(R.id.map_placeholder);
     }
 
+    /**
+     * method to load in mood data
+     */
     private void loadMoodData() {
         String currentUserId = getCurrentUserId(); // TODO: Implement this method to get current user's ID
 
@@ -164,6 +179,12 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * method to handle user moods on map
+     * 
+     * @param snapshot
+     *                 snapshot of the query to get docs from db
+     */
     private void handleUserMoods(QuerySnapshot snapshot) {
         userMoods.clear();
         for (var doc : snapshot.getDocuments()) {
@@ -177,6 +198,9 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * method to load in user's followed user's recent moods
+     */
     private void loadFollowedUsersMoods() {
         // First get list of followed users
         String currentUserId = getCurrentUserId();
@@ -213,6 +237,9 @@ public class MapFragment extends Fragment {
                 });
     }
 
+    /**
+     * method to load in local moods for map
+     */
     private void loadLocalMoods() {
         if (currentLocation == null || mapChipGroup == null)
             return;
@@ -238,6 +265,17 @@ public class MapFragment extends Fragment {
                 });
     }
 
+    /**
+     * method to determine if local moods are within range of display
+     * 
+     * @param point1
+     *                 user location
+     * @param point2
+     *                 mood location
+     * @param radiusKm
+     *                 radius limit for definition of local
+     * @return
+     */
     private boolean isWithinRadius(GeoPoint point1, GeoPoint point2, float radiusKm) {
         float[] results = new float[1];
         Location.distanceBetween(
@@ -247,6 +285,12 @@ public class MapFragment extends Fragment {
         return results[0] <= radiusKm * 1000; // Convert km to meters
     }
 
+    /**
+     * method to update the mood markers on the map based on filter applied
+     * 
+     * @param tabPosition
+     *                    the filter being applied index
+     */
     private void updateMapMarkers(int tabPosition) {
         if (mapView == null)
             return;
@@ -273,34 +317,17 @@ public class MapFragment extends Fragment {
                 float x = (float) ((mood.getLocation().getLongitude() + 180) / 360);
                 float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
-                int color = getMoodColor(mood.getMoodType());
+                int color = mood.getPrimaryColor(requireContext());
                 mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }
     }
 
-    private int getMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case HAPPY:
-                return Color.GREEN;
-            case SAD:
-                return Color.BLUE;
-            case ANGRY:
-                return Color.RED;
-            case EXCITED:
-                return Color.YELLOW;
-            case TIRED:
-                return Color.rgb(255, 165, 0); // Orange
-            case SCARED:
-                return Color.rgb(148, 0, 211); // Violet
-            case SURPRISED:
-                return Color.CYAN;
-            default:
-                return Color.GRAY;
-        }
-    }
-
-    // The method to get the current user's ID
+    /**
+     * method to get current user's id (INCORRECT + REDUNDANT)
+     * 
+     * @return
+     */
     private String getCurrentUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -311,6 +338,9 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * Method to update the users current location
+     */
     private void updateCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -326,6 +356,9 @@ public class MapFragment extends Fragment {
                 });
     }
 
+    /**
+     * helper method to enable locaiton
+     */
     private void enableMyLocation() {
         if (mMap == null)
             return;
@@ -339,6 +372,9 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * helper method to request user permissions for location
+     */
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -352,6 +388,9 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * another helper method to request user location permissions
+     */
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
@@ -374,11 +413,20 @@ public class MapFragment extends Fragment {
         updateCurrentLocation();
     }
 
+    /**
+     * method to toggle filtered view of map
+     */
     private void toggleFilterMenu() {
         isFilterMenuVisible = !isFilterMenuVisible;
         filterMenu.setVisibility(isFilterMenuVisible ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * method to apply filter (INCORRECT)
+     * 
+     * @param filterType
+     *                   filter being applied
+     */
     private void applyFilter(String filterType) {
         // TODO: Implement filter logic
         switch (filterType) {
