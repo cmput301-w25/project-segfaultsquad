@@ -21,6 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import android.widget.CheckBox;
@@ -64,7 +65,7 @@ public class LoginFragment extends Fragment {
         // Check if user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            navigateToHome();
+            navigateToHome(currentUser);
             return rootView;
         }
 
@@ -97,11 +98,11 @@ public class LoginFragment extends Fragment {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
+        // validate input
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("Email is required");
             return;
         }
-
         if (TextUtils.isEmpty(password)) {
             passwordEditText.setError("Password is required");
             return;
@@ -139,14 +140,16 @@ public class LoginFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-                        // Create new user document (probably shouldnt have to do this, but anyways)
+                        // Create new user document
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("username", firebaseUser.getEmail().split("@")[0]);
+                        userData.put("followers", new ArrayList<String>()); // Initialize as empty
+                        userData.put("following", new ArrayList<String>()); // Initialize as empty
 
                         db.collection("users")
                                 .document(firebaseUser.getUid())
                                 .set(userData)
-                                .addOnSuccessListener(aVoid -> navigateToHome())
+                                .addOnSuccessListener(aVoid -> navigateToHome(firebaseUser))
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(getActivity(),
                                             "Error creating user profile",
@@ -154,7 +157,7 @@ public class LoginFragment extends Fragment {
                                 });
                     } else {
                         // user document was already there, navigate to MyMoodFragment
-                        navigateToHome();
+                        navigateToHome(firebaseUser);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -167,7 +170,7 @@ public class LoginFragment extends Fragment {
     /**
      * method to navigate to MyMoodHistoryFragment (or whatever the homescreen is)
      */
-    void navigateToHome() {
+    void navigateToHome(FirebaseUser user) {
         // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation
         // component
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);

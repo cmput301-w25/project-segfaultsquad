@@ -45,13 +45,16 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                 navController = navHostFragment.getNavController();
                 NavigationUI.setupWithNavController(bottomNavigationView, navController);
 
-                // Hide bottom navigation on login screen and landing screen and update menu
+                // Hide bottom navigation on login screen, moodanalyticsfragment and landing
+                // screen and update menu
                 // based on destination
                 navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
                     if (destination.getId() == R.id.navigation_login) {
                         bottomNavigationView.setVisibility(View.GONE);
                     } else if (destination.getId() == R.id.navigation_splash) {
                         bottomNavigationView.setVisibility(View.GONE);
+                    } else if (destination.getId() == R.id.navigation_mood_analytics) {
+
                     } else {
                         bottomNavigationView.setVisibility(View.VISIBLE);
                         updateBottomNavMenu(destination.getId());

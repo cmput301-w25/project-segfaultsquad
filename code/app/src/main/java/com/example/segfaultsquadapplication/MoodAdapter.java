@@ -88,13 +88,14 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
         // Map of mood types to emojis
         private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
-                MoodEvent.MoodType.ANGRY, "😡",
-                MoodEvent.MoodType.SAD, "😭",
-                MoodEvent.MoodType.HAPPY, "😀",
-                MoodEvent.MoodType.EXCITED, "😆",
-                MoodEvent.MoodType.TIRED, "😴",
-                MoodEvent.MoodType.SCARED, "😱",
-                MoodEvent.MoodType.SURPRISED, "🤯");
+                MoodEvent.MoodType.ANGER, "😡",
+                MoodEvent.MoodType.CONFUSION, "😵‍💫",
+                MoodEvent.MoodType.DISGUST, "🤢",
+                MoodEvent.MoodType.FEAR, "😨",
+                MoodEvent.MoodType.HAPPINESS, "😀",
+                MoodEvent.MoodType.SADNESS, "😭",
+                MoodEvent.MoodType.SHAME, "😳",
+                MoodEvent.MoodType.SURPRISE, "🤯");
 
         /**
          * constructor
@@ -160,20 +161,22 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
          */
         private int getMoodColor(MoodEvent.MoodType moodType) {
             switch (moodType) {
-                case HAPPY:
-                    return itemView.getContext().getColor(R.color.mood_happy);
-                case SAD:
-                    return itemView.getContext().getColor(R.color.mood_sad);
-                case ANGRY:
-                    return itemView.getContext().getColor(R.color.mood_angry);
-                case EXCITED:
-                    return itemView.getContext().getColor(R.color.mood_excited);
-                case TIRED:
-                    return itemView.getContext().getColor(R.color.mood_tired);
-                case SCARED:
-                    return itemView.getContext().getColor(R.color.mood_scared);
-                case SURPRISED:
-                    return itemView.getContext().getColor(R.color.mood_surprised);
+                case ANGER:
+                    return itemView.getContext().getColor(R.color.mood_anger);
+                case CONFUSION:
+                    return itemView.getContext().getColor(R.color.mood_confusion);
+                case DISGUST:
+                    return itemView.getContext().getColor(R.color.mood_disgust);
+                case FEAR:
+                    return itemView.getContext().getColor(R.color.mood_fear);
+                case HAPPINESS:
+                    return itemView.getContext().getColor(R.color.mood_happiness);
+                case SADNESS:
+                    return itemView.getContext().getColor(R.color.mood_sadness);
+                case SHAME:
+                    return itemView.getContext().getColor(R.color.mood_shame);
+                case SURPRISE:
+                    return itemView.getContext().getColor(R.color.mood_surprise);
                 default:
                     return itemView.getContext().getColor(R.color.mood_default);
             }
@@ -189,20 +192,22 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
          */
         private int getLightMoodColor(MoodEvent.MoodType moodType) {
             switch (moodType) {
-                case HAPPY:
-                    return itemView.getContext().getColor(R.color.mood_happy_light);
-                case SAD:
-                    return itemView.getContext().getColor(R.color.mood_sad_light);
-                case ANGRY:
-                    return itemView.getContext().getColor(R.color.mood_angry_light);
-                case EXCITED:
-                    return itemView.getContext().getColor(R.color.mood_excited_light);
-                case TIRED:
-                    return itemView.getContext().getColor(R.color.mood_tired_light);
-                case SCARED:
-                    return itemView.getContext().getColor(R.color.mood_scared_light);
-                case SURPRISED:
-                    return itemView.getContext().getColor(R.color.mood_surprised_light);
+                case ANGER:
+                    return itemView.getContext().getColor(R.color.mood_anger_light);
+                case CONFUSION:
+                    return itemView.getContext().getColor(R.color.mood_confusion_light);
+                case DISGUST:
+                    return itemView.getContext().getColor(R.color.mood_disgust_light);
+                case FEAR:
+                    return itemView.getContext().getColor(R.color.mood_fear_light);
+                case HAPPINESS:
+                    return itemView.getContext().getColor(R.color.mood_happiness_light);
+                case SADNESS:
+                    return itemView.getContext().getColor(R.color.mood_sadness_light);
+                case SHAME:
+                    return itemView.getContext().getColor(R.color.mood_shame_light);
+                case SURPRISE:
+                    return itemView.getContext().getColor(R.color.mood_surprise_light);
                 default:
                     return itemView.getContext().getColor(R.color.mood_default);
             }

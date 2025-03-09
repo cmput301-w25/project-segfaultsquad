@@ -125,17 +125,18 @@ public class AddMoodFragment extends Fragment {
     private void setupMoodGrid() {
         // Pair each mood type with its emoji
         String[] moodEmojis = {
-                "😡", // ANGRY
-                "😭", // SAD
-                "😀", // HAPPY
-                "😆", // EXCITED
-                "😴", // TIRED
-                "😱", // SCARED
-                "🤯" // SURPRISED
+                "😡", // ANGER
+                "😵‍💫", // CONFUSION
+                "🤢", // DISGUST
+                "😱", // FEAR
+                "😀", // HAPPINESS
+                "😭", // SADNESS
+                "😳", // SHAME
+                "🤯" // SURPRISE
         };
 
         String[] moodNames = {
-                "ANGRY", "SAD", "HAPPY", "EXCITED", "TIRED", "SCARED", "SURPRISED"
+                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
         };
 
         for (int i = 0; i < moodNames.length; i++) {

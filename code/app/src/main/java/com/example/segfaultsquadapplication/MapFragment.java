@@ -40,6 +40,7 @@ import android.util.Log;
 import com.google.android.material.chip.ChipGroup;
 import android.widget.ImageButton;
 import androidx.cardview.widget.CardView;
+import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -149,6 +150,7 @@ public class MapFragment extends Fragment {
 
     /**
      * method to setup placeholder map view
+     * 
      * @param view
      */
     // TODO: get the actual map working and refactor this bit
@@ -179,8 +181,9 @@ public class MapFragment extends Fragment {
 
     /**
      * method to handle user moods on map
+     * 
      * @param snapshot
-     * snapshot of the query to get docs from db
+     *                 snapshot of the query to get docs from db
      */
     private void handleUserMoods(QuerySnapshot snapshot) {
         userMoods.clear();
@@ -264,12 +267,13 @@ public class MapFragment extends Fragment {
 
     /**
      * method to determine if local moods are within range of display
+     * 
      * @param point1
-     * user location
+     *                 user location
      * @param point2
-     * mood location
+     *                 mood location
      * @param radiusKm
-     * radius limit for definition of local
+     *                 radius limit for definition of local
      * @return
      */
     private boolean isWithinRadius(GeoPoint point1, GeoPoint point2, float radiusKm) {
@@ -283,8 +287,9 @@ public class MapFragment extends Fragment {
 
     /**
      * method to update the mood markers on the map based on filter applied
+     * 
      * @param tabPosition
-     * the filter being applied index
+     *                    the filter being applied index
      */
     private void updateMapMarkers(int tabPosition) {
         if (mapView == null)
@@ -312,42 +317,15 @@ public class MapFragment extends Fragment {
                 float x = (float) ((mood.getLocation().getLongitude() + 180) / 360);
                 float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
-                int color = getMoodColor(mood.getMoodType());
+                int color = mood.getPrimaryColor(requireContext());
                 mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }
     }
 
     /**
-     * method to get each moods associated color (REDUNDANT and INCORRECT)
-     * @param moodType
-     * the mood
-     * @return
-     * color
-     */
-    private int getMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case HAPPY:
-                return Color.GREEN;
-            case SAD:
-                return Color.BLUE;
-            case ANGRY:
-                return Color.RED;
-            case EXCITED:
-                return Color.YELLOW;
-            case TIRED:
-                return Color.rgb(255, 165, 0); // Orange
-            case SCARED:
-                return Color.rgb(148, 0, 211); // Violet
-            case SURPRISED:
-                return Color.CYAN;
-            default:
-                return Color.GRAY;
-        }
-    }
-
-    /**
      * method to get current user's id (INCORRECT + REDUNDANT)
+     * 
      * @return
      */
     private String getCurrentUserId() {
@@ -445,8 +423,9 @@ public class MapFragment extends Fragment {
 
     /**
      * method to apply filter (INCORRECT)
+     * 
      * @param filterType
-     * filter being applied
+     *                   filter being applied
      */
     private void applyFilter(String filterType) {
         // TODO: Implement filter logic

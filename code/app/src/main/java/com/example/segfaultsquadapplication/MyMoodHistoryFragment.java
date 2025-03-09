@@ -234,7 +234,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      * mood
      */
     private void showMoodFilterDialog() {
-        String[] moods = { "HAPPY", "SAD", "ANGRY", "EXCITED", "TIRED", "SCARED", "SURPRISED" };
+        String[] moods = { "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE" };
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Select Mood")
                 .setItems(moods, (dialog, which) -> {

@@ -8,10 +8,12 @@
 package com.example.segfaultsquadapplication;
 
 // imports
+import android.util.Log;
+import android.content.Context;
+
 import com.google.firebase.firestore.GeoPoint;
 import java.util.Date;
 import java.util.List;
-
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 
@@ -38,7 +40,7 @@ public class MoodEvent {
 
     // Enum for mood types
     public enum MoodType {
-        HAPPY, SAD, ANGRY, EXCITED, TIRED, SCARED, SURPRISED
+        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, SURPRISE
     }
 
     // Enum for social situations
@@ -160,5 +162,52 @@ public class MoodEvent {
      */
     public void setImageData(List<Integer> imageData) {
         this.imageData = imageData;
+    }
+
+    public int getPrimaryColor(Context context) {
+        switch (moodType) {
+            case ANGER:
+                Log.d("MoodEvent", "RECOGNIZED ANGER");
+                return context.getColor(R.color.mood_anger);
+            case CONFUSION:
+                return context.getColor(R.color.mood_confusion);
+            case DISGUST:
+                return context.getColor(R.color.mood_disgust);
+            case FEAR:
+                return context.getColor(R.color.mood_fear);
+            case HAPPINESS:
+                return context.getColor(R.color.mood_happiness);
+            case SADNESS:
+                return context.getColor(R.color.mood_sadness);
+            case SHAME:
+                return context.getColor(R.color.mood_shame);
+            case SURPRISE:
+                return context.getColor(R.color.mood_surprise);
+            default:
+                return context.getColor(R.color.mood_default);
+        }
+    }
+
+    public int getSecondaryColor(Context context) {
+        switch (moodType) {
+            case ANGER:
+                return context.getColor(R.color.mood_anger_light);
+            case CONFUSION:
+                return context.getColor(R.color.mood_confusion_light);
+            case DISGUST:
+                return context.getColor(R.color.mood_disgust_light);
+            case FEAR:
+                return context.getColor(R.color.mood_fear_light);
+            case HAPPINESS:
+                return context.getColor(R.color.mood_happiness_light);
+            case SADNESS:
+                return context.getColor(R.color.mood_sadness_light);
+            case SHAME:
+                return context.getColor(R.color.mood_shame_light);
+            case SURPRISE:
+                return context.getColor(R.color.mood_surprise_light);
+            default:
+                return context.getColor(R.color.mood_default);
+        }
     }
 }

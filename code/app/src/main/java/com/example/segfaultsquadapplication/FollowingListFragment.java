@@ -43,6 +43,11 @@ public class FollowingListFragment extends Fragment {
         // logic)
         loadFollowingData();
 
+        // Set up back button
+        view.findViewById(R.id.buttonBack).setOnClickListener(v -> {
+            requireActivity().onBackPressed(); // Navigate back to ProfileFragment
+        });
+
         return view;
     }
 

@@ -24,8 +24,9 @@ public class User {
         this.userId = userId;
         this.username = username;
         this.email = email;
-        this.followers = new ArrayList<>();
-        this.following = new ArrayList<>();
+        this.profilePicUrl = ""; // init as empty
+        this.followers = new ArrayList<>(); // init as empty
+        this.following = new ArrayList<>(); // init as empty
     }
 
     // Getters and setters

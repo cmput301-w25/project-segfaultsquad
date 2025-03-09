@@ -1,128 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp" >
+    android:background="@android:color/holo_red_light" >
 
-    <!-- Header section -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/TopHeaderBackground"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="8dp">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+        <!-- Header section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/TopHeaderBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Profile"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+
+            <ImageButton
+                android:id="@+id/overflowButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_more_vert" />
+        </LinearLayout>
+
+        <!-- Profile Picture -->
+        <ImageView
+            android:id="@+id/profile_picture"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_person"
+            android:contentDescription="@string/profile_picture"
+            android:background="@drawable/circle_background"
+            android:padding="8dp" />
+
+        <!-- Username -->
         <TextView
-            android:id="@+id/headingText"
-            android:layout_width="0dp"
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Profile"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
-    </LinearLayout>
+            android:text="John Doe"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:paddingTop="8dp" />
 
-    <!-- Profile Picture -->
-    <ImageView
-        android:id="@+id/profile_picture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_person"
-        android:contentDescription="@string/profile_picture"
-        android:background="@drawable/circle_background"
-        android:padding="8dp" />
-
-    <!-- Username -->
-    <TextView
-        android:id="@+id/username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="John Doe"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:paddingTop="8dp" />
-
-    <!-- User Description -->
-    <TextView
-        android:id="@+id/user_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="UI/UX Designer | Creating digital experiences that matter"
-        android:textSize="16sp"
-        android:layout_gravity="center"
-        android:paddingTop="4dp"
-        android:paddingBottom="16dp" />
-
-    <!-- Followers and Following Counts -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:paddingTop="16dp">
-
+        <!-- Followers and Following Counts -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center">
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:paddingTop="16dp">
 
-            <TextView
-                android:id="@+id/followers_count"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="248"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/followers_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="8dp"
+                    android:text="248"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Followers"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Followers"
-                android:textSize="16sp" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/following_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="186"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    android:paddingEnd="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Following"
+                    android:textSize="16sp" />
+            </LinearLayout>
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Recent Activity Section -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Recent Activity"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp" />
+
+        <!-- Grid for Mood Events -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_mood_grid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:gravity="center">
+            android:paddingTop="8dp"
+            android:clipToPadding="false"
+            android:background="@android:color/holo_blue_light" />
 
-            <TextView
-                android:id="@+id/following_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="186"
-                android:textSize="32sp"
-                android:textStyle="bold"
-                android:paddingEnd="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Following"
-                android:textSize="16sp" />
-        </LinearLayout>
     </LinearLayout>
 
-    <!-- Recent Activity Section -->
-    <TextView
+
+    <!-- Logout Dropdown -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/logoutDropdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Recent Activity"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="24dp" />
+        android:layout_gravity="end|top"
+        android:layout_marginTop="64dp"
+        android:visibility="gone"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_recent_activity"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingTop="8dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
-</LinearLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="logout_icon"
+                android:src="@drawable/ic_logout" />
+
+            <TextView
+                android:id="@+id/logoutOption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:text="Logout" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

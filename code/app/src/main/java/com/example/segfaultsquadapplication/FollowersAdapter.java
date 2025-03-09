@@ -21,13 +21,13 @@ import java.util.List;
 public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.ViewHolder> {
 
     private List<User> followersList;
-    private OnFollowerActionListener listener;
+    private OnFollowerClickListener listener;
 
-    public interface OnFollowerActionListener {
-        void onFollowerAction(User user, boolean isFollowing);
+    public interface OnFollowerClickListener {
+        void onFollowerClick(User user);
     }
 
-    public FollowersAdapter(List<User> followersList, OnFollowerActionListener listener) {
+    public FollowersAdapter(List<User> followersList, OnFollowerClickListener listener) {
         this.followersList = followersList;
         this.listener = listener;
     }
@@ -42,13 +42,7 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = followersList.get(position);
-        holder.username.setText(user.getUsername());
-        // Load user profile picture using an image loading library (e.g., Glide or
-        // Picasso)
-        // Glide.with(holder.itemView).load(user.getProfilePictureUrl()).into(holder.profilePicture);
-
-        holder.removeButton.setOnClickListener(v -> listener.onFollowerAction(user, true)); // Unfollow
-        holder.followBackButton.setOnClickListener(v -> listener.onFollowerAction(user, false)); // Follow back
+        holder.bind(user, listener);
     }
 
     @Override
@@ -68,6 +62,18 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
             profilePicture = itemView.findViewById(R.id.profile_picture);
             removeButton = itemView.findViewById(R.id.remove_button);
             followBackButton = itemView.findViewById(R.id.follow_back_button);
+        }
+
+        public void bind(User user, OnFollowerClickListener listener) {
+            username.setText(user.getUsername());
+            // Load user profile picture using an image loading library (e.g., Glide or
+            // Picasso)
+            // Glide.with(itemView).load(user.getProfilePictureUrl()).into(profilePicture);
+
+            removeButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Unfollow
+            followBackButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Follow back
+
+            itemView.setOnClickListener(v -> listener.onFollowerClick(user)); // Set click listener
         }
     }
 }

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navigation_my_mood_history"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/home_icon"
         android:title="Home"
         android:visible="false"/>
     <item
@@ -19,6 +19,6 @@
         android:title="Following"/>
     <item
         android:id="@+id/navigation_profile"
-        android:icon="@drawable/ic_person"
+        android:icon="@drawable/profile_icon"
         android:title="Profile"/>
 </menu>
