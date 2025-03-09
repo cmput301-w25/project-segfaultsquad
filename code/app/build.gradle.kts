@@ -48,10 +48,12 @@ dependencies {
 
     // Testing dependencies
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    androidTestImplementation("androidx.navigation:navigation-testing:2.8.8")
-    androidTestImplementation("androidx.test:rules:1.4.0")
+    androidTestImplementation(libs.navigation.testing)
+    androidTestImplementation(libs.rules)
 
     // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
