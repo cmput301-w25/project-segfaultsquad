@@ -33,35 +33,21 @@ public class MoodEvent {
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED, SURPRISED, SURPRISE
+        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED,
+        SURPRISED, SURPRISE
     }
 
     // Enum for social situations
     public enum SocialSituation {
-        ALONE("Alone"),
-        WITH_ONE_PERSON("With One Person"),
-        WITH_GROUP("With a Group"),
-        IN_CROWD("In a Crowd");
-
-        private final String displayName;
-
-        SocialSituation(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        @Override
-        public String toString() {
-            return displayName;
-        }
+        ALONE,
+        WITH_ONE_PERSON,
+        WITH_GROUP,
+        IN_CROWD
     }
 
     // Constructor
     public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
-                     GeoPoint location) {
+            GeoPoint location) {
         this.userId = userId;
         this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
