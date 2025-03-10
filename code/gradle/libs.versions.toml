@@ -13,6 +13,7 @@ navigationTesting = "2.8.8"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
 rules = "1.6.1"
+runner = "1.6.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -28,6 +29,7 @@ navigation-testing = { module = "androidx.navigation:navigation-testing", versio
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 rules = { module = "androidx.test:rules", version.ref = "rules" }
+runner = { group = "androidx.test", name = "runner", version.ref = "runner" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
