@@ -99,7 +99,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * helper method to locate/assign/initialize view components
-     * 
+     *
      * @param view
      *             the view being projected onto
      */
@@ -221,7 +221,7 @@ public class AddMoodFragment extends Fragment {
     /**
      * helper method to setup buttons for confirming moodevent creation or
      * cancellation
-     * 
+     *
      * @param view
      *             the view being projected onto
      */
@@ -235,7 +235,7 @@ public class AddMoodFragment extends Fragment {
     /**
      * method to handle completion of this fragment
      * NOTE: NOT BEING USED ANYMORE
-     * 
+     *
      * @param requestCode
      *                    the request code (e.g. 200, 404, 201, etc)
      * @param resultCode
@@ -259,7 +259,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * visual highlight for the selected mood option
-     * 
+     *
      * @param selectedCard
      *                     the mood type card selected in the "How are you feeling?"
      *                     section
@@ -306,7 +306,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * helper method to check if user gave permission for location use
-     * 
+     *
      * @return
      *         bool value of permission obtained or denied
      */
@@ -317,7 +317,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * helper method to obtain user permission for location permisssion
-     * 
+     *
      * @return
      *         bool value of permission obtained or denied
      */
@@ -329,7 +329,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * helper method to verify results of location permission request
-     * 
+     *
      * @param requestCode
      * @param permissions
      * @param grantResults
@@ -374,7 +374,7 @@ public class AddMoodFragment extends Fragment {
     /**
      * helper method to actually create and save the mood once the confirm button is
      * clicked
-     * 
+     *
      * @param location
      *                 the location of the user. Either null or Geopoint type
      */
@@ -402,7 +402,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * method to save mood event to db given image reason
-     * 
+     *
      * @param mood
      *             the moodEvent being saved
      */
@@ -486,7 +486,7 @@ public class AddMoodFragment extends Fragment {
 
     /**
      * method to save mood event given string reason
-     * 
+     *
      * @param mood
      *             the mood event being saved
      */

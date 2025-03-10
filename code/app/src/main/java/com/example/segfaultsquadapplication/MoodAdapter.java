@@ -34,7 +34,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     // constructor(s)
     /**
      * constructor method
-     * 
+     *
      * @param listener
      *                 listerner to alert the adapter of updates
      */
@@ -66,7 +66,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     // new methods
     /**
      * method to update the moods in ArrayList
-     * 
+     *
      * @param newMoods
      */
     public void updateMoods(List<MoodEvent> newMoods) {
@@ -99,7 +99,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
         /**
          * constructor
-         * 
+         *
          * @param itemView
          *                 the view of the mood card
          */
@@ -122,7 +122,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
         /**
          * method to create the UI of the mood event
-         * 
+         *
          * @param mood
          *             mood information object (MoodEvent)
          */
@@ -137,7 +137,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             textTimestamp.setText(sdf.format(mood.getTimestampDate()));
 
             if (mood.getSocialSituation() != null) {
-                textSocialSituation.setText(mood.getSocialSituation().name());
+                textSocialSituation.setText(mood.getSocialSituation().toString());
                 textSocialSituation.setVisibility(View.VISIBLE);
             } else {
                 textSocialSituation.setVisibility(View.GONE);
@@ -153,7 +153,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
         /**
          * method to get associated mood color (primary/dark) for provided moodType
-         * 
+         *
          * @param moodType
          *                 moodType provided (MoodEvent object)
          * @return
@@ -184,7 +184,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
         /**
          * method to get associated mood color (secondary/lingh) for provided moodType
-         * 
+         *
          * @param moodType
          *                 moodType provided (MoodEvent object)
          * @return

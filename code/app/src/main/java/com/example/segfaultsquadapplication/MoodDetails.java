@@ -1,5 +1,10 @@
 package com.example.segfaultsquadapplication;
 
+import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.ALONE;
+import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.IN_CROWD;
+import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.WITH_GROUP;
+import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.WITH_ONE_PERSON;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -47,15 +52,16 @@ public class MoodDetails extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
-    // Map of mood types to emojis
+    // Map of mood types to emojis - Updated to match MoodAdapter.java
     private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
-            MoodEvent.MoodType.ANGRY, "😡",
-            MoodEvent.MoodType.SAD, "😭",
-            MoodEvent.MoodType.HAPPY, "😀",
-            MoodEvent.MoodType.EXCITED, "😆",
-            MoodEvent.MoodType.TIRED, "😴",
-            MoodEvent.MoodType.SCARED, "😱",
-            MoodEvent.MoodType.SURPRISED, "🤯");
+            MoodEvent.MoodType.ANGER, "😡",
+            MoodEvent.MoodType.CONFUSION, "😵‍💫",
+            MoodEvent.MoodType.DISGUST, "🤢",
+            MoodEvent.MoodType.FEAR, "😨",
+            MoodEvent.MoodType.HAPPINESS, "😀",
+            MoodEvent.MoodType.SADNESS, "😭",
+            MoodEvent.MoodType.SHAME, "😳",
+            MoodEvent.MoodType.SURPRISE, "🤯");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -162,10 +168,14 @@ public class MoodDetails extends Fragment {
                 mood.getMoodType().name().substring(1).toLowerCase());
 
         // Set emoji
-// Set emoji
         String emoji = moodEmojis.get(mood.getMoodType());
         if (emoji != null) {
             moodEmojiTextView.setText(emoji);
+        } else {
+            // Log the mood type for debugging
+            Log.e(TAG, "Emoji not found for mood type: " + mood.getMoodType());
+            // Provide a default emoji
+            moodEmojiTextView.setText("😐");
         }
 
         // Set date and time
@@ -211,9 +221,9 @@ public class MoodDetails extends Fragment {
 
         // Set location
         if (mood.getLocation() != null) {
-            // In a real app, you would reverse geocode the coordinates
-            // For now, just display a placeholder
-            locationTextView.setText("University of Alberta, AB");
+            GeoPoint locationPoint = mood.getLocation();
+            String locationText = "Lat: " + locationPoint.getLatitude() + ", Long: " + locationPoint.getLongitude();
+            locationTextView.setText(locationText);
             locationTextView.setVisibility(View.VISIBLE);
         } else {
             locationTextView.setVisibility(View.GONE);

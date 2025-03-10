@@ -112,19 +112,20 @@ public class EditMoodFragment extends Fragment {
     }
 
     private void setupMoodGrid() {
-        // Pair each mood type with its emoji
+        // Pair each mood type with its emoji - UPDATED to match MoodAdapter.java
         String[] moodEmojis = {
-                "😡", // ANGRY
-                "😭", // SAD
-                "😀", // HAPPY
-                "😆", // EXCITED
-                "😴", // TIRED
-                "😱", // SCARED
-                "🤯" // SURPRISED
+                "😡", // ANGER
+                "😵‍💫", // CONFUSION
+                "🤢", // DISGUST
+                "😱", // FEAR
+                "😀", // HAPPINESS
+                "😭", // SADNESS
+                "😳", // SHAME
+                "🤯" // SURPRISE
         };
 
         String[] moodNames = {
-                "ANGRY", "SAD", "HAPPY", "EXCITED", "TIRED", "SCARED", "SURPRISED"
+                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
         };
 
         for (int i = 0; i < moodNames.length; i++) {
@@ -138,7 +139,10 @@ public class EditMoodFragment extends Fragment {
             moodCard.setLayoutParams(params);
             moodCard.setRadius(8);
             moodCard.setStrokeWidth(1);
-            moodCard.setStrokeColor(getResources().getColor(R.color.color_primary));
+
+            // Use the mood-specific color for the stroke
+            MoodEvent.MoodType moodType = MoodEvent.MoodType.valueOf(moodNames[i]);
+            moodCard.setStrokeColor(getMoodColor(moodType));
 
             // Create vertical layout for emoji and text
             LinearLayout layout = new LinearLayout(requireContext());
@@ -162,7 +166,7 @@ public class EditMoodFragment extends Fragment {
             layout.addView(emojiText);
             layout.addView(moodText);
             moodCard.addView(layout);
-            moodCard.setTag(MoodEvent.MoodType.valueOf(moodNames[i]));
+            moodCard.setTag(moodType);
 
             moodCard.setOnClickListener(v -> {
                 selectedMoodType = (MoodEvent.MoodType) v.getTag();
@@ -174,56 +178,10 @@ public class EditMoodFragment extends Fragment {
     }
 
     private void setupSocialSituationSpinner() {
-        // Create a custom adapter for better text formatting
-        ArrayAdapter<MoodEvent.SocialSituation> adapter = new ArrayAdapter<MoodEvent.SocialSituation>(
+        ArrayAdapter<MoodEvent.SocialSituation> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
-                MoodEvent.SocialSituation.values()) {
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView textView = (TextView) super.getView(position, convertView, parent);
-                MoodEvent.SocialSituation item = getItem(position);
-
-                // Format the text nicely
-                if (item != null) {
-                    String formattedText = formatSocialSituation(item);
-                    textView.setText(formattedText);
-                }
-
-                return textView;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                TextView textView = (TextView) super.getDropDownView(position, convertView, parent);
-                MoodEvent.SocialSituation item = getItem(position);
-
-                // Format the text the same way for dropdown items
-                if (item != null) {
-                    String formattedText = formatSocialSituation(item);
-                    textView.setText(formattedText);
-                }
-
-                return textView;
-            }
-
-            private String formatSocialSituation(MoodEvent.SocialSituation situation) {
-                switch (situation) {
-                    case ALONE:
-                        return "Alone";
-                    case WITH_ONE_PERSON:
-                        return "With One Person";
-                    case WITH_GROUP:
-                        return "With a Group";
-                    case IN_CROWD:
-                        return "In a Crowd";
-                    default:
-                        return situation.name();
-                }
-            }
-        };
-
+                MoodEvent.SocialSituation.values());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         socialSituationSpinner.setAdapter(adapter);
     }
@@ -336,8 +294,14 @@ public class EditMoodFragment extends Fragment {
 
             boolean isSelected = cardMoodType == moodType;
             card.setStrokeWidth(isSelected ? 0 : 1);
-            card.setCardBackgroundColor(getResources().getColor(
-                    isSelected ? R.color.color_primary : android.R.color.white));
+
+            // Use mood-specific colors instead of just color_primary
+            if (isSelected) {
+                card.setCardBackgroundColor(getMoodColor(moodType));
+            } else {
+                card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+                card.setStrokeColor(getMoodColor(cardMoodType));
+            }
 
             // Update both emoji and text color
             LinearLayout layout = (LinearLayout) card.getChildAt(0);
@@ -352,12 +316,22 @@ public class EditMoodFragment extends Fragment {
     }
 
     private void updateMoodSelection(MaterialCardView selectedCard) {
+        MoodEvent.MoodType selectedType = (MoodEvent.MoodType) selectedCard.getTag();
+
         for (int i = 0; i < moodGrid.getChildCount(); i++) {
             MaterialCardView card = (MaterialCardView) moodGrid.getChildAt(i);
+            MoodEvent.MoodType cardMoodType = (MoodEvent.MoodType) card.getTag();
             boolean isSelected = card == selectedCard;
+
             card.setStrokeWidth(isSelected ? 0 : 1);
-            card.setCardBackgroundColor(getResources().getColor(
-                    isSelected ? R.color.color_primary : android.R.color.white));
+
+            // Use mood-specific colors
+            if (isSelected) {
+                card.setCardBackgroundColor(getMoodColor(cardMoodType));
+            } else {
+                card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
+                card.setStrokeColor(getMoodColor(cardMoodType));
+            }
 
             // Update both emoji and text color
             LinearLayout layout = (LinearLayout) card.getChildAt(0);
@@ -368,6 +342,66 @@ public class EditMoodFragment extends Fragment {
                     isSelected ? android.R.color.white : R.color.color_primary);
             emojiText.setTextColor(textColor);
             moodText.setTextColor(textColor);
+        }
+    }
+
+    /**
+     * Method to get associated mood color (primary/dark) for provided moodType
+     * Copied from MoodAdapter.java for consistency
+     *
+     * @param moodType moodType provided (MoodEvent object)
+     * @return returns color integer
+     */
+    private int getMoodColor(MoodEvent.MoodType moodType) {
+        switch (moodType) {
+            case ANGER:
+                return requireContext().getColor(R.color.mood_anger);
+            case CONFUSION:
+                return requireContext().getColor(R.color.mood_confusion);
+            case DISGUST:
+                return requireContext().getColor(R.color.mood_disgust);
+            case FEAR:
+                return requireContext().getColor(R.color.mood_fear);
+            case HAPPINESS:
+                return requireContext().getColor(R.color.mood_happiness);
+            case SADNESS:
+                return requireContext().getColor(R.color.mood_sadness);
+            case SHAME:
+                return requireContext().getColor(R.color.mood_shame);
+            case SURPRISE:
+                return requireContext().getColor(R.color.mood_surprise);
+            default:
+                return requireContext().getColor(R.color.mood_default);
+        }
+    }
+
+    /**
+     * Method to get associated mood color (secondary/light) for provided moodType
+     * Copied from MoodAdapter.java for consistency
+     *
+     * @param moodType moodType provided (MoodEvent object)
+     * @return returns color integer
+     */
+    private int getLightMoodColor(MoodEvent.MoodType moodType) {
+        switch (moodType) {
+            case ANGER:
+                return requireContext().getColor(R.color.mood_anger_light);
+            case CONFUSION:
+                return requireContext().getColor(R.color.mood_confusion_light);
+            case DISGUST:
+                return requireContext().getColor(R.color.mood_disgust_light);
+            case FEAR:
+                return requireContext().getColor(R.color.mood_fear_light);
+            case HAPPINESS:
+                return requireContext().getColor(R.color.mood_happiness_light);
+            case SADNESS:
+                return requireContext().getColor(R.color.mood_sadness_light);
+            case SHAME:
+                return requireContext().getColor(R.color.mood_shame_light);
+            case SURPRISE:
+                return requireContext().getColor(R.color.mood_surprise_light);
+            default:
+                return requireContext().getColor(R.color.mood_default);
         }
     }
 
@@ -401,7 +435,7 @@ public class EditMoodFragment extends Fragment {
         updates.put("reasonText", reason);
 
         if (socialSituationSpinner.getSelectedItem() != null) {
-            updates.put("socialSituation", socialSituationSpinner.getSelectedItem().toString());
+            updates.put("socialSituation", socialSituationSpinner.getSelectedItem());
         }
 
         // Keep the original timestamp and location
@@ -438,10 +472,15 @@ public class EditMoodFragment extends Fragment {
         db.collection("moods").document(moodId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
+                    // Add a log statement here
+                    Log.d(TAG, "Mood update successful");
                     Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
+                    if (isAdded()) {
+                        Navigation.findNavController(requireView()).navigateUp();
+                    }
                 })
                 .addOnFailureListener(e -> {
+                    // This may be executing instead
                     Log.e(TAG, "Error updating mood", e);
                     Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
