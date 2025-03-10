@@ -1,3 +1,12 @@
+/**
+ * Classname: AddMoodFragment
+ * Purpose: Allow user to add a mood event to thier history
+ * Current Issues: N/A
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 import android.app.Activity;
@@ -55,6 +64,7 @@ public class AddMoodFragment extends Fragment {
     private GridLayout moodGrid;
     private TextView textDateTime;
     private EditText reasonInput;
+    private EditText triggerInput;
     private Spinner socialSituationSpinner;
     private ImageView imageUpload;
     private Uri selectedImageUri;
@@ -97,6 +107,7 @@ public class AddMoodFragment extends Fragment {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
         reasonInput = view.findViewById(R.id.editTextReason);
+        triggerInput = view.findViewById(R.id.editTextTrigger);
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
         imageUpload = view.findViewById(R.id.imageUpload);
     }
@@ -116,17 +127,18 @@ public class AddMoodFragment extends Fragment {
     private void setupMoodGrid() {
         // Pair each mood type with its emoji
         String[] moodEmojis = {
-                "😡", // ANGRY
-                "😭", // SAD
-                "😀", // HAPPY
-                "😆", // EXCITED
-                "😴", // TIRED
-                "😱", // SCARED
-                "🤯" // SURPRISED
+                "😡", // ANGER
+                "😵‍💫", // CONFUSION
+                "🤢", // DISGUST
+                "😱", // FEAR
+                "😀", // HAPPINESS
+                "😭", // SADNESS
+                "😳", // SHAME
+                "🤯" // SURPRISE
         };
 
         String[] moodNames = {
-                "ANGRY", "SAD", "HAPPY", "EXCITED", "TIRED", "SCARED", "SURPRISED"
+                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
         };
 
         for (int i = 0; i < moodNames.length; i++) {
@@ -220,6 +232,17 @@ public class AddMoodFragment extends Fragment {
         view.findViewById(R.id.buttonCancel).setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
     }
 
+    /**
+     * method to handle completion of this fragment
+     * NOTE: NOT BEING USED ANYMORE
+     * 
+     * @param requestCode
+     *                    the request code (e.g. 200, 404, 201, etc)
+     * @param resultCode
+     *                    the result code
+     * @param data
+     *                    the data transmitted as intent
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // debugging
@@ -359,12 +382,12 @@ public class AddMoodFragment extends Fragment {
         // get all user input fields
         String userId = auth.getCurrentUser().getUid(); // get user Id
         String reason = reasonInput.getText().toString().trim(); // get reason text
+        String trigger = triggerInput.getText().toString().trim(); // get trigger text
 
         // create mood event and set its location to provided location or null (if not
         // provided)
-        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason);
-        newMood.setLocation(location); // set location using attribute
-
+        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason, null, location);
+        newMood.setTrigger(trigger); // Set the trigger
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             newMood.setSocialSituation(
                     (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem());
@@ -471,14 +494,13 @@ public class AddMoodFragment extends Fragment {
         // Create a map to store the mood data
         Map<String, Object> moodData = new HashMap<>();
         moodData.put("userId", mood.getUserId());
-        moodData.put("moodType", mood.getMoodType().name());
-        moodData.put("reasonText", mood.getReasonText());
         moodData.put("timestamp", mood.getTimestamp());
-
-        // Add the image data as a BLOB (if image reason)
-        if (mood.getImageData() != null) {
-            moodData.put("imageData", mood.getImageData());
-        }
+        moodData.put("moodType", mood.getMoodType().name());
+        moodData.put("reasonText", mood.getReasonText()); // either this or the imageData
+        moodData.put("imageData", mood.getImageData()); // either this or the reasonText
+        // optional
+        moodData.put("trigger", mood.getTrigger());
+        moodData.put("socialSituation", mood.getSocialSituation());
 
         // save to firestore db
         db.collection("moods")

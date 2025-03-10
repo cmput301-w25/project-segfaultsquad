@@ -16,4 +16,8 @@
         android:id="@+id/navigation_following"
         android:icon="@drawable/following_icon"
         android:title="Following"/>
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/profile_icon"
+        android:title="Profile"/>
 </menu> 

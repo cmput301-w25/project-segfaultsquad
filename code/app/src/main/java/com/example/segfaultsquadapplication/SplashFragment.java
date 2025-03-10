@@ -1,3 +1,10 @@
+/**
+ * Classname: SplashFragment
+ * Version Info: Initial
+ * Date: Feb 19, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 import android.animation.Animator;
