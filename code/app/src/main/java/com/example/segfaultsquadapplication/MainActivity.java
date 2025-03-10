@@ -70,7 +70,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         int itemId = destinationId;
         // These fragments use the same as its parent, the profile fragment
         if (destinationId == R.id.navigation_FollowersListFragment ||
-                destinationId == R.id.navigation_FollowingListFragment) {
+                destinationId == R.id.navigation_FollowingListFragment ||
+                destinationId == R.id.navigation_add_mood ||
+                destinationId == R.id.navigation_edit_mood ||
+                destinationId == R.id.navigation_mood_details) {
             itemId = R.id.navigation_profile;
         }
         View item = getBottomNavigationView().findViewById(itemId);
