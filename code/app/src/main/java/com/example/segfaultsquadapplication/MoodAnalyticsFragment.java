@@ -108,7 +108,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * just silly analytics (most frequent mood type. Maight remove later)
-     * 
+     *
      * @param moodEvents
      *                   list of this user's mood events
      */
@@ -200,7 +200,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * Distribution of mood types
-     * 
+     *
      * @param moodEvents
      *                   list of all of this user's mood events
      */
@@ -238,7 +238,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * Trend of mood counts over time
-     * 
+     *
      * @param moodEvents
      *                   list of all of this user's mood events
      */

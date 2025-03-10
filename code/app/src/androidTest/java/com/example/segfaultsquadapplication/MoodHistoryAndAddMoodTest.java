@@ -67,7 +67,7 @@ public class MoodHistoryAndAddMoodTest {
         CollectionReference moodsRef = db.collection("moods");
 
         MoodEvent[] evts = {
-                new MoodEvent("1236478", MoodEvent.MoodType.ANGRY, "RRR"),
+                new MoodEvent("1236478", MoodEvent.MoodType.ANGER, "RRR", null, null),
         };
         for (MoodEvent evt : evts) {
             DocumentReference docRef = moodsRef.document();
@@ -155,7 +155,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test Regular - All fields filled");
         onView(withId(R.id.fabAddMood)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😴")).perform(click());
+        onView(withText("😱")).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
@@ -189,7 +189,7 @@ public class MoodHistoryAndAddMoodTest {
         CollectionReference collRef = FirebaseFirestore.getInstance().collection("moods");
 
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        MoodEvent evtLastMonth = new MoodEvent(uid, MoodEvent.MoodType.ANGRY, "Last M.");
+        MoodEvent evtLastMonth = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "Last M.", null, null);
         DocumentReference docRef = collRef.document();
         Date newDate = Calendar.getInstance().getTime();
         newDate.setTime(newDate.getTime() - 30L * 24 * 60 * 60 * 1000);
@@ -197,7 +197,7 @@ public class MoodHistoryAndAddMoodTest {
         evtLastMonth.setMoodId(docRef.getId());
         docRef.set(evtLastMonth);
 
-        MoodEvent evtOtherAngry = new MoodEvent(uid, MoodEvent.MoodType.ANGRY, "RAGE");
+        MoodEvent evtOtherAngry = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "RAGE", null, null);
         docRef = collRef.document();
         evtOtherAngry.setMoodId(docRef.getId());
         docRef.set(evtOtherAngry);
@@ -217,13 +217,13 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test - filter with mood");
         onView(withId(R.id.filterButton)).perform(click());
         onView(withText("By Mood")).perform(click());
-        onView(withText("ANGRY")).perform(click());
+        onView(withText("ANGER")).perform(click());
         Thread.sleep(500);
         // The recent fury mood should be shown
         onView(withText("Fury!")).check(matches(isDisplayed()));
         // Should now reveal the angry event last month!
         onView(withText("Last M.")).check(matches(isDisplayed()));
-        // The TIRED event should be hidden
+        // The fear event should be hidden
         onView(withText("Reason text")).check(doesNotExist());
 
         System.out.println("Test - cancel all mood filter");
@@ -232,7 +232,7 @@ public class MoodHistoryAndAddMoodTest {
         Thread.sleep(500);
         // The event last month should be shown
         onView(withText("Last M.")).check(matches(isDisplayed()));
-        // The TIRED event should also be shown
+        // The fear event should also be shown
         onView(withText("Reason text")).check(matches(isDisplayed()));
 
         System.out.println("Test - filter by reason");
