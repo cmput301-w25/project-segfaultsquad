@@ -127,6 +127,32 @@
             app:destination="@+id/MyMoodHistory" />
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_edit_mood"
+        android:name="com.example.segfaultsquadapplication.EditMoodFragment"
+        android:label="Edit Mood">
+        <argument
+            android:name="moodId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_mood_details"
+        android:name="com.example.segfaultsquadapplication.MoodDetails"
+        android:label="Mood Details">
+        <argument
+            android:name="moodId"
+            app:argType="string" />
+    </fragment>
+
+    <action
+        android:id="@+id/action_moodDetails_to_editMood"
+        app:destination="@id/navigation_edit_mood" />
+
+    <action
+        android:id="@+id/action_myMoodHistory_to_moodDetails"
+        app:destination="@id/navigation_mood_details" />
+
 
     <!-- Profile Fragment -->
     <fragment
