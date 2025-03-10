@@ -24,10 +24,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingBottom="16dp"
             android:text="Followers"
             android:textSize="24sp"
-            android:textStyle="bold"
-            android:paddingBottom="16dp" />
+            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

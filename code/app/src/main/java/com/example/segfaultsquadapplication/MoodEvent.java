@@ -29,24 +29,39 @@ public class MoodEvent {
 
     // Optional attributes
     private String trigger; // Trigger for the mood (optional)
-    private SocialSituation socialSituation; // Social situation (optional)
+    private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, SURPRISE
+        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED, SURPRISED, SURPRISE
     }
 
     // Enum for social situations
     public enum SocialSituation {
-        ALONE,
-        WITH_ONE_PERSON,
-        WITH_GROUP,
-        IN_CROWD
+        ALONE("Alone"),
+        WITH_ONE_PERSON("With One Person"),
+        WITH_GROUP("With a Group"),
+        IN_CROWD("In a Crowd");
+
+        private final String displayName;
+
+        SocialSituation(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
+        }
     }
 
     // Constructor
     public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
-            GeoPoint location) {
+                     GeoPoint location) {
         this.userId = userId;
         this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
@@ -120,11 +135,11 @@ public class MoodEvent {
     }
 
     public SocialSituation getSocialSituation() {
-        return socialSituation;
+        return SocialSituation;
     }
 
-    public void setSocialSituation(SocialSituation socialSituation) {
-        this.socialSituation = socialSituation;
+    public void setSocialSituation(SocialSituation SocialSituation) {
+        this.SocialSituation = SocialSituation;
     }
 
     public GeoPoint getLocation() {
@@ -139,7 +154,7 @@ public class MoodEvent {
     // getter and setters for imageData
     /**
      * gets the image data from int array to deconstruct images
-     * 
+     *
      * @return
      *         returns the int array constructed
      */
@@ -149,7 +164,7 @@ public class MoodEvent {
 
     /**
      * * gets the image data from int array to reconstruct images
-     * 
+     *
      * @param imageData
      *                  the gotten int array imageData
      */

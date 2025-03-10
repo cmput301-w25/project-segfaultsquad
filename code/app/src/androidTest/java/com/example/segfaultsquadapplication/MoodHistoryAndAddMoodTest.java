@@ -140,7 +140,7 @@ public class MoodHistoryAndAddMoodTest {
         onView(withId(R.id.editTextReason)).perform(typeText("???"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
-        onView(withText("WITH_GROUP")).perform(click());
+        onView(withText(MoodEvent.SocialSituation.WITH_GROUP.getDisplayName())).perform(click());
         onView(withId(R.id.buttonConfirm)).perform(click());
         // Toast msg hard & unreliable to test; validate in mood event list.
         try {
@@ -159,7 +159,7 @@ public class MoodHistoryAndAddMoodTest {
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
-        onView(withText("WITH_GROUP")).perform(click());
+        onView(withText(MoodEvent.SocialSituation.WITH_GROUP.getDisplayName())).perform(click());
         onView(withId(R.id.buttonConfirm)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
         onView(withText("Reason text")).check(matches(isDisplayed()));

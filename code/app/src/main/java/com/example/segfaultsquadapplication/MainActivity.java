@@ -6,26 +6,18 @@
  */
 package com.example.segfaultsquadapplication;
 
-import android.animation.ObjectAnimator;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarItemView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import androidx.navigation.Navigation;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
@@ -61,7 +53,10 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     private void updateBottomNavMenu(int destinationId) {
         // During these phase, the menu is invisible.
         if (destinationId == R.id.navigation_login ||
-                destinationId == R.id.navigation_splash) {
+                destinationId == R.id.navigation_splash ||
+                destinationId == R.id.navigation_add_mood ||
+                destinationId == R.id.navigation_edit_mood ||
+                destinationId == R.id.navigation_mood_details) {
             getBottomNavigationView().setVisibility(View.GONE);
             return;
         }
@@ -70,10 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         int itemId = destinationId;
         // These fragments use the same as its parent, the profile fragment
         if (destinationId == R.id.navigation_FollowersListFragment ||
-                destinationId == R.id.navigation_FollowingListFragment ||
-                destinationId == R.id.navigation_add_mood ||
-                destinationId == R.id.navigation_edit_mood ||
-                destinationId == R.id.navigation_mood_details) {
+                destinationId == R.id.navigation_FollowingListFragment) {
             itemId = R.id.navigation_profile;
         }
         View item = getBottomNavigationView().findViewById(itemId);

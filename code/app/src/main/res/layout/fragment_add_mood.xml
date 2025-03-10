@@ -6,13 +6,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Header -->
+    <!-- Header section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/TopHeaderBackground"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp">
 
         <ImageButton
             android:id="@+id/buttonBack"
@@ -23,16 +24,16 @@
             android:padding="8dp"/>
 
         <TextView
+            android:id="@+id/textViewTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Create Mood Event"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"/>
+            android:text="Create Mood"
+            android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -226,7 +227,7 @@
             android:layout_weight="1"
             android:text="Confirm"
             android:layout_marginEnd="8dp"
-            android:backgroundTint="@android:color/holo_green_light"/>
+            android:backgroundTint="@color/color_primary"/>
 
         <Button
             android:id="@+id/buttonCancel"
@@ -235,6 +236,6 @@
             android:layout_weight="1"
             android:text="Cancel"
             android:layout_marginStart="8dp"
-            android:backgroundTint="@android:color/holo_red_light"/>
+            android:backgroundTint="@color/color_primary"/>
     </LinearLayout>
-</LinearLayout> 
+</LinearLayout>
