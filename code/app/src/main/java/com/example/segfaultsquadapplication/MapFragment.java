@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,14 @@ import java.util.List;
 import java.util.Date;
 import java.util.Map;
 import android.graphics.Color;
+import org.osmdroid.views.MapView;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.overlay.compass.CompassOverlay;
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 
 public class MapFragment extends Fragment {
     // Attributes
@@ -69,7 +78,7 @@ public class MapFragment extends Fragment {
     // distance in km for local moods
     private static final float LOCAL_RADIUS_KM = 5f;
 
-    private MapPlaceholderView mapView;
+    private MapView mapView;
 
     private ChipGroup mapChipGroup;
 
@@ -97,14 +106,27 @@ public class MapFragment extends Fragment {
         localMoods = new ArrayList<>();
     }
 
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Initialize MapView or any other components that require view interaction
+        mapView = view.findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK); // Example of setting map tiles
+        mapView.setMultiTouchControls(true);
+
+        // Check and request location permissions if necessary
+        enableMyLocation();
+    }
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        // chip group view
+        // Chip group view
         mapChipGroup = view.findViewById(R.id.map_chip_group); // find it
         mapChipGroup.check(R.id.chip_my_moods); // Set default selection
-        // chip click listener
+        // Chip click listener
         mapChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chip_my_moods) {
                 // Handle My Mood History selection
@@ -117,10 +139,6 @@ public class MapFragment extends Fragment {
                 updateMapMarkers(TAB_LOCAL);
             }
         });
-
-        // setup map
-        // TODO: get the actual map working and replace this
-        setupPlaceholderMap(view);
 
         // Initialize filter views
         filterButton = view.findViewById(R.id.filterButton);
@@ -145,22 +163,49 @@ public class MapFragment extends Fragment {
             toggleFilterMenu();
         });
 
+        // Load user settings
+        Configuration.getInstance().load(requireContext(), PreferenceManager.getDefaultSharedPreferences(requireContext()));
+
+        // Initialize MapView
+        mapView = view.findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK); // Use OpenStreetMap tiles
+        mapView.setMultiTouchControls(true);
+
+
+        // Set default location and zoom level
+        mapView.getController().setZoom(15.0);
+        enableMyLocation();
+
+
+/*
+        // Example Firestore GeoPoint (latitude, longitude)
+        com.google.firebase.firestore.GeoPoint firestoreGeoPoint = new com.google.firebase.firestore.GeoPoint(37.7749, -122.4194); // Example: San Francisco
+
+        // Convert Firestore GeoPoint to OSMDroid GeoPoint
+        org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(
+                firestoreGeoPoint.getLatitude(),
+                firestoreGeoPoint.getLongitude()
+        );
+
+        // Set map center to converted GeoPoint
+        mapView.getController().setCenter(osmGeoPoint);
+
+
+        // Enable location overlay
+        MyLocationNewOverlay locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()), mapView);
+        locationOverlay.enableMyLocation();
+        mapView.getOverlays().add(locationOverlay);
+*/
+        // Add compass overlay
+        CompassOverlay compassOverlay = new CompassOverlay(requireContext(), new InternalCompassOrientationProvider(requireContext()), mapView);
+        compassOverlay.enableCompass();
+        mapView.getOverlays().add(compassOverlay);
+
         return view;
     }
 
-    /**
-     * method to setup placeholder map view
-     * 
-     * @param view
-     */
-    // TODO: get the actual map working and refactor this bit
-    private void setupPlaceholderMap(View view) {
-        mapView = view.findViewById(R.id.map_placeholder);
-    }
 
-    /**
-     * method to load in mood data
-     */
+
     private void loadMoodData() {
         String currentUserId = getCurrentUserId(); // TODO: Implement this method to get current user's ID
 
@@ -179,12 +224,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    /**
-     * method to handle user moods on map
-     * 
-     * @param snapshot
-     *                 snapshot of the query to get docs from db
-     */
     private void handleUserMoods(QuerySnapshot snapshot) {
         userMoods.clear();
         for (var doc : snapshot.getDocuments()) {
@@ -198,9 +237,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    /**
-     * method to load in user's followed user's recent moods
-     */
     private void loadFollowedUsersMoods() {
         // First get list of followed users
         String currentUserId = getCurrentUserId();
@@ -237,9 +273,6 @@ public class MapFragment extends Fragment {
                 });
     }
 
-    /**
-     * method to load in local moods for map
-     */
     private void loadLocalMoods() {
         if (currentLocation == null || mapChipGroup == null)
             return;
@@ -267,7 +300,7 @@ public class MapFragment extends Fragment {
 
     /**
      * method to determine if local moods are within range of display
-     * 
+     *
      * @param point1
      *                 user location
      * @param point2
@@ -287,15 +320,16 @@ public class MapFragment extends Fragment {
 
     /**
      * method to update the mood markers on the map based on filter applied
-     * 
+     *
      * @param tabPosition
      *                    the filter being applied index
      */
+
     private void updateMapMarkers(int tabPosition) {
         if (mapView == null)
             return;
 
-        mapView.clearMarkers();
+        //mapView.clearMarkers();
         List<MoodEvent> moodsToShow = new ArrayList<>();
 
         switch (tabPosition) {
@@ -318,16 +352,12 @@ public class MapFragment extends Fragment {
                 float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
                 int color = mood.getPrimaryColor(requireContext());
-                mapView.addMarker(x, y, color, mood.getMoodType().toString());
+                //mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }
     }
 
-    /**
-     * method to get current user's id (INCORRECT + REDUNDANT)
-     * 
-     * @return
-     */
+    // The method to get the current user's ID
     private String getCurrentUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -338,43 +368,73 @@ public class MapFragment extends Fragment {
         }
     }
 
-    /**
-     * Method to update the users current location
-     */
     private void updateCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+            return; // Exit if permission is not granted
         }
 
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         currentLocation = location;
-                        updateMapMarkers(mapChipGroup.getCheckedChipId() == R.id.chip_local_moods ? TAB_LOCAL : -1);
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        Log.d("Location", "Latitude: " + latitude + ", Longitude: " + longitude);
+
+                        // Update map with user's location
+                        updateMapLocation(latitude, longitude);
+                    } else {
+                        setDefaultLocation(); // Handle case where location is null
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Location", "Failed to get location", e);
+                    setDefaultLocation(); // Handle failure case
                 });
     }
 
     /**
-     * helper method to enable locaiton
+     * Updates the map with the given latitude and longitude.
      */
-    private void enableMyLocation() {
-        if (mMap == null)
-            return;
+    private void updateMapLocation(double latitude, double longitude) {
+        org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(latitude, longitude);
 
+        mapView.getController().setCenter(osmGeoPoint);
+        enableLocationOverlay();
+    }
+
+    /**
+     * Sets a default location (e.g., San Francisco) when location retrieval fails.
+     */
+    private void setDefaultLocation() {
+        double defaultLat = 53.52624;
+        double defaultLon = -113.52048;
+
+        updateMapLocation(defaultLat, defaultLon);
+        Log.w("Location", "Using default location: Edmonton");
+    }
+
+    /**
+     * Enables the location overlay on the map.
+     */
+    private void enableLocationOverlay() {
+        MyLocationNewOverlay locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()), mapView);
+        locationOverlay.enableMyLocation();
+        mapView.getOverlays().add(locationOverlay);
+    }
+
+
+    private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
             updateCurrentLocation();
         } else {
             requestLocationPermission();
         }
     }
 
-    /**
-     * helper method to request user permissions for location
-     */
+
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -388,9 +448,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    /**
-     * another helper method to request user location permissions
-     */
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
@@ -423,7 +480,7 @@ public class MapFragment extends Fragment {
 
     /**
      * method to apply filter (INCORRECT)
-     * 
+     *
      * @param filterType
      *                   filter being applied
      */
