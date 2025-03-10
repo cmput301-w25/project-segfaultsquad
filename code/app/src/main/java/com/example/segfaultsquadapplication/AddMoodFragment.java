@@ -64,6 +64,7 @@ public class AddMoodFragment extends Fragment {
     private GridLayout moodGrid;
     private TextView textDateTime;
     private EditText reasonInput;
+    private EditText triggerInput;
     private Spinner socialSituationSpinner;
     private ImageView imageUpload;
     private Uri selectedImageUri;
@@ -106,6 +107,7 @@ public class AddMoodFragment extends Fragment {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
         reasonInput = view.findViewById(R.id.editTextReason);
+        triggerInput = view.findViewById(R.id.editTextTrigger);
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
         imageUpload = view.findViewById(R.id.imageUpload);
     }
@@ -380,12 +382,12 @@ public class AddMoodFragment extends Fragment {
         // get all user input fields
         String userId = auth.getCurrentUser().getUid(); // get user Id
         String reason = reasonInput.getText().toString().trim(); // get reason text
+        String trigger = triggerInput.getText().toString().trim(); // get trigger text
 
         // create mood event and set its location to provided location or null (if not
         // provided)
-        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason);
-        newMood.setLocation(location); // set location using attribute
-
+        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason, null, location);
+        newMood.setTrigger(trigger); // Set the trigger
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             newMood.setSocialSituation(
                     (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem());
@@ -492,14 +494,13 @@ public class AddMoodFragment extends Fragment {
         // Create a map to store the mood data
         Map<String, Object> moodData = new HashMap<>();
         moodData.put("userId", mood.getUserId());
-        moodData.put("moodType", mood.getMoodType().name());
-        moodData.put("reasonText", mood.getReasonText());
         moodData.put("timestamp", mood.getTimestamp());
-
-        // Add the image data as a BLOB (if image reason)
-        if (mood.getImageData() != null) {
-            moodData.put("imageData", mood.getImageData());
-        }
+        moodData.put("moodType", mood.getMoodType().name());
+        moodData.put("reasonText", mood.getReasonText()); // either this or the imageData
+        moodData.put("imageData", mood.getImageData()); // either this or the reasonText
+        // optional
+        moodData.put("trigger", mood.getTrigger());
+        moodData.put("socialSituation", mood.getSocialSituation());
 
         // save to firestore db
         db.collection("moods")

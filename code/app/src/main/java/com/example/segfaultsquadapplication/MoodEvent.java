@@ -18,25 +18,18 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 
 public class MoodEvent {
-    // attributes
-    private String moodId;
-    private String userId;
-    private Timestamp timestamp;
-    private MoodType moodType;
-    private String reasonText;
-    private String reasonImageUrl;
-    private SocialSituation socialSituation;
-    private GeoPoint location;
-    // since firestore made the Storage thing private recently, im gonna store
-    // images as BLOBs in the db itself and de-construct and reconstruct as
-    // necessary
-    // private List<Byte> imageData; // For storing the image as a byte array
-    // Change from byte[] to List<Byte> cuz firestore doesn allow serializing of
-    // byte arrays directly
-    // NOPE
-    private List<Integer> imageData; // For storing the image as a integer array
-    // apparetnly firestore also doesnt support serializing Byte objects, so using
-    // numeric objects (int) now
+    // Required attributes
+    private String moodId; // Unique identifier for the mood event
+    private String userId; // User ID of the person creating the mood event
+    private Timestamp timestamp; // Date and time of the mood event
+    private MoodType moodType; // Emotional state
+    private String reasonText; // Reason text (optional)
+    private List<Integer> imageData; // Reason image data (optional)
+    private GeoPoint location; // Location of the mood event
+
+    // Optional attributes
+    private String trigger; // Trigger for the mood (optional)
+    private SocialSituation socialSituation; // Social situation (optional)
 
     // Enum for mood types
     public enum MoodType {
@@ -51,12 +44,20 @@ public class MoodEvent {
         IN_CROWD
     }
 
-    // Constructor(s)
-    public MoodEvent(String userId, MoodType moodType, String reasonText) {
+    // Constructor
+    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
+            GeoPoint location) {
         this.userId = userId;
+        this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
         this.reasonText = reasonText;
-        this.timestamp = new Timestamp(new Date());
+        this.imageData = imageData;
+        this.location = location;
+
+        // Validate that at least one of reasonText or imageData is provided
+        if (reasonText == null && (imageData == null || imageData.isEmpty())) {
+            throw new IllegalArgumentException("Either reasonText or imageData must be provided.");
+        }
     }
 
     // Add a no-argument constructor for Firestore
@@ -118,14 +119,6 @@ public class MoodEvent {
         }
     }
 
-    public String getReasonImageUrl() {
-        return reasonImageUrl;
-    }
-
-    public void setReasonImageUrl(String reasonImageUrl) {
-        this.reasonImageUrl = reasonImageUrl;
-    }
-
     public SocialSituation getSocialSituation() {
         return socialSituation;
     }
@@ -162,6 +155,14 @@ public class MoodEvent {
      */
     public void setImageData(List<Integer> imageData) {
         this.imageData = imageData;
+    }
+
+    public String getTrigger() {
+        return trigger;
+    }
+
+    public void setTrigger(String trigger) {
+        this.trigger = trigger;
     }
 
     public int getPrimaryColor(Context context) {
