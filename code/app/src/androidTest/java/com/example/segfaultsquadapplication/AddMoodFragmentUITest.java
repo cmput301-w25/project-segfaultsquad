@@ -35,6 +35,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
+/**
+ * This test is to ensure that mood event is the UI for mood creation event works </br>
+ * A seed database is mocked and used, it's also torn down at end of test
+ */
+
 @RunWith(AndroidJUnit4.class)
 public class AddMoodFragmentUITest {
 
@@ -60,7 +65,7 @@ public class AddMoodFragmentUITest {
     @Before //grow database, runs before each test
     public void seedDatabase() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference moods = db.collection("moods");
+        CollectionReference moodsRef = db.collection("moods");
     }
 
     @Test
@@ -80,6 +85,7 @@ public class AddMoodFragmentUITest {
         Thread.sleep(500);
 
         onView(withText("CONFUSION")).check(ViewAssertions.matches(isDisplayed()));
+        Thread.sleep(200);
     }
 
     @After
