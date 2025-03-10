@@ -6,16 +6,22 @@
  */
 package com.example.segfaultsquadapplication;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
+
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarItemView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,7 +31,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
     // attributes
     private BottomNavigationView bottomNavigationView;
-    private NavController navController;
+    private NavController navController = null;
     private FirebaseAuth mAuth;
 
     @Override
@@ -36,72 +42,77 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         mAuth = FirebaseAuth.getInstance();
 
         // Initialize the bottom navigation and NavController
-        try {
-            bottomNavigationView = findViewById(R.id.BottomNavBar);
-            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.nav_host_fragment);
+        setupNavController();
 
-            if (navHostFragment != null) {
-                navController = navHostFragment.getNavController();
-                NavigationUI.setupWithNavController(bottomNavigationView, navController);
+        getBottomNavigationView().setLabelVisibilityMode(
+                NavigationBarView.LABEL_VISIBILITY_UNLABELED);
 
-                // Hide bottom navigation on login screen, moodanalyticsfragment and landing
-                // screen and update menu
-                // based on destination
-                navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
-                    if (destination.getId() == R.id.navigation_login) {
-                        bottomNavigationView.setVisibility(View.GONE);
-                    } else if (destination.getId() == R.id.navigation_splash) {
-                        bottomNavigationView.setVisibility(View.GONE);
-                    } else if (destination.getId() == R.id.navigation_mood_analytics) {
-
-                    } else {
-                        bottomNavigationView.setVisibility(View.VISIBLE);
-                        updateBottomNavMenu(destination.getId());
-                    }
-                });
-            } else {
-                Log.e("MainActivity", "NavHostFragment is null, cannot initialize NavController");
-            }
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error initializing NavController: " + e.getMessage());
-        }
+        updateBottomNavMenu(R.id.navigation_splash);
 
         // Bottom navigation item selection
-        bottomNavigationView.setOnItemSelectedListener(this);
+        getBottomNavigationView().setOnItemSelectedListener(this);
     }
 
     /**
      * method to update the bottom nav bar based upon the destination
-     * 
+     *
      * @param destinationId the id of the view/activity user is navigating to
      */
     private void updateBottomNavMenu(int destinationId) {
-        bottomNavigationView.getMenu().clear(); // Clear existing menu items
-        if (destinationId == R.id.navigation_my_mood_history) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_home);
-        } else if (destinationId == R.id.navigation_map) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_map);
-        } else if (destinationId == R.id.navigation_following) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_following);
-        } else if (destinationId == R.id.navigation_follow_requests) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_requests);
-        } else if (destinationId == R.id.navigation_profile) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile);
-        } else if (destinationId == R.id.navigation_FollowersListFragment) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile); // im not going to make seperate
-                                                                              // navigations for this... just have the
-                                                                              // same as its parent profile fragment
-        } else if (destinationId == R.id.navigation_FollowingListFragment) {
-            bottomNavigationView.inflateMenu(R.menu.bottom_nav_menu_profile); // im not going to make seperate
-                                                                              // navigations for this... just have the
-                                                                              // same as its parent profile fragment
+        // During these phase, the menu is invisible.
+        if (destinationId == R.id.navigation_login ||
+                destinationId == R.id.navigation_splash) {
+            getBottomNavigationView().setVisibility(View.GONE);
+            return;
+        }
+        getBottomNavigationView().setVisibility(View.VISIBLE);
+        // Hide the selected button
+        int itemId = destinationId;
+        // These fragments use the same as its parent, the profile fragment
+        if (destinationId == R.id.navigation_FollowersListFragment ||
+                destinationId == R.id.navigation_FollowingListFragment) {
+            itemId = R.id.navigation_profile;
+        }
+        View item = getBottomNavigationView().findViewById(itemId);
+        if (item != null) {
+            item.setVisibility(View.INVISIBLE);
         }
     }
 
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        navController.navigate(item.getItemId());
+        getNavController().navigate(item.getItemId());
         return true;
+    }
+
+    private BottomNavigationView getBottomNavigationView() {
+        // Try to fetch the bottomNavigationView.
+        if (bottomNavigationView == null) {
+            bottomNavigationView = findViewById(R.id.BottomNavBar);
+        }
+        return bottomNavigationView;
+    }
+
+    private NavController getNavController() {
+        // Try to fetch the nav controller.
+        if (navController == null) {
+            setupNavController();
+        }
+        return navController;
+    }
+
+    private void setupNavController() {
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        // Initialized; setup navigation view as well.
+        if (navHostFragment != null) {
+            navController = navHostFragment.getNavController();
+            NavigationUI.setupWithNavController(getBottomNavigationView(), navController);
+            // Register the
+            navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+                updateBottomNavMenu(destination.getId());
+            });
+        }
     }
 }
