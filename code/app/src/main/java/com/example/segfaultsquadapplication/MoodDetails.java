@@ -29,6 +29,12 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * A Fragment that displays detailed information about a specific mood event.
+ * This class retrieves a mood event from Firestore using the mood ID passed as an argument,
+ * and displays all related information including mood type, date/time, reason text, images,
+ * social situation, and location.
+ */
 public class MoodDetails extends Fragment {
     private static final String TAG = "MoodDetails";
 
@@ -53,7 +59,10 @@ public class MoodDetails extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
-    // Map of mood types to emojis - Updated to match MoodAdapter.java
+    /**
+     * Map that associates each MoodType with its corresponding emoji representation.
+     * This map is used to display the appropriate emoji for each mood type.
+     */
     private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
             MoodEvent.MoodType.ANGER, "😡",
             MoodEvent.MoodType.CONFUSION, "😵‍💫",
@@ -64,6 +73,15 @@ public class MoodDetails extends Fragment {
             MoodEvent.MoodType.SHAME, "😳",
             MoodEvent.MoodType.SURPRISE, "🤯");
 
+    /**
+     * Inflates the mood details layout and initializes the fragment.
+     * Retrieves the mood ID from arguments and sets up the UI components.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that the fragment's UI should be attached to
+     * @param savedInstanceState Previous state of the fragment if it was saved
+     * @return The View for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.mood_details, container, false);
@@ -96,6 +114,11 @@ public class MoodDetails extends Fragment {
         return view;
     }
 
+    /**
+     * Initializes all UI components from the inflated view.
+     *
+     * @param view The root view containing all UI components
+     */
     private void initializeViews(View view) {
         backButton = view.findViewById(R.id.backButton);
         titleTextView = view.findViewById(R.id.moodTitleTextView);
@@ -110,6 +133,11 @@ public class MoodDetails extends Fragment {
         deleteButton = view.findViewById(R.id.deleteButton);
     }
 
+    /**
+     * Sets up click listeners for interactive UI components.
+     * This includes navigation actions for the back and edit buttons,
+     * and confirmation dialog for the delete button.
+     */
     private void setupListeners() {
         // Back button
         backButton.setOnClickListener(v ->
@@ -127,6 +155,12 @@ public class MoodDetails extends Fragment {
         deleteButton.setOnClickListener(v -> confirmDeleteMood());
     }
 
+    /**
+     * Loads the mood data from Firestore using the mood ID.
+     * When successful, it converts the Firestore document to a MoodEvent object
+     * and populates the UI with the retrieved data.
+     * On failure, it shows an error message and navigates back.
+     */
     private void loadMoodData() {
         db.collection("moods").document(moodId)
                 .get()
@@ -164,6 +198,14 @@ public class MoodDetails extends Fragment {
                 });
     }
 
+    /**
+     * Populates the UI components with data from the MoodEvent object.
+     * This includes setting the mood title, emoji, date/time, reason text and image,
+     * social situation, trigger, and location information.
+     * Components are hidden if their corresponding data is not available.
+     *
+     * @param mood The MoodEvent object containing all the mood data
+     */
     private void populateUI(MoodEvent mood) {
         // Set mood title and emoji
         titleTextView.setText(mood.getMoodType().name().charAt(0) +
@@ -240,6 +282,12 @@ public class MoodDetails extends Fragment {
         }
     }
 
+    /**
+     * Formats the SocialSituation enum value into a user-friendly string.
+     *
+     * @param situation The SocialSituation enum value to format
+     * @return A formatted string representation of the social situation
+     */
     private String formatSocialSituation(MoodEvent.SocialSituation situation) {
         switch (situation) {
             case ALONE:
@@ -255,6 +303,10 @@ public class MoodDetails extends Fragment {
         }
     }
 
+    /**
+     * Shows a confirmation dialog before deleting a mood event.
+     * If confirmed, it calls the deleteMood method to perform the actual deletion.
+     */
     private void confirmDeleteMood() {
         // Show a confirmation dialog before deleting
         new android.app.AlertDialog.Builder(requireContext())
@@ -265,6 +317,11 @@ public class MoodDetails extends Fragment {
                 .show();
     }
 
+    /**
+     * Deletes the current mood event from Firestore.
+     * On success, it shows a confirmation message and navigates back.
+     * On failure, it shows an error message.
+     */
     private void deleteMood() {
         db.collection("moods").document(moodId)
                 .delete()

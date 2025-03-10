@@ -41,6 +41,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Fragment for editing an existing mood event.
+ * This fragment allows users to update details of a previously created mood event including
+ * the mood type, reason, trigger, social situation, and associated image.
+ */
 public class EditMoodFragment extends Fragment {
     private static final String TAG = "EditMoodFragment";
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -63,6 +68,14 @@ public class EditMoodFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
+    /**
+     * Creates and returns the view hierarchy associated with the fragment.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state
+     * @return The View for the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.edit_mood, container, false);
@@ -98,6 +111,11 @@ public class EditMoodFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Initializes all UI components from the view.
+     *
+     * @param view The root view containing all UI components
+     */
     private void initializeViews(View view) {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
@@ -113,6 +131,10 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Sets up the mood selection grid with all available mood types.
+     * Creates a card for each mood type with an emoji and text label.
+     */
     private void setupMoodGrid() {
         // Pair each mood type with its emoji - UPDATED to match MoodAdapter.java
         String[] moodEmojis = {
@@ -179,6 +201,9 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Sets up the social situation spinner with all available options.
+     */
     private void setupSocialSituationSpinner() {
         ArrayAdapter<MoodEvent.SocialSituation> adapter = new ArrayAdapter<>(
                 requireContext(),
@@ -188,6 +213,10 @@ public class EditMoodFragment extends Fragment {
         socialSituationSpinner.setAdapter(adapter);
     }
 
+    /**
+     * Sets up the image upload functionality.
+     * Configures the click listener to launch the image picker.
+     */
     private void setupImageUpload() {
         imageUpload.setOnClickListener(v -> {
             Intent intent = new Intent();
@@ -197,6 +226,11 @@ public class EditMoodFragment extends Fragment {
         });
     }
 
+    /**
+     * Sets up the navigation and action buttons.
+     *
+     * @param view The root view containing all buttons
+     */
     private void setupButtons(View view) {
         // Navigation back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v ->
@@ -211,6 +245,10 @@ public class EditMoodFragment extends Fragment {
                 Navigation.findNavController(v).navigateUp());
     }
 
+    /**
+     * Loads the current mood data from Firestore.
+     * Retrieves the mood document using the provided mood ID.
+     */
     private void loadMoodData() {
         db.collection("moods").document(moodId)
                 .get()
@@ -248,6 +286,11 @@ public class EditMoodFragment extends Fragment {
                 });
     }
 
+    /**
+     * Populates the UI with data from the loaded mood event.
+     *
+     * @param mood The MoodEvent object containing all mood data
+     */
     private void populateUI(MoodEvent mood) {
         // Set the mood type
         selectedMoodType = mood.getMoodType();
@@ -294,6 +337,12 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Highlights the selected mood in the mood grid.
+     * Updates the background and text colors of all mood cards.
+     *
+     * @param moodType The MoodType to highlight as selected
+     */
     private void highlightSelectedMood(MoodEvent.MoodType moodType) {
         for (int i = 0; i < moodGrid.getChildCount(); i++) {
             MaterialCardView card = (MaterialCardView) moodGrid.getChildAt(i);
@@ -322,6 +371,11 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Updates the visual selection state when a new mood is selected.
+     *
+     * @param selectedCard The MaterialCardView that was selected
+     */
     private void updateMoodSelection(MaterialCardView selectedCard) {
         MoodEvent.MoodType selectedType = (MoodEvent.MoodType) selectedCard.getTag();
 
@@ -353,11 +407,11 @@ public class EditMoodFragment extends Fragment {
     }
 
     /**
-     * Method to get associated mood color (primary/dark) for provided moodType
-     * Copied from MoodAdapter.java for consistency
+     * Returns the primary color associated with the given mood type.
+     * Copied from MoodAdapter.java for consistency.
      *
-     * @param moodType moodType provided (MoodEvent object)
-     * @return returns color integer
+     * @param moodType The MoodType to get the color for
+     * @return The color resource ID as an integer
      */
     private int getMoodColor(MoodEvent.MoodType moodType) {
         switch (moodType) {
@@ -383,11 +437,11 @@ public class EditMoodFragment extends Fragment {
     }
 
     /**
-     * Method to get associated mood color (secondary/light) for provided moodType
-     * Copied from MoodAdapter.java for consistency
+     * Returns the secondary (light) color associated with the given mood type.
+     * Copied from MoodAdapter.java for consistency.
      *
-     * @param moodType moodType provided (MoodEvent object)
-     * @return returns color integer
+     * @param moodType The MoodType to get the light color for
+     * @return The color resource ID as an integer
      */
     private int getLightMoodColor(MoodEvent.MoodType moodType) {
         switch (moodType) {
@@ -412,6 +466,14 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Handles the result of the image picker activity.
+     * Updates the image preview when a new image is selected.
+     *
+     * @param requestCode The request code passed to startActivityForResult()
+     * @param resultCode The result code returned by the child activity
+     * @param data An Intent that carries the result data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -423,6 +485,10 @@ public class EditMoodFragment extends Fragment {
         }
     }
 
+    /**
+     * Updates the mood event in Firestore with the user's changes.
+     * Validates input data before updating the database.
+     */
     private void updateMood() {
         if (selectedMoodType == null) {
             Toast.makeText(getContext(), "Please select a mood", Toast.LENGTH_SHORT).show();
