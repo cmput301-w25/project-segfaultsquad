@@ -49,6 +49,7 @@ public class EditMoodFragment extends Fragment {
     private GridLayout moodGrid;
     private TextView textDateTime;
     private EditText reasonInput;
+    private EditText triggerInput;
     private Spinner socialSituationSpinner;
     private ImageView imageUpload;
     private Uri selectedImageUri;
@@ -101,6 +102,7 @@ public class EditMoodFragment extends Fragment {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
         reasonInput = view.findViewById(R.id.editTextReason);
+        triggerInput = view.findViewById(R.id.editTextTrigger);
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
         imageUpload = view.findViewById(R.id.imageUpload);
 
@@ -253,6 +255,11 @@ public class EditMoodFragment extends Fragment {
 
         // Set the reason text
         reasonInput.setText(mood.getReasonText());
+
+        // Set the trigger text if available
+        if (mood.getTrigger() != null) {
+            triggerInput.setText(mood.getTrigger());
+        }
 
         // Set the timestamp
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
@@ -423,6 +430,7 @@ public class EditMoodFragment extends Fragment {
         }
 
         String reason = reasonInput.getText().toString().trim();
+        String trigger = triggerInput.getText().toString().trim();
 
         // Check if reason text is within the limit
         if (reason.length() > 20) {
@@ -433,6 +441,7 @@ public class EditMoodFragment extends Fragment {
         Map<String, Object> updates = new HashMap<>();
         updates.put("moodType", selectedMoodType.name());
         updates.put("reasonText", reason);
+        updates.put("trigger", trigger);
 
         if (socialSituationSpinner.getSelectedItem() != null) {
             updates.put("socialSituation", socialSituationSpinner.getSelectedItem());

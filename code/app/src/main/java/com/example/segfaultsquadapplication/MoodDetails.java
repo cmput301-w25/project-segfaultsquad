@@ -41,6 +41,7 @@ public class MoodDetails extends Fragment {
     private ImageView reasonImageView;
     private TextView socialSituationTextView;
     private TextView locationTextView;
+    private TextView triggerTextView;
     private Button editButton;
     private Button deleteButton;
 
@@ -57,7 +58,7 @@ public class MoodDetails extends Fragment {
             MoodEvent.MoodType.ANGER, "😡",
             MoodEvent.MoodType.CONFUSION, "😵‍💫",
             MoodEvent.MoodType.DISGUST, "🤢",
-            MoodEvent.MoodType.FEAR, "😨",
+            MoodEvent.MoodType.FEAR, "😱",
             MoodEvent.MoodType.HAPPINESS, "😀",
             MoodEvent.MoodType.SADNESS, "😭",
             MoodEvent.MoodType.SHAME, "😳",
@@ -104,6 +105,7 @@ public class MoodDetails extends Fragment {
         reasonImageView = view.findViewById(R.id.reasonImageView);
         socialSituationTextView = view.findViewById(R.id.socialSituationTextView);
         locationTextView = view.findViewById(R.id.locationTextView);
+        triggerTextView = view.findViewById(R.id.triggerTextView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
     }
@@ -188,6 +190,14 @@ public class MoodDetails extends Fragment {
             reasonTextView.setVisibility(View.VISIBLE);
         } else {
             reasonTextView.setVisibility(View.GONE);
+        }
+
+        // Set trigger text
+        if (mood.getTrigger() != null && !mood.getTrigger().isEmpty()) {
+            triggerTextView.setText(mood.getTrigger());
+            triggerTextView.setVisibility(View.VISIBLE);
+        } else {
+            triggerTextView.setVisibility(View.GONE);
         }
 
         // Set reason image
