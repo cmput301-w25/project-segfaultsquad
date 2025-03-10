@@ -1,3 +1,10 @@
+/**
+ * Classname: LoginFragment
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
+
 package com.example.segfaultsquadapplication;
 
 import android.os.Bundle;
@@ -14,6 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import android.widget.CheckBox;
@@ -22,9 +30,11 @@ import com.google.android.material.button.MaterialButton;
 
 public class LoginFragment extends Fragment {
 
-    private TextInputEditText emailEditText, passwordEditText;
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
+    // attributes
+    TextInputEditText emailEditText;
+    TextInputEditText passwordEditText;
+    FirebaseAuth mAuth;
+    FirebaseFirestore db;
     private AppCompatButton loginButton;
     private CheckBox rememberMeCheckbox;
     private TextView forgotPasswordText;
@@ -55,7 +65,7 @@ public class LoginFragment extends Fragment {
         // Check if user is already logged in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            navigateToHome();
+            navigateToHome(currentUser);
             return rootView;
         }
 
@@ -81,15 +91,18 @@ public class LoginFragment extends Fragment {
         return rootView;
     }
 
-    private void loginUser() {
+    /**
+     * method ot log usir into the system/app
+     */
+    void loginUser() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
 
+        // validate input
         if (TextUtils.isEmpty(email)) {
             emailEditText.setError("Email is required");
             return;
         }
-
         if (TextUtils.isEmpty(password)) {
             passwordEditText.setError("Password is required");
             return;
@@ -115,20 +128,28 @@ public class LoginFragment extends Fragment {
                 });
     }
 
+    /**
+     * method to check for existance otherwise create a user in the db
+     * 
+     * @param firebaseUser
+     *                     the user we are checking for
+     */
     private void checkAndCreateUserDocument(FirebaseUser firebaseUser) {
         db.collection("users")
                 .document(firebaseUser.getUid())
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-                        // Create new user document (probably shouldnt have to do this, but anyways)
+                        // Create new user document
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("username", firebaseUser.getEmail().split("@")[0]);
+                        userData.put("followers", new ArrayList<String>()); // Initialize as empty
+                        userData.put("following", new ArrayList<String>()); // Initialize as empty
 
                         db.collection("users")
                                 .document(firebaseUser.getUid())
                                 .set(userData)
-                                .addOnSuccessListener(aVoid -> navigateToHome())
+                                .addOnSuccessListener(aVoid -> navigateToHome(firebaseUser))
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(getActivity(),
                                             "Error creating user profile",
@@ -136,7 +157,7 @@ public class LoginFragment extends Fragment {
                                 });
                     } else {
                         // user document was already there, navigate to MyMoodFragment
-                        navigateToHome();
+                        navigateToHome(firebaseUser);
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -146,7 +167,10 @@ public class LoginFragment extends Fragment {
                 });
     }
 
-    private void navigateToHome() {
+    /**
+     * method to navigate to MyMoodHistoryFragment (or whatever the homescreen is)
+     */
+    void navigateToHome(FirebaseUser user) {
         // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation
         // component
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);

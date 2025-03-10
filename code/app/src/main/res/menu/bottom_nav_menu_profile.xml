@@ -3,22 +3,22 @@
     <item
         android:id="@+id/navigation_my_mood_history"
         android:icon="@drawable/home_icon"
-        android:title="Home"/>
+        android:title="Home" />
     <item
         android:id="@+id/navigation_map"
         android:icon="@drawable/map_icon"
-        android:title="Map"
-        android:visible="false"/>
+        android:title="Map" />
     <item
         android:id="@+id/navigation_follow_requests"
         android:icon="@drawable/follow_requests_icon"
-        android:title="Follow Requests"/>
+        android:title="Follow Requests" />
     <item
         android:id="@+id/navigation_following"
         android:icon="@drawable/following_icon"
-        android:title="Following"/>
+        android:title="Following" />
     <item
         android:id="@+id/navigation_profile"
         android:icon="@drawable/profile_icon"
-        android:title="Profile"/>
-</menu> 
+        android:title="Profile"
+        android:visible="false" />
+</menu>

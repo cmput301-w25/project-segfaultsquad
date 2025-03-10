@@ -116,10 +116,8 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         }
         double averageMood = moodEvents.size() > 0 ? (double) totalMoodValue / moodEvents.size() : 0;
 
-        mostCommonMoodText.setText("Most Common Mood: " + (mostCommonMood != null ? mostCommonMood.name() : "None"));
         averageMoodText.setText("Average Mood: " + String.format("%.2f", averageMood));
 
-        setupPieChart(moodCountMap);
         setupLineChart(moodEvents);
 
         fadeInViews();
@@ -128,14 +126,12 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     private void fadeInViews() {
         mostCommonMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
         averageMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
-        moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator()).start();
         moodTrendChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator()).start();
     }
 
     private void startEmojiRain() {
         final String[] emojis = { "😡", "😭", "😀", "😆", "😴", "😱", "🤯" };
         FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
-        if (emojiRainContainer == null) return;
 
         for (int i = 0; i < 50; i++) {
             final TextView emojiView = new TextView(getContext());
@@ -151,7 +147,6 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
             emojiView.setScaleY(scale);
             emojiView.setRotation(rotation);
 
-            ObjectAnimator fallAnimation = ObjectAnimator.ofFloat(emojiView, "translationY", emojiRainContainer.getHeight() + 100);
             fallAnimation.setDuration(3000 + (long) (Math.random() * 2000));
             fallAnimation.setInterpolator(new AccelerateInterpolator());
             fallAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
@@ -166,48 +161,20 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         }
     }
 
-    private void setupPieChart(Map<MoodEvent.MoodType, Integer> moodCountMap) {
         List<PieEntry> entries = new ArrayList<>();
         List<Integer> colors = new ArrayList<>();
 
         for (Map.Entry<MoodEvent.MoodType, Integer> entry : moodCountMap.entrySet()) {
-            entries.add(new PieEntry(entry.getValue(), entry.getKey().name()));
-            colors.add(getMoodColor(entry.getKey())); // Get the corresponding color
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Mood Distribution");
         dataSet.setColors(colors); // Set the custom colors
         PieData pieData = new PieData(dataSet);
         moodDistributionChart.setData(pieData);
-        moodDistributionChart.invalidate(); // refresh
-    }
-
-    private int getMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case HAPPY:
-                return getResources().getColor(R.color.mood_happy);
-            case SAD:
-                return getResources().getColor(R.color.mood_sad);
-            case ANGRY:
-                return getResources().getColor(R.color.mood_angry);
-            case EXCITED:
-                return getResources().getColor(R.color.mood_excited);
-            case TIRED:
-                return getResources().getColor(R.color.mood_tired);
-            case SCARED:
-                return getResources().getColor(R.color.mood_scared);
-            case SURPRISED:
-                return getResources().getColor(R.color.mood_surprised);
-            default:
-                return getResources().getColor(R.color.mood_default);
-        }
     }
 
     private void setupLineChart(List<MoodEvent> moodEvents) {
         List<Entry> entries = new ArrayList<>();
-        for (int i = 0; i < moodEvents.size(); i++) {
-            MoodEvent mood = moodEvents.get(i);
-            entries.add(new Entry(i, mood.getMoodType().ordinal() + 1)); // Assuming ordinal gives a value from 1 to 8
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Mood Trend");
@@ -223,7 +190,6 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         moodTrendChart.setData(lineData);
         moodTrendChart.getDescription().setEnabled(false); // Disable description
         moodTrendChart.getLegend().setEnabled(false); // Disable legend
-        moodTrendChart.invalidate(); // refresh
     }
 
     @Override
@@ -231,5 +197,3 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         Toast.makeText(getContext(), "Clicked on mood: " + mood.getMoodType().name(), Toast.LENGTH_SHORT).show();
     }
 }
-
-

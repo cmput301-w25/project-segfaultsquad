@@ -12,21 +12,27 @@
     <color name="chip_stroke">#2196F3</color>  <!-- Same as primary -->
 
     <!-- Mood colors -->
-    <color name="mood_happy">#FFD700</color>     <!-- Gold -->
-    <color name="mood_sad">#4682B4</color>       <!-- Steel Blue -->
-    <color name="mood_angry">#FF4500</color>     <!-- Red Orange -->
-    <color name="mood_excited">#32CD32</color>   <!-- Lime Green -->
-    <color name="mood_tired">#8B4513</color>     <!-- Saddle Brown -->
-    <color name="mood_scared">#800080</color>    <!-- Purple -->
-    <color name="mood_surprised">#FF69B4</color> <!-- Hot Pink -->
-    <color name="mood_default">#808080</color>   <!-- Gray -->
+    <color name="mood_anger">#FE0000</color> <!-- Red for anger -->
+    <color name="mood_confusion">#FF8200</color> <!-- Orange for confusion -->
+    <color name="mood_disgust">#D2D755</color> <!-- Olive green for disgust -->
+    <color name="mood_fear">#011EFE</color> <!-- Darker blue for fear -->
+    <color name="mood_happiness">#FEFF02</color> <!-- Yellow for happiness -->
+    <color name="mood_sadness">#003471</color> <!-- Deep blue for sadness -->
+    <color name="mood_shame">#E0457B</color> <!-- Pink for shame -->
+    <color name="mood_surprise">#5F259F</color> <!-- Purple for surprise -->
+    <color name="mood_default">#A9A9A9</color> <!-- Grey for default -->
 
-    <!-- Light mood colors (30% opacity) -->
-    <color name="mood_happy_light">#4DFFD700</color>
-    <color name="mood_sad_light">#4D4682B4</color>
-    <color name="mood_angry_light">#4DFF4500</color>
-    <color name="mood_excited_light">#4D32CD32</color>
-    <color name="mood_tired_light">#4D8B4513</color>
-    <color name="mood_scared_light">#4D800080</color>
-    <color name="mood_surprised_light">#4DFF69B4</color>
+    <!-- Light mood colors (lighter) -->
+    <color name="mood_anger_light">#FF8A8A</color> <!-- Light red for anger -->
+    <color name="mood_confusion_light">#FFC285</color> <!-- Light orange for confusion -->
+    <color name="mood_disgust_light">#E5F4A5</color> <!-- Light green for disgust -->
+    <color name="mood_fear_light">#92C1E9</color> <!-- Light blue for fear -->
+    <color name="mood_happiness_light">#FFFACD</color> <!-- Light yellow for happiness -->
+    <color name="mood_sadness_light">#8094DD</color> <!-- Light deep blue for sadness -->
+    <color name="mood_shame_light">#F5B6CD</color> <!-- Light pink for shame -->
+    <color name="mood_surprise_light">#B884CB</color> <!-- Light purple for surprise -->
+    <color name="mood_default_light">#D3D3D3</color> <!-- Light grey for default -->
+
+
+
 </resources>
