@@ -36,7 +36,7 @@ public class AddMoodTest {
 
     @Test
     public void moodEventUseCurrentTime() {
-        MoodEvent evt = new MoodEvent("id", MoodEvent.MoodType.SAD, "reason");
+        MoodEvent evt = new MoodEvent("id", MoodEvent.MoodType.SADNESS, "reason", null, null);
         // Error within 1000 ms = 1 second
         long diff = Calendar.getInstance().getTime().getTime() - evt.getTimestampDate().getTime();
         System.out.println("NS time diff: " + diff);
