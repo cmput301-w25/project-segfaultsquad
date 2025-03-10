@@ -15,6 +15,8 @@ import android.Manifest;
 import android.util.Log;
 import android.widget.EditText;
 
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -116,6 +118,8 @@ public class MoodHistoryAndAddMoodTest {
 
         // Test for display only own moods
         testOnlyOwnMood();
+        // Test for invalid new moods
+        testNewMoodInvalid();
         // Test for regular new moods
         testNewMoodRegular();
         // Test for mood filters
@@ -128,6 +132,24 @@ public class MoodHistoryAndAddMoodTest {
         onView(withText("RRR")).check(doesNotExist());
     }
 
+    // Test that invalid mood events are not added
+    private void testNewMoodInvalid() {
+        System.out.println("Test Invalid - Do not select emotion state");
+        onView(withId(R.id.fabAddMood)).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        onView(withId(R.id.editTextReason)).perform(typeText("???"));
+        onView(withId(R.id.spinnerSocialSituation))
+                .perform(ViewActions.scrollTo()).perform(click());
+        onView(withText("WITH_GROUP")).perform(click());
+        onView(withId(R.id.buttonConfirm)).perform(click());
+        // Toast msg hard & unreliable to test; validate in mood event list.
+        try {
+            onView(withId(R.id.buttonCancel)).perform(click());
+        } catch (Exception ignored) {}
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
+        onView(withText("???")).check(doesNotExist());
+    }
+
     // Mood event; tests for "proper" new mood, up to optional fields.
     private void testNewMoodRegular() {
         System.out.println("Test Regular - All fields filled");
@@ -135,7 +157,6 @@ public class MoodHistoryAndAddMoodTest {
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
         onView(withText("😴")).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
-        // TODO: Lets not mock photos just yet...
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
         onView(withText("WITH_GROUP")).perform(click());

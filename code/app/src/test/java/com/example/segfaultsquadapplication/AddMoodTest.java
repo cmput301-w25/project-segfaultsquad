@@ -1,5 +1,6 @@
 package com.example.segfaultsquadapplication;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Calendar;
 
 
 public class AddMoodTest {
@@ -32,5 +35,11 @@ public class AddMoodTest {
     }
 
     @Test
-    public void
+    public void moodEventUseCurrentTime() {
+        MoodEvent evt = new MoodEvent("id", MoodEvent.MoodType.SAD, "reason");
+        // Error within 1000 ms = 1 second
+        long diff = Calendar.getInstance().getTime().getTime() - evt.getTimestampDate().getTime();
+        System.out.println("NS time diff: " + diff);
+        assertTrue( diff < 1000);
+    }
 }
