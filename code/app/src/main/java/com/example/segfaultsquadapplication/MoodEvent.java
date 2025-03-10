@@ -29,11 +29,12 @@ public class MoodEvent {
 
     // Optional attributes
     private String trigger; // Trigger for the mood (optional)
-    private SocialSituation socialSituation; // Social situation (optional)
+    private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, SURPRISE
+        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED,
+        SURPRISED, SURPRISE
     }
 
     // Enum for social situations
@@ -120,11 +121,11 @@ public class MoodEvent {
     }
 
     public SocialSituation getSocialSituation() {
-        return socialSituation;
+        return SocialSituation;
     }
 
-    public void setSocialSituation(SocialSituation socialSituation) {
-        this.socialSituation = socialSituation;
+    public void setSocialSituation(SocialSituation SocialSituation) {
+        this.SocialSituation = SocialSituation;
     }
 
     public GeoPoint getLocation() {
@@ -139,7 +140,7 @@ public class MoodEvent {
     // getter and setters for imageData
     /**
      * gets the image data from int array to deconstruct images
-     * 
+     *
      * @return
      *         returns the int array constructed
      */
@@ -149,7 +150,7 @@ public class MoodEvent {
 
     /**
      * * gets the image data from int array to reconstruct images
-     * 
+     *
      * @param imageData
      *                  the gotten int array imageData
      */

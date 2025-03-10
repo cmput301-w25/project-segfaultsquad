@@ -175,8 +175,10 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      */
     @Override
     public void onMoodClick(MoodEvent mood) {
-        // TODO: Navigate to mood details view
-        Toast.makeText(getContext(), "Clicked: " + mood.getMoodType(), Toast.LENGTH_SHORT).show();
+        Bundle args = new Bundle();
+        args.putString("moodId", mood.getMoodId());
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_myMoodHistory_to_moodDetails, args);
     }
 
     /**

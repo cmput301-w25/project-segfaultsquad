@@ -54,7 +54,13 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
                     } else if (destination.getId() == R.id.navigation_splash) {
                         bottomNavigationView.setVisibility(View.GONE);
                     } else if (destination.getId() == R.id.navigation_mood_analytics) {
-
+                        // Current behavior preserved
+                    } else if (destination.getId() == R.id.navigation_mood_details) {
+                        bottomNavigationView.setVisibility(View.GONE); // Hide on MoodDetails page
+                    } else if (destination.getId() == R.id.navigation_edit_mood) {
+                        bottomNavigationView.setVisibility(View.GONE); // Hide on EditMood page
+                    } else if (destination.getId() == R.id.navigation_add_mood) {
+                        bottomNavigationView.setVisibility(View.GONE); // Hide on AddMood page
                     } else {
                         bottomNavigationView.setVisibility(View.VISIBLE);
                         updateBottomNavMenu(destination.getId());
