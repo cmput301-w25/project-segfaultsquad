@@ -20,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.DbUtils;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.firebase.auth.FirebaseAuth;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,8 +29,7 @@ import android.os.Looper;
 public class SplashFragment extends Fragment {
     // attributes
     private TextView emojiText; // displayed emoji str
-    // emojis: angry, sad, happy, excited, tired, scared, surprised
-    private final String[] emojis = { "😡", "😭", "😀", "😆", "😴", "😱", "🤯" }; // set of emojis
+    private final String[] emojis = MoodEvent.MoodType.getAllEmoticons();
     private int currentEmojiIndex = 0; // index of current display emoji
     private final Handler handler = new Handler(Looper.getMainLooper()); // loop handler
 
@@ -96,8 +97,7 @@ public class SplashFragment extends Fragment {
      * previosuly logged in
      */
     private void navigateToNextScreen() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null) {
+        if (DbUtils.getUser() != null) {
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_splash_to_myMoodHistory);
         } else {
