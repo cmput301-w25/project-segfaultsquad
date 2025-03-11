@@ -16,6 +16,7 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
 import com.google.firebase.Timestamp;
 
 public class MoodEvent {
@@ -64,7 +65,9 @@ public class MoodEvent {
         }
 
         public static String[] getAllEmoticons() {
-            return (String[]) Arrays.stream(values()).map(MoodType::getEmoticon).toArray();
+            return Arrays.stream(values())
+                    .map(MoodType::getEmoticon)
+                    .toArray(String[]::new);
         }
     }
 
