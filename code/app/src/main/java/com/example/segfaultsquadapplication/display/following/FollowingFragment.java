@@ -7,7 +7,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+
+import com.example.segfaultsquadapplication.R;
 
 public class FollowingFragment extends Fragment {
     @Override

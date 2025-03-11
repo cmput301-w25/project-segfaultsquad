@@ -8,22 +8,21 @@ import static androidx.test.espresso.matcher.ViewMatchers.*;
 
 import static com.example.segfaultsquadapplication.TestLoginUtil.waitUntil;
 
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
 import android.util.Log;
 import android.widget.EditText;
 
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.GrantPermissionRule;
-import androidx.test.services.events.TimeStamp;
 
+import com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment;
+import com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;

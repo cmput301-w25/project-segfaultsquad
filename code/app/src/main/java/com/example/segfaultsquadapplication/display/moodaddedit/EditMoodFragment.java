@@ -1,4 +1,4 @@
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -24,6 +24,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;

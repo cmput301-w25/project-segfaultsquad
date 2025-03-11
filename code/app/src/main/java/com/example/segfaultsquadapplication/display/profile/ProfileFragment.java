@@ -4,7 +4,7 @@
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.profile;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +26,8 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;

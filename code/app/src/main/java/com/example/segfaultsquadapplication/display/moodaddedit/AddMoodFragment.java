@@ -7,7 +7,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -25,7 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import com.google.android.material.button.MaterialButton;
+
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,7 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+
 import android.widget.EditText;
 import android.widget.ArrayAdapter;
 import android.view.Gravity;
@@ -48,7 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.location.Location;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;

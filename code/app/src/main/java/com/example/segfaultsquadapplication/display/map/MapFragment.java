@@ -4,7 +4,7 @@
  * Date: Feb 16, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.map;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,34 +20,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.Manifest;
+
+import com.example.segfaultsquadapplication.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.example.segfaultsquadapplication.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.firebase.firestore.QuerySnapshot;
-import android.util.Log;
 import com.google.android.material.chip.ChipGroup;
 import android.widget.ImageButton;
 import androidx.cardview.widget.CardView;
-import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Date;
 import java.util.Map;
-import android.graphics.Color;
 
 public class MapFragment extends Fragment {
     // Attributes

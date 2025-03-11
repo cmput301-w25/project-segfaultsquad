@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/navigation_splash"
-        android:name="com.example.segfaultsquadapplication.SplashFragment"
+        android:name="com.example.segfaultsquadapplication.display.SplashFragment"
         android:label="Splash">
         <action
             android:id="@+id/action_splash_to_login"
@@ -23,7 +23,7 @@
     <!-- login fragment -->
     <fragment
         android:id="@+id/navigation_login"
-        android:name="com.example.segfaultsquadapplication.LoginFragment"
+        android:name="com.example.segfaultsquadapplication.display.LoginFragment"
         android:label="Login">
         <action
             android:id="@+id/action_to_my_mood_history"
@@ -33,7 +33,7 @@
     <!-- My Mood History -->
     <fragment
         android:id="@+id/navigation_my_mood_history"
-        android:name="com.example.segfaultsquadapplication.MyMoodHistoryFragment"
+        android:name="com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment"
         android:label="MyMoodHistory">
         <action
             android:id="@+id/action_to_map"
@@ -59,7 +59,7 @@
     <!-- Add Mood -->
     <fragment
         android:id="@+id/navigation_add_mood"
-        android:name="com.example.segfaultsquadapplication.AddMoodFragment"
+        android:name="com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment"
         android:label="Add Mood">
         <action
             android:id="@+id/action_addMood_to_myMoodHistory"
@@ -71,7 +71,7 @@
     <!-- Map -->
     <fragment
         android:id="@+id/navigation_map"
-        android:name="com.example.segfaultsquadapplication.MapFragment"
+        android:name="com.example.segfaultsquadapplication.display.map.MapFragment"
         android:label="Map">
         <action
             android:id="@+id/action_to_my_mood_history"
@@ -87,7 +87,7 @@
     <!-- Follow Requests -->
     <fragment
         android:id="@+id/navigation_follow_requests"
-        android:name="com.example.segfaultsquadapplication.FollowingRequestsFragment"
+        android:name="com.example.segfaultsquadapplication.display.following.FollowingRequestsFragment"
         android:label="Follow Requests">
         <action
             android:id="@+id/action_to_my_mood_history"
@@ -103,7 +103,7 @@
     <!-- Following -->
     <fragment
         android:id="@+id/navigation_following"
-        android:name="com.example.segfaultsquadapplication.FollowingFragment"
+        android:name="com.example.segfaultsquadapplication.display.following.FollowingFragment"
         android:label="Following">
         <action
             android:id="@+id/action_to_my_mood_history"
@@ -120,7 +120,7 @@
     <!-- Mood Analytics -->
     <fragment
         android:id="@+id/navigation_mood_analytics"
-        android:name="com.example.segfaultsquadapplication.MoodAnalyticsFragment"
+        android:name="com.example.segfaultsquadapplication.display.moodhistory.MoodAnalyticsFragment"
         android:label="Mood Analytics">
         <action
             android:id="@+id/action_to_my_mood_history"
@@ -129,7 +129,7 @@
 
     <fragment
         android:id="@+id/navigation_edit_mood"
-        android:name="com.example.segfaultsquadapplication.EditMoodFragment"
+        android:name="com.example.segfaultsquadapplication.display.moodaddedit.EditMoodFragment"
         android:label="Edit Mood">
         <argument
             android:name="moodId"
@@ -138,7 +138,7 @@
 
     <fragment
         android:id="@+id/navigation_mood_details"
-        android:name="com.example.segfaultsquadapplication.MoodDetails"
+        android:name="com.example.segfaultsquadapplication.display.MoodDetailsFragment"
         android:label="Mood Details">
         <argument
             android:name="moodId"
@@ -157,7 +157,7 @@
     <!-- Profile Fragment -->
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.segfaultsquadapplication.ProfileFragment"
+        android:name="com.example.segfaultsquadapplication.display.profile.ProfileFragment"
         android:label="Profile">
         <!-- bottom nav -->
         <action
@@ -184,7 +184,7 @@
     <!-- Profile Page Followers List Fragment -->
     <fragment
         android:id="@+id/navigation_FollowersListFragment"
-        android:name="com.example.segfaultsquadapplication.FollowersListFragment"
+        android:name="com.example.segfaultsquadapplication.display.following.FollowersListFragment"
         android:label="FollowersList">
         <!-- bottom nav -->
         <action
@@ -204,7 +204,7 @@
     <!-- Profile Page Following List Fragment -->
     <fragment
         android:id="@+id/navigation_FollowingListFragment"
-        android:name="com.example.segfaultsquadapplication.FollowingListFragment"
+        android:name="com.example.segfaultsquadapplication.display.following.FollowingListFragment"
         android:label="FollowingList">
         <!-- bottom nav -->
         <action

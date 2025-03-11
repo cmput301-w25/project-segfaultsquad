@@ -5,7 +5,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.impl.user;
 
 import java.util.List;
 import java.util.ArrayList;

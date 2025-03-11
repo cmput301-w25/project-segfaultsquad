@@ -5,7 +5,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +13,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
     // attributes

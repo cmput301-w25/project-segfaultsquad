@@ -1,4 +1,4 @@
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.profile;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 
 import java.util.List;
 

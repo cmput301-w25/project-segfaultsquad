@@ -10,6 +10,9 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
+import com.example.segfaultsquadapplication.display.LoginFragment;
+import com.example.segfaultsquadapplication.display.SplashFragment;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 

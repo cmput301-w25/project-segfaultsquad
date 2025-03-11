@@ -1,9 +1,4 @@
-package com.example.segfaultsquadapplication;
-
-import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.ALONE;
-import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.IN_CROWD;
-import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.WITH_GROUP;
-import static com.example.segfaultsquadapplication.MoodEvent.SocialSituation.WITH_ONE_PERSON;
+package com.example.segfaultsquadapplication.display;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,13 +16,14 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * A Fragment that displays detailed information about a specific mood event.
@@ -35,7 +31,7 @@ import java.util.Map;
  * and displays all related information including mood type, date/time, reason text, images,
  * social situation, and location.
  */
-public class MoodDetails extends Fragment {
+public class MoodDetailsFragment extends Fragment {
     private static final String TAG = "MoodDetails";
 
     // UI components

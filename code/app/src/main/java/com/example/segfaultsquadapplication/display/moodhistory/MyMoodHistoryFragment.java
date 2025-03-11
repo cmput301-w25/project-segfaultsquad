@@ -4,7 +4,7 @@
  * Date: Feb 16, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,6 +16,9 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -29,7 +32,7 @@ import android.app.AlertDialog;
 import android.widget.EditText;
 import java.util.Calendar;
 import java.util.Date;
-import android.widget.Button;
+
 import androidx.navigation.NavController;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

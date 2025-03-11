@@ -5,19 +5,18 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.impl.moodevent;
 
 // imports
-import android.util.Log;
 import android.content.Context;
 
+import com.example.segfaultsquadapplication.R;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.PropertyName;
 
 public class MoodEvent {
     // Required attributes
