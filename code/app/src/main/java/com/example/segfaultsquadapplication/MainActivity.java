@@ -24,14 +24,11 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
     // attributes
     private BottomNavigationView bottomNavigationView;
     private NavController navController = null;
-    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mAuth = FirebaseAuth.getInstance();
 
         // Initialize the bottom navigation and NavController
         setupNavController();

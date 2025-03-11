@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.DbUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -35,8 +36,6 @@ public class LoginFragment extends Fragment {
     // attributes
     TextInputEditText emailEditText;
     TextInputEditText passwordEditText;
-    FirebaseAuth mAuth;
-    FirebaseFirestore db;
     private AppCompatButton loginButton;
     private CheckBox rememberMeCheckbox;
     private TextView forgotPasswordText;
@@ -50,10 +49,6 @@ public class LoginFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.login_fragment, container, false);
 
-        // Initialize Firebase instances
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-
         // Initialize views
         emailEditText = rootView.findViewById(R.id.editTextEmail);
         passwordEditText = rootView.findViewById(R.id.editTextPassword);
@@ -65,9 +60,8 @@ public class LoginFragment extends Fragment {
         appleLoginButton = rootView.findViewById(R.id.buttonAppleLogin);
 
         // Check if user is already logged in
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            navigateToHome(currentUser);
+        if (DbUtils.getUser() != null) {
+            navigateToHome();
             return rootView;
         }
 
@@ -113,68 +107,23 @@ public class LoginFragment extends Fragment {
         // Disable login button while processing
         loginButton.setEnabled(false);
 
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(getActivity(), task -> {
+        DbUtils.signIn(email, password, new DbUtils.DbOpResultHandler<>(
+                result -> navigateToHome(),
+                e -> {
                     loginButton.setEnabled(true);
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            // Check if user document exists in Firestore
-                            checkAndCreateUserDocument(user);
-                        }
-                    } else {
-                        Toast.makeText(getActivity(),
-                                "Authentication failed: " + task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    /**
-     * method to check for existance otherwise create a user in the db
-     * 
-     * @param firebaseUser
-     *                     the user we are checking for
-     */
-    private void checkAndCreateUserDocument(FirebaseUser firebaseUser) {
-        db.collection("users")
-                .document(firebaseUser.getUid())
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        // Create new user document
-                        Map<String, Object> userData = new HashMap<>();
-                        userData.put("username", firebaseUser.getEmail().split("@")[0]);
-                        userData.put("followers", new ArrayList<String>()); // Initialize as empty
-                        userData.put("following", new ArrayList<String>()); // Initialize as empty
-
-                        db.collection("users")
-                                .document(firebaseUser.getUid())
-                                .set(userData)
-                                .addOnSuccessListener(aVoid -> navigateToHome(firebaseUser))
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(getActivity(),
-                                            "Error creating user profile",
-                                            Toast.LENGTH_SHORT).show();
-                                });
-                    } else {
-                        // user document was already there, navigate to MyMoodFragment
-                        navigateToHome(firebaseUser);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getActivity(),
-                            "Error checking user profile",
-                            Toast.LENGTH_SHORT).show();
-                });
+                    // If the cause is from the sign in event, we also include the raw error msg
+                    String msg = e.getMessage() + (e.getCause() != e ?
+                            ": " + e.getCause().getMessage() : "");
+                    Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
+                }
+        ));
     }
 
     /**
      * method to navigate to MyMoodHistoryFragment (or whatever the homescreen is)
      */
-    void navigateToHome(FirebaseUser user) {
-        // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation
-        // component
+    void navigateToHome() {
+        // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation component
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         navController.navigate(R.id.navigation_my_mood_history);
     }
