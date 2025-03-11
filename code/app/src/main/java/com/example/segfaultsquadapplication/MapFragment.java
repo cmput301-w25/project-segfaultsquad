@@ -317,7 +317,7 @@ public class MapFragment extends Fragment {
                 float x = (float) ((mood.getLocation().getLongitude() + 180) / 360);
                 float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
-                int color = mood.getPrimaryColor(requireContext());
+                int color = mood.getMoodType().getPrimaryColor(requireContext());
                 mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }

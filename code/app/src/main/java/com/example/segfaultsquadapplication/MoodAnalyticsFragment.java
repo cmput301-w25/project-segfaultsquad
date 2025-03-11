@@ -163,7 +163,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void startEmojiRain() {
-        final String[] emojis = { "😡", "😭", "😀", "😆", "😴", "😱", "🤯" };
+        final String[] emojis = MoodEvent.MoodType.getAllEmoticons();
         FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
         if (emojiRainContainer == null)
             return;
@@ -225,7 +225,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
             if (moodEvent != null) {
                 entries.add(new PieEntry(count, moodType.name()));
-                colors.add(moodEvent.getPrimaryColor(requireContext())); // Get the corresponding color
+                colors.add(moodEvent.getMoodType().getPrimaryColor(requireContext())); // Get the corresponding color
             }
         }
 

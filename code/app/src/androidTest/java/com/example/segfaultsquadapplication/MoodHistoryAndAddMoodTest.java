@@ -155,7 +155,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test Regular - All fields filled");
         onView(withId(R.id.fabAddMood)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😱")).perform(click());
+        onView(withText( MoodEvent.MoodType.FEAR.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
@@ -167,7 +167,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test Regular - optional fields omitted");
         onView(withId(R.id.fabAddMood)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😡")).perform(click());
+        onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Fury!"));
         onView(withId(R.id.buttonConfirm)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
@@ -176,7 +176,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test Regular - cancelled");
         onView(withId(R.id.fabAddMood)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😡")).perform(click());
+        onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("CANCEL!"));
         onView(withId(R.id.buttonCancel)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
@@ -217,7 +217,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test - filter with mood");
         onView(withId(R.id.filterButton)).perform(click());
         onView(withText("By Mood")).perform(click());
-        onView(withText("ANGER")).perform(click());
+        onView(withText( MoodEvent.MoodType.ANGER.name() )).perform(click());
         Thread.sleep(500);
         // The recent fury mood should be shown
         onView(withText("Fury!")).check(matches(isDisplayed()));

@@ -12,6 +12,8 @@ import android.util.Log;
 import android.content.Context;
 
 import com.google.firebase.firestore.GeoPoint;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import com.google.firebase.Timestamp;
@@ -33,7 +35,38 @@ public class MoodEvent {
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED, SURPRISED, SURPRISE
+        ANGER(R.color.mood_anger, R.color.mood_anger_light, "😡"),
+        CONFUSION(R.color.mood_confusion, R.color.mood_confusion_light, "😵‍💫"),
+        DISGUST(R.color.mood_disgust, R.color.mood_disgust_light, "🤢"),
+        FEAR(R.color.mood_fear, R.color.mood_fear_light, "😨"),
+        HAPPINESS(R.color.mood_happiness, R.color.mood_happiness_light, "😀"),
+        SADNESS(R.color.mood_sadness, R.color.mood_sadness_light, "😭"),
+        SHAME(R.color.mood_shame, R.color.mood_shame_light, "😳"),
+        SURPRISE(R.color.mood_surprise, R.color.mood_surprise_light, "🤯");
+
+        final int colorId, colorSecondaryId;
+        final String emoticon;
+        MoodType(int colorId, int colorSecondaryId, String emoticon) {
+            this.colorId = colorId;
+            this.colorSecondaryId = colorSecondaryId;
+            this.emoticon = emoticon;
+        }
+
+        public int getPrimaryColor(Context ctx) {
+            return ctx.getColor(colorId);
+        }
+
+        public int getSecondaryColor(Context ctx) {
+            return ctx.getColor(colorSecondaryId);
+        }
+
+        public String getEmoticon() {
+            return emoticon;
+        }
+
+        public static String[] getAllEmoticons() {
+            return (String[]) Arrays.stream(values()).map(MoodType::getEmoticon).toArray();
+        }
     }
 
     // Enum for social situations
@@ -178,52 +211,5 @@ public class MoodEvent {
 
     public void setTrigger(String trigger) {
         this.trigger = trigger;
-    }
-
-    public int getPrimaryColor(Context context) {
-        switch (moodType) {
-            case ANGER:
-                Log.d("MoodEvent", "RECOGNIZED ANGER");
-                return context.getColor(R.color.mood_anger);
-            case CONFUSION:
-                return context.getColor(R.color.mood_confusion);
-            case DISGUST:
-                return context.getColor(R.color.mood_disgust);
-            case FEAR:
-                return context.getColor(R.color.mood_fear);
-            case HAPPINESS:
-                return context.getColor(R.color.mood_happiness);
-            case SADNESS:
-                return context.getColor(R.color.mood_sadness);
-            case SHAME:
-                return context.getColor(R.color.mood_shame);
-            case SURPRISE:
-                return context.getColor(R.color.mood_surprise);
-            default:
-                return context.getColor(R.color.mood_default);
-        }
-    }
-
-    public int getSecondaryColor(Context context) {
-        switch (moodType) {
-            case ANGER:
-                return context.getColor(R.color.mood_anger_light);
-            case CONFUSION:
-                return context.getColor(R.color.mood_confusion_light);
-            case DISGUST:
-                return context.getColor(R.color.mood_disgust_light);
-            case FEAR:
-                return context.getColor(R.color.mood_fear_light);
-            case HAPPINESS:
-                return context.getColor(R.color.mood_happiness_light);
-            case SADNESS:
-                return context.getColor(R.color.mood_sadness_light);
-            case SHAME:
-                return context.getColor(R.color.mood_shame_light);
-            case SURPRISE:
-                return context.getColor(R.color.mood_surprise_light);
-            default:
-                return context.getColor(R.color.mood_default);
-        }
     }
 }

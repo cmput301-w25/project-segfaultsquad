@@ -86,17 +86,6 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         private TextView textTimestamp;
         private TextView textSocialSituation;
 
-        // Map of mood types to emojis
-        private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
-                MoodEvent.MoodType.ANGER, "😡",
-                MoodEvent.MoodType.CONFUSION, "😵‍💫",
-                MoodEvent.MoodType.DISGUST, "🤢",
-                MoodEvent.MoodType.FEAR, "😨",
-                MoodEvent.MoodType.HAPPINESS, "😀",
-                MoodEvent.MoodType.SADNESS, "😭",
-                MoodEvent.MoodType.SHAME, "😳",
-                MoodEvent.MoodType.SURPRISE, "🤯");
-
         /**
          * constructor
          *
@@ -128,7 +117,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
          */
         public void bind(MoodEvent mood) {
             // Set mood emoji
-            moodEmoji.setText(moodEmojis.get(mood.getMoodType()));
+            moodEmoji.setText(mood.getMoodType().getEmoticon());
 
             textMoodType.setText(mood.getMoodType().name());
             textReason.setText(mood.getReasonText());
@@ -144,73 +133,11 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             }
 
             // Set mood colors
-            int moodColor = getMoodColor(mood.getMoodType());
-            int backgroundColor = getLightMoodColor(mood.getMoodType());
+            int moodColor = mood.getMoodType().getPrimaryColor(itemView.getContext());
+            int backgroundColor = mood.getMoodType().getSecondaryColor(itemView.getContext());
 
             moodCard.setStrokeColor(moodColor);
             moodCard.setCardBackgroundColor(backgroundColor);
-        }
-
-        /**
-         * method to get associated mood color (primary/dark) for provided moodType
-         *
-         * @param moodType
-         *                 moodType provided (MoodEvent object)
-         * @return
-         *         returns color integer
-         */
-        private int getMoodColor(MoodEvent.MoodType moodType) {
-            switch (moodType) {
-                case ANGER:
-                    return itemView.getContext().getColor(R.color.mood_anger);
-                case CONFUSION:
-                    return itemView.getContext().getColor(R.color.mood_confusion);
-                case DISGUST:
-                    return itemView.getContext().getColor(R.color.mood_disgust);
-                case FEAR:
-                    return itemView.getContext().getColor(R.color.mood_fear);
-                case HAPPINESS:
-                    return itemView.getContext().getColor(R.color.mood_happiness);
-                case SADNESS:
-                    return itemView.getContext().getColor(R.color.mood_sadness);
-                case SHAME:
-                    return itemView.getContext().getColor(R.color.mood_shame);
-                case SURPRISE:
-                    return itemView.getContext().getColor(R.color.mood_surprise);
-                default:
-                    return itemView.getContext().getColor(R.color.mood_default);
-            }
-        }
-
-        /**
-         * method to get associated mood color (secondary/lingh) for provided moodType
-         *
-         * @param moodType
-         *                 moodType provided (MoodEvent object)
-         * @return
-         *         returns color integer
-         */
-        private int getLightMoodColor(MoodEvent.MoodType moodType) {
-            switch (moodType) {
-                case ANGER:
-                    return itemView.getContext().getColor(R.color.mood_anger_light);
-                case CONFUSION:
-                    return itemView.getContext().getColor(R.color.mood_confusion_light);
-                case DISGUST:
-                    return itemView.getContext().getColor(R.color.mood_disgust_light);
-                case FEAR:
-                    return itemView.getContext().getColor(R.color.mood_fear_light);
-                case HAPPINESS:
-                    return itemView.getContext().getColor(R.color.mood_happiness_light);
-                case SADNESS:
-                    return itemView.getContext().getColor(R.color.mood_sadness_light);
-                case SHAME:
-                    return itemView.getContext().getColor(R.color.mood_shame_light);
-                case SURPRISE:
-                    return itemView.getContext().getColor(R.color.mood_surprise_light);
-                default:
-                    return itemView.getContext().getColor(R.color.mood_default);
-            }
         }
     }
 }

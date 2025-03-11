@@ -125,23 +125,10 @@ public class AddMoodFragment extends Fragment {
      * includes setup of boxes, texts and emojis
      */
     private void setupMoodGrid() {
-        // Pair each mood type with its emoji
-        String[] moodEmojis = {
-                "😡", // ANGER
-                "😵‍💫", // CONFUSION
-                "🤢", // DISGUST
-                "😱", // FEAR
-                "😀", // HAPPINESS
-                "😭", // SADNESS
-                "😳", // SHAME
-                "🤯" // SURPRISE
-        };
-
-        String[] moodNames = {
-                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
-        };
-
-        for (int i = 0; i < moodNames.length; i++) {
+        int i = -1;
+        for (MoodEvent.MoodType type : MoodEvent.MoodType.values()) {
+            // Next position
+            i ++;
             MaterialCardView moodCard = new MaterialCardView(requireContext());
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
             params.width = 0;
@@ -162,13 +149,13 @@ public class AddMoodFragment extends Fragment {
 
             // Add emoji
             TextView emojiText = new TextView(requireContext());
-            emojiText.setText(moodEmojis[i]);
+            emojiText.setText(type.getEmoticon());
             emojiText.setTextSize(24);
             emojiText.setGravity(Gravity.CENTER);
 
             // Add mood name
             TextView moodText = new TextView(requireContext());
-            moodText.setText(moodNames[i].charAt(0) + moodNames[i].substring(1).toLowerCase());
+            moodText.setText(type.name().charAt(0) + type.name().substring(1).toLowerCase());
             moodText.setGravity(Gravity.CENTER);
             moodText.setTextSize(12);
             moodText.setPadding(0, 8, 0, 0);
@@ -176,7 +163,7 @@ public class AddMoodFragment extends Fragment {
             layout.addView(emojiText);
             layout.addView(moodText);
             moodCard.addView(layout);
-            moodCard.setTag(MoodEvent.MoodType.valueOf(moodNames[i]));
+            moodCard.setTag(type);
 
             moodCard.setOnClickListener(v -> {
                 selectedMoodType = (MoodEvent.MoodType) v.getTag();

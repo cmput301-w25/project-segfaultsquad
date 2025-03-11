@@ -60,20 +60,6 @@ public class MoodDetails extends Fragment {
     private FirebaseAuth auth;
 
     /**
-     * Map that associates each MoodType with its corresponding emoji representation.
-     * This map is used to display the appropriate emoji for each mood type.
-     */
-    private final Map<MoodEvent.MoodType, String> moodEmojis = Map.of(
-            MoodEvent.MoodType.ANGER, "😡",
-            MoodEvent.MoodType.CONFUSION, "😵‍💫",
-            MoodEvent.MoodType.DISGUST, "🤢",
-            MoodEvent.MoodType.FEAR, "😱",
-            MoodEvent.MoodType.HAPPINESS, "😀",
-            MoodEvent.MoodType.SADNESS, "😭",
-            MoodEvent.MoodType.SHAME, "😳",
-            MoodEvent.MoodType.SURPRISE, "🤯");
-
-    /**
      * Inflates the mood details layout and initializes the fragment.
      * Retrieves the mood ID from arguments and sets up the UI components.
      *
@@ -212,7 +198,7 @@ public class MoodDetails extends Fragment {
                 mood.getMoodType().name().substring(1).toLowerCase());
 
         // Set emoji
-        String emoji = moodEmojis.get(mood.getMoodType());
+        String emoji = mood.getMoodType().getEmoticon();
         if (emoji != null) {
             moodEmojiTextView.setText(emoji);
         } else {

@@ -20,17 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Gravity;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -136,23 +132,9 @@ public class EditMoodFragment extends Fragment {
      * Creates a card for each mood type with an emoji and text label.
      */
     private void setupMoodGrid() {
-        // Pair each mood type with its emoji - UPDATED to match MoodAdapter.java
-        String[] moodEmojis = {
-                "😡", // ANGER
-                "😵‍💫", // CONFUSION
-                "🤢", // DISGUST
-                "😱", // FEAR
-                "😀", // HAPPINESS
-                "😭", // SADNESS
-                "😳", // SHAME
-                "🤯" // SURPRISE
-        };
-
-        String[] moodNames = {
-                "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE"
-        };
-
-        for (int i = 0; i < moodNames.length; i++) {
+        int i = -1;
+        for (MoodEvent.MoodType moodType : MoodEvent.MoodType.values()) {
+            i ++;
             MaterialCardView moodCard = new MaterialCardView(requireContext());
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
             params.width = 0;
@@ -165,8 +147,7 @@ public class EditMoodFragment extends Fragment {
             moodCard.setStrokeWidth(1);
 
             // Use the mood-specific color for the stroke
-            MoodEvent.MoodType moodType = MoodEvent.MoodType.valueOf(moodNames[i]);
-            moodCard.setStrokeColor(getMoodColor(moodType));
+            moodCard.setStrokeColor(moodType.getPrimaryColor(requireContext()));
 
             // Create vertical layout for emoji and text
             LinearLayout layout = new LinearLayout(requireContext());
@@ -176,13 +157,13 @@ public class EditMoodFragment extends Fragment {
 
             // Add emoji
             TextView emojiText = new TextView(requireContext());
-            emojiText.setText(moodEmojis[i]);
+            emojiText.setText(moodType.name());
             emojiText.setTextSize(24);
             emojiText.setGravity(Gravity.CENTER);
 
             // Add mood name
             TextView moodText = new TextView(requireContext());
-            moodText.setText(moodNames[i].charAt(0) + moodNames[i].substring(1).toLowerCase());
+            moodText.setText(moodType.name().charAt(0) + moodType.name().substring(1).toLowerCase());
             moodText.setGravity(Gravity.CENTER);
             moodText.setTextSize(12);
             moodText.setPadding(0, 8, 0, 0);
@@ -353,10 +334,10 @@ public class EditMoodFragment extends Fragment {
 
             // Use mood-specific colors instead of just color_primary
             if (isSelected) {
-                card.setCardBackgroundColor(getMoodColor(moodType));
+                card.setCardBackgroundColor(moodType.getPrimaryColor(requireContext()));
             } else {
                 card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
-                card.setStrokeColor(getMoodColor(cardMoodType));
+                card.setStrokeColor(cardMoodType.getPrimaryColor(requireContext()));
             }
 
             // Update both emoji and text color
@@ -377,8 +358,6 @@ public class EditMoodFragment extends Fragment {
      * @param selectedCard The MaterialCardView that was selected
      */
     private void updateMoodSelection(MaterialCardView selectedCard) {
-        MoodEvent.MoodType selectedType = (MoodEvent.MoodType) selectedCard.getTag();
-
         for (int i = 0; i < moodGrid.getChildCount(); i++) {
             MaterialCardView card = (MaterialCardView) moodGrid.getChildAt(i);
             MoodEvent.MoodType cardMoodType = (MoodEvent.MoodType) card.getTag();
@@ -388,10 +367,10 @@ public class EditMoodFragment extends Fragment {
 
             // Use mood-specific colors
             if (isSelected) {
-                card.setCardBackgroundColor(getMoodColor(cardMoodType));
+                card.setCardBackgroundColor(cardMoodType.getPrimaryColor(requireContext()));
             } else {
                 card.setCardBackgroundColor(getResources().getColor(android.R.color.white));
-                card.setStrokeColor(getMoodColor(cardMoodType));
+                card.setStrokeColor(cardMoodType.getPrimaryColor(requireContext()));
             }
 
             // Update both emoji and text color
@@ -403,66 +382,6 @@ public class EditMoodFragment extends Fragment {
                     isSelected ? android.R.color.white : R.color.color_primary);
             emojiText.setTextColor(textColor);
             moodText.setTextColor(textColor);
-        }
-    }
-
-    /**
-     * Returns the primary color associated with the given mood type.
-     * Copied from MoodAdapter.java for consistency.
-     *
-     * @param moodType The MoodType to get the color for
-     * @return The color resource ID as an integer
-     */
-    private int getMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case ANGER:
-                return requireContext().getColor(R.color.mood_anger);
-            case CONFUSION:
-                return requireContext().getColor(R.color.mood_confusion);
-            case DISGUST:
-                return requireContext().getColor(R.color.mood_disgust);
-            case FEAR:
-                return requireContext().getColor(R.color.mood_fear);
-            case HAPPINESS:
-                return requireContext().getColor(R.color.mood_happiness);
-            case SADNESS:
-                return requireContext().getColor(R.color.mood_sadness);
-            case SHAME:
-                return requireContext().getColor(R.color.mood_shame);
-            case SURPRISE:
-                return requireContext().getColor(R.color.mood_surprise);
-            default:
-                return requireContext().getColor(R.color.mood_default);
-        }
-    }
-
-    /**
-     * Returns the secondary (light) color associated with the given mood type.
-     * Copied from MoodAdapter.java for consistency.
-     *
-     * @param moodType The MoodType to get the light color for
-     * @return The color resource ID as an integer
-     */
-    private int getLightMoodColor(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case ANGER:
-                return requireContext().getColor(R.color.mood_anger_light);
-            case CONFUSION:
-                return requireContext().getColor(R.color.mood_confusion_light);
-            case DISGUST:
-                return requireContext().getColor(R.color.mood_disgust_light);
-            case FEAR:
-                return requireContext().getColor(R.color.mood_fear_light);
-            case HAPPINESS:
-                return requireContext().getColor(R.color.mood_happiness_light);
-            case SADNESS:
-                return requireContext().getColor(R.color.mood_sadness_light);
-            case SHAME:
-                return requireContext().getColor(R.color.mood_shame_light);
-            case SURPRISE:
-                return requireContext().getColor(R.color.mood_surprise_light);
-            default:
-                return requireContext().getColor(R.color.mood_default);
         }
     }
 
