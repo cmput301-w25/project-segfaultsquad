@@ -20,9 +20,9 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.DbUtils;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
-import com.google.firebase.auth.FirebaseAuth;
+
 import android.os.Handler;
 import android.os.Looper;
 

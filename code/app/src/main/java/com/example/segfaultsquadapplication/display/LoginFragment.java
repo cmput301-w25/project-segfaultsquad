@@ -9,6 +9,7 @@ package com.example.segfaultsquadapplication.display;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,17 +17,13 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.DbUtils;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
@@ -107,14 +104,14 @@ public class LoginFragment extends Fragment {
         // Disable login button while processing
         loginButton.setEnabled(false);
 
-        DbUtils.signIn(email, password, new DbUtils.DbOpResultHandler<>(
+        DbUtils.login(email, password, new DbOpResultHandler<>(
+                // Success
                 result -> navigateToHome(),
+                // Failure
                 e -> {
                     loginButton.setEnabled(true);
-                    // If the cause is from the sign in event, we also include the raw error msg
-                    String msg = e.getMessage() + (e.getCause() != e ?
-                            ": " + e.getCause().getMessage() : "");
-                    Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
+                    Log.w("login", e);
+                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
         ));
     }

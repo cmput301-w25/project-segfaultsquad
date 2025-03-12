@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,7 +33,6 @@ public class FollowersListFragment extends Fragment {
     private RecyclerView recyclerView;
     private FollowersAdapter followersAdapter;
     private List<User> followersList; // Assume User is a model class for user data
-    private FirebaseFirestore db;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -53,9 +54,6 @@ public class FollowersListFragment extends Fragment {
             requireActivity().onBackPressed(); // Navigate back to ProfileFragment
         });
 
-        // Initialize Firestore
-        db = FirebaseFirestore.getInstance();
-
         return view;
     }
 
@@ -68,7 +66,7 @@ public class FollowersListFragment extends Fragment {
 
     private void onFollowerAction(User user) {
         // Check if the user is following
-        checkIfFollowing(user, isFollowing -> {
+        FollowingManager.checkIfCurrentUserFollowing(user, isFollowing -> {
             if (isFollowing) {
                 // Unfollow logic
                 Toast.makeText(getContext(), "Unfollowed " + user.getUsername(), Toast.LENGTH_SHORT).show();
@@ -77,30 +75,5 @@ public class FollowersListFragment extends Fragment {
                 Toast.makeText(getContext(), "Followed " + user.getUsername(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void checkIfFollowing(User user, FollowingCheckCallback callback) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
-
-        // Query Firestore to check if the current user is following the specified user
-        db.collection("followers")
-                .whereEqualTo("followerId", currentUserId)
-                .whereEqualTo("followedId", user.getUserId()) // Assuming User has a method to get user ID
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        boolean isFollowing = !task.getResult().isEmpty(); // User is following if the result is not
-                                                                           // empty
-                        callback.onResult(isFollowing); // Return the result via callback
-                    } else {
-                        Log.e("FollowersListFragment", "Error checking following status: " + task.getException());
-                        callback.onResult(false); // Default to false on error
-                    }
-                });
-    }
-
-    // Callback interface for checking following status
-    public interface FollowingCheckCallback {
-        void onResult(boolean isFollowing);
     }
 }

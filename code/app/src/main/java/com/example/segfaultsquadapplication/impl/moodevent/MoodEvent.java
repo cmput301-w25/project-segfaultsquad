@@ -11,6 +11,7 @@ package com.example.segfaultsquadapplication.impl.moodevent;
 import android.content.Context;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.IDbData;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.Arrays;
@@ -19,9 +20,9 @@ import java.util.List;
 
 import com.google.firebase.Timestamp;
 
-public class MoodEvent {
+public class MoodEvent implements IDbData {
     // Required attributes
-    private String moodId; // Unique identifier for the mood event
+    private String dbFileId; // Unique identifier for the mood event
     private String userId; // User ID of the person creating the mood event
     private Timestamp timestamp; // Date and time of the mood event
     private MoodType moodType; // Emotional state
@@ -110,23 +111,23 @@ public class MoodEvent {
         }
     }
 
-    // Add a no-argument constructor for Firestore
     /**
-     * Constructor. Was needed in earlier iteration of code. Not being used
-     * anywhere.
+     * Add a no-argument constructor for Firestore; SHOULD NOT be used anywhere in the code.
      */
+    @Deprecated
     public MoodEvent() {
         // Required empty constructor for Firestore
     }
 
     // Other Methods
     // Getters and setters
-    public String getMoodId() {
-        return moodId;
+    @Override
+    public void setDbFileId(String id) {
+        this.dbFileId = id;
     }
-
-    public void setMoodId(String moodId) {
-        this.moodId = moodId;
+    @Override
+    public String getDbFileId() {
+        return dbFileId;
     }
 
     public String getUserId() {

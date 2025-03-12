@@ -9,8 +9,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -36,8 +38,6 @@ import android.view.animation.DecelerateInterpolator;
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private TextView mostCommonMoodText;
     private TextView averageMoodText;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
     private LineChart moodTrendChart;
@@ -53,10 +53,6 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
                 bottomNav.setVisibility(View.GONE);
             }
         }
-
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         mostCommonMoodText = view.findViewById(R.id.mostCommonMoodText);
@@ -86,23 +82,20 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void loadAnalyticsData() {
-        String userId = auth.getCurrentUser().getUid();
-        db.collection("moods")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        MoodEvent mood = doc.toObject(MoodEvent.class);
-                        // debugging
-                        Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType()); // Log the mood type
-                        moodEvents.add(mood);
-                    }
-                    displayAnalytics(moodEvents);
-                    startEmojiRain();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
-                });
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+            if (isSuccess) {
+                for (MoodEvent mood : holder) {
+                    Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType()); // Log the mood type
+                    moodEvents.add(mood);
+                }
+                displayAnalytics(moodEvents);
+                startEmojiRain();
+            }
+            else {
+                Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**

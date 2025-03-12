@@ -26,13 +26,18 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.following.Following;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,9 +52,8 @@ public class ProfileFragment extends Fragment {
     private TextView followingCount;
     private RecyclerView recyclerViewMoodGrid;
     private MoodGridAdapter moodGridAdapter;
+    private static int numFollower = 0, numFollowing = 0;
 
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private List<MoodEvent> moodEvents = new ArrayList<>();
 
     @Override
@@ -66,10 +70,6 @@ public class ProfileFragment extends Fragment {
         ImageButton overflowButton = view.findViewById(R.id.overflowButton);
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
         TextView logoutOption = view.findViewById(R.id.logoutOption);
-
-        // Initialize Firestore and Auth
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Set user data
         setUserData();
@@ -132,25 +132,26 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadFollowerAndFollowingCounts() {
-        String userId = auth.getCurrentUser().getUid(); // Get user ID
-
         // Load followers count
-        db.collection("followers")
-                .whereEqualTo("followedId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int followers = queryDocumentSnapshots.size();
-                    followersCount.setText(String.valueOf(followers));
-                });
-
+        ArrayList<Following> followerHolder = new ArrayList<>();
+        FollowingManager.getAllFollowed(DbUtils.getUserId(), followerHolder, isSuccess -> {
+            if (isSuccess) {
+                numFollower = followerHolder.size();
+                followersCount.setText(String.valueOf(numFollower));
+            } else {
+                Toast.makeText(getContext(), "Failed to get number of followers", Toast.LENGTH_SHORT).show();
+            }
+        });
         // Load following count
-        db.collection("following")
-                .whereEqualTo("followerId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int following = queryDocumentSnapshots.size();
-                    followingCount.setText(String.valueOf(following));
-                });
+        ArrayList<Following> followingHolder = new ArrayList<>();
+        FollowingManager.getAllFollowing(DbUtils.getUserId(), followingHolder, isSuccess -> {
+            if (isSuccess) {
+                numFollowing = followingHolder.size();
+                followingCount.setText(String.valueOf(numFollowing));
+            } else {
+                Toast.makeText(getContext(), "Failed to get number of followed users", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupRecyclerView() {
@@ -160,22 +161,18 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadMoodEvents() {
-        String userId = auth.getCurrentUser().getUid(); // Get user ID
-
-        db.collection("moods")
-                .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    moodEvents.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        MoodEvent mood = doc.toObject(MoodEvent.class);
-                        moodEvents.add(mood);
-                    }
-                    // debugging
-                    Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
-                    moodGridAdapter.notifyDataSetChanged(); // Notify adapter of data change
-                });
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+            if (isSuccess) {
+                moodEvents.clear();
+                moodEvents.addAll(holder);
+                // debugging
+                Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
+                moodGridAdapter.notifyDataSetChanged(); // Notify adapter of data change
+            } else {
+                Toast.makeText(getContext(), "Failed to get mood events", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void navigateToFollowersList() {

@@ -242,7 +242,7 @@ public class EditMoodFragment extends Fragment {
                             MoodEvent mood = documentSnapshot.toObject(MoodEvent.class);
                             if (mood != null) {
                                 currentMood = mood;
-                                currentMood.setMoodId(documentSnapshot.getId());
+                                currentMood.setDbFileId(documentSnapshot.getId());
 
                                 // Fill the UI with the mood data
                                 populateUI(mood);

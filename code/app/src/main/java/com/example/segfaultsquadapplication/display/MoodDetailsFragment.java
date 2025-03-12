@@ -18,12 +18,12 @@ import androidx.navigation.Navigation;
 
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A Fragment that displays detailed information about a specific mood event.
@@ -48,12 +48,8 @@ public class MoodDetailsFragment extends Fragment {
     private Button deleteButton;
 
     // Data
-    private String moodId;
+    private String moodId = null;
     private MoodEvent currentMood;
-
-    // Firebase
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
 
     /**
      * Inflates the mood details layout and initializes the fragment.
@@ -68,20 +64,12 @@ public class MoodDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.mood_details, container, false);
 
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
         // Get the mood ID from arguments
         if (getArguments() != null) {
             moodId = getArguments().getString("moodId");
-            if (moodId == null) {
-                Toast.makeText(getContext(), "Error: No mood ID provided", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(container).navigateUp();
-                return view;
-            }
-        } else {
-            Toast.makeText(getContext(), "Error: No arguments provided", Toast.LENGTH_SHORT).show();
+        }
+        if (moodId == null) {
+            Toast.makeText(getContext(), "Error: No mood ID provided", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(container).navigateUp();
             return view;
         }
@@ -144,39 +132,16 @@ public class MoodDetailsFragment extends Fragment {
      * On failure, it shows an error message and navigates back.
      */
     private void loadMoodData() {
-        db.collection("moods").document(moodId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        try {
-                            // Create a MoodEvent object from the document
-                            MoodEvent mood = documentSnapshot.toObject(MoodEvent.class);
-                            if (mood != null) {
-                                currentMood = mood;
-                                currentMood.setMoodId(documentSnapshot.getId());
-
-                                // Fill the UI with the mood data
-                                populateUI(mood);
-                            } else {
-                                Log.e(TAG, "Failed to convert document to MoodEvent object");
-                                Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
-                                Navigation.findNavController(requireView()).navigateUp();
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error parsing document", e);
-                            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Navigation.findNavController(requireView()).navigateUp();
-                        }
-                    } else {
-                        Log.e(TAG, "Document does not exist");
-                        Toast.makeText(getContext(), "Mood not found", Toast.LENGTH_SHORT).show();
+        AtomicReference<MoodEvent> holder = new AtomicReference<>();
+        MoodEventManager.getMoodEventById(moodId, holder,
+                result -> {
+                    if (result) {
+                        populateUI(holder.get());
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
                         Navigation.findNavController(requireView()).navigateUp();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting document", e);
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
                 });
     }
 
@@ -246,7 +211,8 @@ public class MoodDetailsFragment extends Fragment {
 
         // Set social situation
         if (mood.getSocialSituation() != null) {
-            String socialSituation = formatSocialSituation(mood.getSocialSituation());
+            MoodEvent.SocialSituation situation = mood.getSocialSituation();
+            String socialSituation = situation.getDisplayName();
             socialSituationTextView.setText(socialSituation);
             socialSituationTextView.setVisibility(View.VISIBLE);
         } else {
@@ -261,27 +227,6 @@ public class MoodDetailsFragment extends Fragment {
             locationTextView.setVisibility(View.VISIBLE);
         } else {
             locationTextView.setVisibility(View.GONE);
-        }
-    }
-
-    /**
-     * Formats the SocialSituation enum value into a user-friendly string.
-     *
-     * @param situation The SocialSituation enum value to format
-     * @return A formatted string representation of the social situation
-     */
-    private String formatSocialSituation(MoodEvent.SocialSituation situation) {
-        switch (situation) {
-            case ALONE:
-                return "Alone";
-            case WITH_ONE_PERSON:
-                return "With One Person";
-            case WITH_GROUP:
-                return "With a Group";
-            case IN_CROWD:
-                return "In a Crowd";
-            default:
-                return situation.name();
         }
     }
 
@@ -305,15 +250,14 @@ public class MoodDetailsFragment extends Fragment {
      * On failure, it shows an error message.
      */
     private void deleteMood() {
-        db.collection("moods").document(moodId)
-                .delete()
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error deleting mood", e);
-                    Toast.makeText(getContext(), "Error deleting mood: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        MoodEventManager.deleteMoodEventById(moodId, isSuccess -> {
+            if (isSuccess) {
+                Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).navigateUp();
+            }
+            else {
+                Toast.makeText(getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
