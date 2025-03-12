@@ -71,6 +71,9 @@ public class ProfileFragment extends Fragment {
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
         TextView logoutOption = view.findViewById(R.id.logoutOption);
 
+        followingCount.setText(String.valueOf(numFollowing));
+        followersCount.setText(String.valueOf(numFollower));
+
         // Set user data
         setUserData();
 

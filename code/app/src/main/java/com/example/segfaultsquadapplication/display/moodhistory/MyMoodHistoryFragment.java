@@ -90,6 +90,8 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         moodAdapter = new MoodAdapter(this);
         moodRecyclerView.setAdapter(moodAdapter);
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Display with last fetched moods for now, will be updated when new moods are fetched
+        moodAdapter.updateMoods(allMoods);
     }
 
     /**
