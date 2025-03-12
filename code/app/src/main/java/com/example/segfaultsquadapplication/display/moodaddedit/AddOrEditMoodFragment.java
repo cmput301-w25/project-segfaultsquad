@@ -26,27 +26,31 @@ import androidx.navigation.Navigation;
 
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.android.material.card.MaterialCardView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.Timestamp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Fragment for editing an existing mood event.
  * This fragment allows users to update details of a previously created mood event including
  * the mood type, reason, trigger, social situation, and associated image.
  */
-public class EditMoodFragment extends Fragment {
-    private static final String TAG = "EditMoodFragment";
+public class AddOrEditMoodFragment extends Fragment {
+    private static final String TAG = "AddEditMoodFragment";
     private static final int PICK_IMAGE_REQUEST = 1;
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
 
     // UI components
     private GridLayout moodGrid;
@@ -62,9 +66,8 @@ public class EditMoodFragment extends Fragment {
     private MoodEvent currentMood;
     private MoodEvent.MoodType selectedMoodType = null;
 
-    // Firebase
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
+    // Frag Type
+    private boolean isEditFrag;
 
     /**
      * Creates and returns the view hierarchy associated with the fragment.
@@ -78,20 +81,14 @@ public class EditMoodFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.edit_mood, container, false);
 
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-
-        // Get the mood ID from arguments
+        // Both triggers have arguments
         if (getArguments() != null) {
+            // Edit mood fragment has moodId
             moodId = getArguments().getString("moodId");
-            if (moodId == null) {
-                Toast.makeText(getContext(), "Error: No mood ID provided", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(container).navigateUp();
-                return view;
-            }
+            isEditFrag = moodId != null;
         } else {
-            Toast.makeText(getContext(), "Error: No arguments provided", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error: No arguments provided");
+            Toast.makeText(getContext(), "Error displaying modification page", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(container).navigateUp();
             return view;
         }
@@ -104,7 +101,12 @@ public class EditMoodFragment extends Fragment {
         setupButtons(view);
 
         // Load the current mood data
-        loadMoodData();
+        if (isEditFrag) {
+            loadMoodData();
+        } else {
+            // Set the timestamp
+            textDateTime.setText(SDF.format(new Date()));
+        }
 
         return view;
     }
@@ -125,7 +127,7 @@ public class EditMoodFragment extends Fragment {
         // Update the title to "Edit Mood" instead of "Add Mood"
         TextView titleTextView = view.findViewById(R.id.textViewTitle);
         if (titleTextView != null) {
-            titleTextView.setText("Edit Mood");
+            titleTextView.setText(isEditFrag ? "Edit Mood" : "Create Mood");
         }
     }
 
@@ -159,7 +161,7 @@ public class EditMoodFragment extends Fragment {
 
             // Add emoji
             TextView emojiText = new TextView(requireContext());
-            emojiText.setText(moodType.name());
+            emojiText.setText(moodType.getEmoticon());
             emojiText.setTextSize(24);
             emojiText.setGravity(Gravity.CENTER);
 
@@ -221,7 +223,7 @@ public class EditMoodFragment extends Fragment {
 
         // Save changes button
         view.findViewById(R.id.buttonConfirm).setOnClickListener(v ->
-                updateMood());
+                saveChanges());
 
         // Cancel button
         view.findViewById(R.id.buttonCancel).setOnClickListener(v ->
@@ -233,40 +235,17 @@ public class EditMoodFragment extends Fragment {
      * Retrieves the mood document using the provided mood ID.
      */
     private void loadMoodData() {
-        db.collection("moods").document(moodId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        try {
-                            // Create a MoodEvent object from the document
-                            MoodEvent mood = documentSnapshot.toObject(MoodEvent.class);
-                            if (mood != null) {
-                                currentMood = mood;
-                                currentMood.setDbFileId(documentSnapshot.getId());
-
-                                // Fill the UI with the mood data
-                                populateUI(mood);
-                            } else {
-                                Log.e(TAG, "Failed to convert document to MoodEvent object");
-                                Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
-                                Navigation.findNavController(requireView()).navigateUp();
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error parsing document", e);
-                            Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Navigation.findNavController(requireView()).navigateUp();
-                        }
-                    } else {
-                        Log.e(TAG, "Document does not exist");
-                        Toast.makeText(getContext(), "Mood not found", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).navigateUp();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error getting document", e);
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Navigation.findNavController(requireView()).navigateUp();
-                });
+        AtomicReference<MoodEvent> ref = new AtomicReference<>();
+        MoodEventManager.getMoodEventById(moodId, ref, isSuccess -> {
+            if (isSuccess) {
+                currentMood = ref.get();
+                // Fill the UI with the mood data
+                populateUI(currentMood);
+            } else {
+                Toast.makeText(getContext(), "Mood event not found", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(requireView()).navigateUp();
+            }
+        });
     }
 
     /**
@@ -288,8 +267,7 @@ public class EditMoodFragment extends Fragment {
         }
 
         // Set the timestamp
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
-        textDateTime.setText(sdf.format(mood.getTimestampDate()));
+        textDateTime.setText(SDF.format(mood.getTimestampDate()));
 
         // Set the social situation if available
         if (mood.getSocialSituation() != null) {
@@ -410,75 +388,47 @@ public class EditMoodFragment extends Fragment {
      * Updates the mood event in Firestore with the user's changes.
      * Validates input data before updating the database.
      */
-    private void updateMood() {
-        if (selectedMoodType == null) {
-            Toast.makeText(getContext(), "Please select a mood", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    private void saveChanges() {
         String reason = reasonInput.getText().toString().trim();
         String trigger = triggerInput.getText().toString().trim();
 
-        // Check if reason text is within the limit
-        if (reason.length() > 20) {
-            Toast.makeText(getContext(), "Reason must be 20 characters or less", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("moodType", selectedMoodType.name());
-        updates.put("reasonText", reason);
-        updates.put("trigger", trigger);
-
+        MoodEvent.SocialSituation situation;
         if (socialSituationSpinner.getSelectedItem() != null) {
-            updates.put("socialSituation", socialSituationSpinner.getSelectedItem());
-        }
-
-        // Keep the original timestamp and location
-
-        // Handle image update if there's a new image
-        if (selectedImageUri != null) {
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), selectedImageUri);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                byte[] byteArray = stream.toByteArray();
-
-                // Check image size
-                if (byteArray.length > 65536) { // 64 KB limit
-                    Toast.makeText(getContext(), "Image size exceeds the limit of 64 KB", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                // Convert byte array to List<Integer>
-                List<Integer> byteList = new ArrayList<>();
-                for (byte b : byteArray) {
-                    byteList.add((int) b);
-                }
-
-                updates.put("imageData", byteList);
-            } catch (IOException e) {
-                Log.e(TAG, "Error processing image", e);
-                Toast.makeText(getContext(), "Error processing image", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            situation = (MoodEvent.SocialSituation) socialSituationSpinner.getAdapter().getItem(socialSituationSpinner.getSelectedItemPosition());
+        } else {
+            situation = (MoodEvent.SocialSituation) socialSituationSpinner.getAdapter().getItem(0);
         }
 
         // Update the mood in Firestore
-        db.collection("moods").document(moodId)
-                .update(updates)
-                .addOnSuccessListener(aVoid -> {
-                    // Add a log statement here
-                    Log.d(TAG, "Mood update successful");
-                    Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
-                    if (isAdded()) {
-                        Navigation.findNavController(requireView()).navigateUp();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    // This may be executing instead
-                    Log.e(TAG, "Error updating mood", e);
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+        try {
+            if (isEditFrag) {
+                MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason, trigger,
+                        situation, selectedImageUri, isSuccess -> {
+                            if (isSuccess) {
+                                Log.d(TAG, "Mood update successful");
+                                Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
+                                Navigation.findNavController(requireView()).navigateUp();
+                            } else {
+                                Toast.makeText(getContext(), "Error updating mood", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+            // Create
+            else {
+                MoodEventManager.createMoodEvent(getContext(), selectedMoodType, reason, trigger,
+                        situation, selectedImageUri, isSuccess -> {
+                            if (isSuccess) {
+                                Log.d(TAG, "Mood creation successful");
+                                Toast.makeText(getContext(), "Mood created successfully", Toast.LENGTH_SHORT).show();
+                                Navigation.findNavController(requireView()).navigateUp();
+                            } else {
+                                Toast.makeText(getContext(), "Error creating mood", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception while saving changes", e);
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

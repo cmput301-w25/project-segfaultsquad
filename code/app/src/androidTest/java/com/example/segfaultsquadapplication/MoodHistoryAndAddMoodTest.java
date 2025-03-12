@@ -20,7 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.GrantPermissionRule;
 
-import com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment;
+import com.example.segfaultsquadapplication.display.moodaddedit.AddOrEditMoodFragment;
 import com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.firebase.Timestamp;
@@ -69,7 +69,7 @@ public class MoodHistoryAndAddMoodTest {
         };
         for (MoodEvent evt : evts) {
             DocumentReference docRef = moodsRef.document();
-            evt.setMoodId(docRef.getId());
+            evt.setDbFileId(docRef.getId());
             docRef.set(evt);
         }
 
@@ -134,7 +134,7 @@ public class MoodHistoryAndAddMoodTest {
     private void testNewMoodInvalid() {
         System.out.println("Test Invalid - Do not select emotion state");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
         onView(withId(R.id.editTextReason)).perform(typeText("???"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
@@ -152,7 +152,7 @@ public class MoodHistoryAndAddMoodTest {
     private void testNewMoodRegular() {
         System.out.println("Test Regular - All fields filled");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
         onView(withText( MoodEvent.MoodType.FEAR.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
         onView(withId(R.id.spinnerSocialSituation))
@@ -164,7 +164,7 @@ public class MoodHistoryAndAddMoodTest {
 
         System.out.println("Test Regular - optional fields omitted");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
         onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Fury!"));
         onView(withId(R.id.buttonConfirm)).perform(click());
@@ -173,7 +173,7 @@ public class MoodHistoryAndAddMoodTest {
 
         System.out.println("Test Regular - cancelled");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
         onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("CANCEL!"));
         onView(withId(R.id.buttonCancel)).perform(click());
@@ -192,12 +192,12 @@ public class MoodHistoryAndAddMoodTest {
         Date newDate = Calendar.getInstance().getTime();
         newDate.setTime(newDate.getTime() - 30L * 24 * 60 * 60 * 1000);
         evtLastMonth.setTimestamp(new Timestamp(newDate));
-        evtLastMonth.setMoodId(docRef.getId());
+        evtLastMonth.setDbFileId(docRef.getId());
         docRef.set(evtLastMonth);
 
         MoodEvent evtOtherAngry = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "RAGE", null, null);
         docRef = collRef.document();
-        evtOtherAngry.setMoodId(docRef.getId());
+        evtOtherAngry.setDbFileId(docRef.getId());
         docRef.set(evtOtherAngry);
         Thread.sleep(1000);
 

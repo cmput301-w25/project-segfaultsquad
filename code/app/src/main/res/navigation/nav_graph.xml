@@ -46,7 +46,7 @@
             app:destination="@+id/navigation_following" />
         <action
             android:id="@+id/action_myMoodHistory_to_addMood"
-            app:destination="@id/navigation_add_mood"
+            app:destination="@id/navigation_add_edit_mood"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -54,18 +54,6 @@
         <action
             android:id="@+id/action_to_mood_analytics"
             app:destination="@id/navigation_mood_analytics" />
-    </fragment>
-
-    <!-- Add Mood -->
-    <fragment
-        android:id="@+id/navigation_add_mood"
-        android:name="com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment"
-        android:label="Add Mood">
-        <action
-            android:id="@+id/action_addMood_to_myMoodHistory"
-            app:destination="@id/navigation_my_mood_history"
-            app:popUpTo="@id/navigation_my_mood_history"
-            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- Map -->
@@ -128,9 +116,9 @@
     </fragment>
 
     <fragment
-        android:id="@+id/navigation_edit_mood"
-        android:name="com.example.segfaultsquadapplication.display.moodaddedit.EditMoodFragment"
-        android:label="Edit Mood">
+        android:id="@+id/navigation_add_edit_mood"
+        android:name="com.example.segfaultsquadapplication.display.moodaddedit.AddOrEditMoodFragment"
+        android:label="Add Edit Mood">
         <argument
             android:name="moodId"
             app:argType="string" />
@@ -147,7 +135,7 @@
 
     <action
         android:id="@+id/action_moodDetails_to_editMood"
-        app:destination="@id/navigation_edit_mood" />
+        app:destination="@id/navigation_add_edit_mood" />
 
     <action
         android:id="@+id/action_myMoodHistory_to_moodDetails"
