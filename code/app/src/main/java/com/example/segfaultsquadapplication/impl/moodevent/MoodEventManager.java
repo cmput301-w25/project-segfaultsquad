@@ -1,14 +1,12 @@
 package com.example.segfaultsquadapplication.impl.moodevent;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -41,7 +39,8 @@ public class MoodEventManager {
     private static final String LOG_TITLE = "MoodEventManager";
     public enum MoodEventFilter {
         ALL(UnaryOperator.identity()),
-        MOST_RECENT( query -> query.limit(1) );
+        MOST_RECENT_1(query -> query.limit(1) ),
+        MOST_RECENT_3( query -> query.limit(3) );
 
         private final UnaryOperator<Query> queryFilter;
         MoodEventFilter(UnaryOperator<Query> queryFilter) {
@@ -53,15 +52,27 @@ public class MoodEventManager {
      * BELOW: mood event "creation"/"modification" functions
      */
 
+    /**
+     * Creates a mood event from the specified params
+     * @param ctx Android context
+     * @param moodType Mood type
+     * @param reason Text reason
+     * @param trigger Text trigger
+     * @param situation Social situation
+     * @param imgUri Image Uri (optional)
+     * @param callback Callback on success/failure
+     * @throws RuntimeException Exception thrown when data is invalid / encounters IO exception reading image
+     */
     public static void createMoodEvent(Context ctx, MoodEvent.MoodType moodType,
                                        String reason, String trigger,
-                                       MoodEvent.SocialSituation situation, Uri imgUri,
+                                       MoodEvent.SocialSituation situation, @Nullable Uri imgUri,
                                        Consumer<Boolean> callback) throws RuntimeException {
         validateMoodEvent(moodType, reason);
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
         FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(ctx);
+        // No location permission - save without location
         if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             addMoodEvent(moodType, reason, imgBytes, null, situation, trigger, callback);
@@ -69,6 +80,7 @@ public class MoodEventManager {
         }
 
         fusedLocationClient.getLastLocation()
+                // Location retrieved
                 .addOnSuccessListener(location -> {
                     GeoPoint geoPoint = null;
                     if (location != null) {
@@ -76,14 +88,26 @@ public class MoodEventManager {
                     }
                     addMoodEvent(moodType, reason, imgBytes, geoPoint, situation, trigger, callback);
                 })
+                // Location not retrieved
                 .addOnFailureListener(e -> {
                     // Failed to get location, save mood without it
                     addMoodEvent(moodType, reason, imgBytes, null, situation, trigger, callback);
                 });
     }
 
+    /**
+     * Helper function for createMoodEvent.
+     * @param moodType Mood type
+     * @param reason String reason
+     * @param imgBytes Parsed image bytes
+     * @param geoPoint Geopoint info (optional)
+     * @param situation Social situation
+     * @param trigger String trigger
+     * @param callback Success/failure callback
+     */
     private static void addMoodEvent(MoodEvent.MoodType moodType,
-                                    String reason, List<Integer> imgBytes, GeoPoint geoPoint,
+                                    String reason, @Nullable List<Integer> imgBytes,
+                                     @Nullable GeoPoint geoPoint,
                                     MoodEvent.SocialSituation situation, String trigger,
                                     Consumer<Boolean> callback) {
         MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, geoPoint);
@@ -103,9 +127,21 @@ public class MoodEventManager {
         DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, moodEvent, handler);
     }
 
+    /**
+     * Updates the mood event and saves it to the database.
+     * @param ctx Android context
+     * @param moodEvent Mood event
+     * @param moodType New mood type
+     * @param reason Reason text
+     * @param trigger Trigger text
+     * @param situation Social situation
+     * @param imgUri Optional - image Uri
+     * @param callback Success/failure callback
+     * @throws RuntimeException Exception thrown on invalid data / IO exception
+     */
     public static void updateMoodEvent(Context ctx, MoodEvent moodEvent, MoodEvent.MoodType moodType,
                                        String reason, String trigger, MoodEvent.SocialSituation situation,
-                                       Uri imgUri, Consumer<Boolean> callback) throws RuntimeException {
+                                       @Nullable Uri imgUri, Consumer<Boolean> callback) throws RuntimeException {
         validateMoodEvent(moodType, reason);
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
@@ -119,6 +155,13 @@ public class MoodEventManager {
         updateMoodEventById(moodEvent, callback);
     }
 
+    /**
+     * Helper function for add/update mood event.
+     * Validates the mood type and reason length.
+     * @param moodType Mood type; exception thrown if mood type is null
+     * @param reason Reason text; exception thrown if too long.
+     * @throws RuntimeException Throws exception when the data is invalid.
+     */
     private static void validateMoodEvent(MoodEvent.MoodType moodType, String reason) throws RuntimeException {
         // Mood type must be defined
         if (moodType == null) {
@@ -130,7 +173,15 @@ public class MoodEventManager {
         }
     }
 
-    private static List<Integer> encodeImg(Context ctx, Uri imgUri) throws RuntimeException {
+    /**
+     * Encodes image from Uri to bit array.
+     * @param ctx Android context
+     * @param imgUri Image uri
+     * @return The bit array ready to be saved
+     * @throws RuntimeException Exception thrown if IOException met;
+     *                          wrapped with RuntimeException to directly show error message to android UI
+     */
+    private static List<Integer> encodeImg(Context ctx, @Nullable Uri imgUri) throws RuntimeException {
         if (imgUri != null) {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(ctx.getContentResolver(), imgUri);
@@ -161,6 +212,15 @@ public class MoodEventManager {
      * BELOW: "getter"/"delete" functions
      */
 
+    /**
+     * Gets all mood events satisfying the filter.
+     * If user id is provided, the records are restricted to the specified user. </br>
+     * On success, all mood events will be saved in the holder; otherwise, holder will not be changed.
+     * @param userId User id, optional
+     * @param filter Filter for the mood event
+     * @param holder The holder for retrieved mood events
+     * @param onComplete Callback when operation is completed
+     */
     public static void getAllMoodEvents(@Nullable String userId, MoodEventFilter filter,
                                         Collection<MoodEvent> holder, Consumer<Boolean> onComplete) {
         // Restrict to the current user & order by time, then apply further filters

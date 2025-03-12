@@ -211,7 +211,7 @@ public class MapFragment extends Fragment {
                 for (Following following : followedUsers) {
                     ArrayList<MoodEvent> mostRecentEvent = new ArrayList<>(1);
                     String followedUserId = following.getFollowedId();
-                    MoodEventManager.getAllMoodEvents(followedUserId, MoodEventManager.MoodEventFilter.MOST_RECENT,
+                    MoodEventManager.getAllMoodEvents(followedUserId, MoodEventManager.MoodEventFilter.MOST_RECENT_1,
                             mostRecentEvent, (succeed) -> {
                                 if (succeed && mostRecentEvent.size() != 0) {
                                     followedMoods.put(followedUserId, mostRecentEvent.get(0));

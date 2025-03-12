@@ -43,8 +43,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Fragment for editing an existing mood event.
- * This fragment allows users to update details of a previously created mood event including
+ * Fragment for adding a new mood event or editing an existing mood event.
+ * This fragment allows users to update details of a mood event including
  * the mood type, reason, trigger, social situation, and associated image.
  */
 public class AddOrEditMoodFragment extends Fragment {
