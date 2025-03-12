@@ -17,21 +17,17 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements NavigationBarView.OnItemSelectedListener {
 
     // attributes
     private BottomNavigationView bottomNavigationView;
     private NavController navController = null;
-    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mAuth = FirebaseAuth.getInstance();
 
         // Initialize the bottom navigation and NavController
         setupNavController();
@@ -54,8 +50,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         // During these phase, the menu is invisible.
         if (destinationId == R.id.navigation_login ||
                 destinationId == R.id.navigation_splash ||
-                destinationId == R.id.navigation_add_mood ||
-                destinationId == R.id.navigation_edit_mood ||
+                destinationId == R.id.navigation_add_edit_mood ||
                 destinationId == R.id.navigation_mood_details) {
             getBottomNavigationView().setVisibility(View.GONE);
             return;

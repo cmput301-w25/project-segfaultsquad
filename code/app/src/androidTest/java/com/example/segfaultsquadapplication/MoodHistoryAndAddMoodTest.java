@@ -8,22 +8,21 @@ import static androidx.test.espresso.matcher.ViewMatchers.*;
 
 import static com.example.segfaultsquadapplication.TestLoginUtil.waitUntil;
 
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
 import android.util.Log;
 import android.widget.EditText;
 
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.GrantPermissionRule;
-import androidx.test.services.events.TimeStamp;
 
+import com.example.segfaultsquadapplication.display.moodaddedit.AddOrEditMoodFragment;
+import com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
@@ -36,7 +35,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -71,7 +69,7 @@ public class MoodHistoryAndAddMoodTest {
         };
         for (MoodEvent evt : evts) {
             DocumentReference docRef = moodsRef.document();
-            evt.setMoodId(docRef.getId());
+            evt.setDbFileId(docRef.getId());
             docRef.set(evt);
         }
 
@@ -136,7 +134,7 @@ public class MoodHistoryAndAddMoodTest {
     private void testNewMoodInvalid() {
         System.out.println("Test Invalid - Do not select emotion state");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
         onView(withId(R.id.editTextReason)).perform(typeText("???"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
@@ -154,8 +152,8 @@ public class MoodHistoryAndAddMoodTest {
     private void testNewMoodRegular() {
         System.out.println("Test Regular - All fields filled");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😱")).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
+        onView(withText( MoodEvent.MoodType.FEAR.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Reason text"));
         onView(withId(R.id.spinnerSocialSituation))
                 .perform(ViewActions.scrollTo()).perform(click());
@@ -166,8 +164,8 @@ public class MoodHistoryAndAddMoodTest {
 
         System.out.println("Test Regular - optional fields omitted");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😡")).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
+        onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("Fury!"));
         onView(withId(R.id.buttonConfirm)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
@@ -175,8 +173,8 @@ public class MoodHistoryAndAddMoodTest {
 
         System.out.println("Test Regular - cancelled");
         onView(withId(R.id.fabAddMood)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
-        onView(withText("😡")).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof AddOrEditMoodFragment), 20, 500));
+        onView(withText( MoodEvent.MoodType.ANGER.getEmoticon() )).perform(click());
         onView(withId(R.id.editTextReason)).perform(typeText("CANCEL!"));
         onView(withId(R.id.buttonCancel)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
@@ -194,12 +192,12 @@ public class MoodHistoryAndAddMoodTest {
         Date newDate = Calendar.getInstance().getTime();
         newDate.setTime(newDate.getTime() - 30L * 24 * 60 * 60 * 1000);
         evtLastMonth.setTimestamp(new Timestamp(newDate));
-        evtLastMonth.setMoodId(docRef.getId());
+        evtLastMonth.setDbFileId(docRef.getId());
         docRef.set(evtLastMonth);
 
         MoodEvent evtOtherAngry = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "RAGE", null, null);
         docRef = collRef.document();
-        evtOtherAngry.setMoodId(docRef.getId());
+        evtOtherAngry.setDbFileId(docRef.getId());
         docRef.set(evtOtherAngry);
         Thread.sleep(1000);
 
@@ -217,7 +215,7 @@ public class MoodHistoryAndAddMoodTest {
         System.out.println("Test - filter with mood");
         onView(withId(R.id.filterButton)).perform(click());
         onView(withText("By Mood")).perform(click());
-        onView(withText("ANGER")).perform(click());
+        onView(withText( MoodEvent.MoodType.ANGER.name() )).perform(click());
         Thread.sleep(500);
         // The recent fury mood should be shown
         onView(withText("Fury!")).check(matches(isDisplayed()));
