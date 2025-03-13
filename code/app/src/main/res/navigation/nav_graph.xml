@@ -102,6 +102,9 @@
         <action
             android:id="@+id/action_to_follow_requests"
             app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_searchUsers"
+            app:destination="@id/navigation_follow_requests"/>
     </fragment>
 
 
