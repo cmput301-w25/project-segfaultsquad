@@ -52,8 +52,6 @@ public class FollowersListFragment extends Fragment {
         // Load followers data
         loadFollowersData();
 
-        view.findViewById(R.id.search_users).setOnClickListener(
-                v -> Navigation.findNavController(v).navigate(R.id.action_to_searchUsers));
 
         // Set up back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v -> {
