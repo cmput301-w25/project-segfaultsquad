@@ -60,8 +60,8 @@ public class FollowersListFragment extends Fragment {
 
     private void loadFollowersData() {
         // Mock data for demonstration
-        followersList.add(new User("User1", "url_to_profile_picture", "user_email"));
-        followersList.add(new User("User2", "url_to_profile_picture", "user_email"));
+        followersList.add(new User("User1", "username_1", "user_email_1"));
+        followersList.add(new User("User2", "username_2", "user_email_2"));
         followersAdapter.notifyDataSetChanged();
     }
 

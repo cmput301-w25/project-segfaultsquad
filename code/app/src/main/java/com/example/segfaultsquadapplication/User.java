@@ -18,6 +18,7 @@ public class User {
     private List<Integer> profilePicUrl;
     private List<String> followers;
     private List<String> following;
+    private List<String> followRequests;
 
     // Constructor(s)
     public User(String userId, String username, String email) {
@@ -27,6 +28,7 @@ public class User {
         this.profilePicUrl = new ArrayList<>();
         this.followers = new ArrayList<>();
         this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
     }
 
     public User() {
@@ -84,5 +86,19 @@ public class User {
 
     public void removeFollowing(String userId) {
         following.remove(userId);
+    }
+
+    public List<String> getFollowRequests() {
+        return followRequests;
+    }
+
+    public void addFollowRequest(String userId) {
+        if (!followRequests.contains(userId)) {
+            followRequests.add(userId);
+        }
+    }
+
+    public void removeFollowRequest(String userId) {
+        followRequests.remove(userId);
     }
 }

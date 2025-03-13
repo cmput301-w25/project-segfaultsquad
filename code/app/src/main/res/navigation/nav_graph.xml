@@ -105,6 +105,7 @@
         android:id="@+id/navigation_following"
         android:name="com.example.segfaultsquadapplication.FollowingFragment"
         android:label="Following">
+        <!-- Bottom Nav -->
         <action
             android:id="@+id/action_to_my_mood_history"
             app:destination="@+id/MyMoodHistory" />
@@ -114,6 +115,10 @@
         <action
             android:id="@+id/action_to_follow_requests"
             app:destination="@id/navigation_follow_requests" />
+        <!-- To mood detials of following mood -->
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_mood_details" />
     </fragment>
 
 
@@ -167,11 +172,12 @@
             android:id="@+id/action_to_map"
             app:destination="@id/navigation_map" />
         <action
-            android:id="@+id/action_to_follow_requests"
-            app:destination="@id/navigation_follow_requests" />
-        <action
             android:id="@+id/action_to_following"
             app:destination="@id/navigation_following" />
+        <!-- This is from bottom nav and the heart in top -->
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
         <!-- inner nav -->
         <action
             android:id="@+id/action_to_followers_list"

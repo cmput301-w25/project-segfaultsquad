@@ -78,6 +78,7 @@ public class ProfileFragment extends Fragment {
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
         TextView logoutOption = view.findViewById(R.id.logoutOption);
         ImageButton editProfilePictureButton = view.findViewById(R.id.editProfilePictureButton);
+        ImageButton heartButton = view.findViewById(R.id.heartButton);
 
         // Initialize Firestore and Auth
         db = FirebaseFirestore.getInstance();
@@ -125,6 +126,11 @@ public class ProfileFragment extends Fragment {
 
         // Handle profile picture edit button click
         editProfilePictureButton.setOnClickListener(v -> openImagePicker());
+
+        // Set click listener for the heart button
+        heartButton.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_to_follow_requests);
+        });
 
         // debugging
         Log.d("ProfileFragment", "-99");

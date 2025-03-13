@@ -1,12 +1,3 @@
-/**
- * Classname: FollowingRequestFragment
- * Purpose: Allow user to look at other user profiles and request to follow them
- * Current Issues: N/A
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
-
 package com.example.segfaultsquadapplication;
 
 import android.os.Bundle;
@@ -30,7 +21,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FollowingRequestsFragment extends Fragment {
+public class FollowRequestsFragment extends Fragment {
     private RecyclerView requestsRecyclerView;
     private FollowRequestsAdapter requestsAdapter;
     private FirebaseFirestore db;
