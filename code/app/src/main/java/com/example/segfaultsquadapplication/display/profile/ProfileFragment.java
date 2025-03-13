@@ -71,9 +71,6 @@ public class ProfileFragment extends Fragment {
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
         TextView logoutOption = view.findViewById(R.id.logoutOption);
 
-        followingCount.setText(String.valueOf(numFollowing));
-        followersCount.setText(String.valueOf(numFollower));
-
         // Set user data
         setUserData();
 
@@ -127,8 +124,12 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setUserData() {
-        // TODO: Replace with actual user data retrieval logic
-        username.setText("John Doe");
+        String stored_username = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        if (stored_username == null) {
+            Toast.makeText(getContext(), "Failed to load username, setting default", Toast.LENGTH_SHORT).show();
+            stored_username = "Segfault Squad";
+        }
+        username.setText(stored_username);
         loadFollowerAndFollowingCounts();
         // Load profile picture if available
         // profilePicture.setImageBitmap(...);
