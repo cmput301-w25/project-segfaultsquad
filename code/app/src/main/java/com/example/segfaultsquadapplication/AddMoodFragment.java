@@ -56,6 +56,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.GeoPoint;
 import android.widget.LinearLayout;
 import android.util.Log;
+import android.text.InputFilter;
+import android.widget.Switch;
 
 public class AddMoodFragment extends Fragment {
     // attributes
@@ -64,7 +66,6 @@ public class AddMoodFragment extends Fragment {
     private GridLayout moodGrid;
     private TextView textDateTime;
     private EditText reasonInput;
-    private EditText triggerInput;
     private Spinner socialSituationSpinner;
     private ImageView imageUpload;
     private Uri selectedImageUri;
@@ -73,6 +74,8 @@ public class AddMoodFragment extends Fragment {
     private FirebaseAuth auth;
     private StorageReference storageRef;
     private FusedLocationProviderClient fusedLocationClient;
+    private boolean isPublicMood = true; // Default to public
+    private Switch togglePublicPrivate; // Declare the Switch
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -107,9 +110,10 @@ public class AddMoodFragment extends Fragment {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
         reasonInput = view.findViewById(R.id.editTextReason);
-        triggerInput = view.findViewById(R.id.editTextTrigger);
+        reasonInput.setFilters(new InputFilter[] { new InputFilter.LengthFilter(200) }); // Set max length to 200
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
         imageUpload = view.findViewById(R.id.imageUpload);
+        togglePublicPrivate = view.findViewById(R.id.togglePublicPrivate); // Initialize the Switch
     }
 
     /**
@@ -230,6 +234,11 @@ public class AddMoodFragment extends Fragment {
 
         view.findViewById(R.id.buttonConfirm).setOnClickListener(v -> saveMood());
         view.findViewById(R.id.buttonCancel).setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
+
+        // Set the listener for the toggle
+        togglePublicPrivate.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            isPublicMood = isChecked; // Update the visibility based on toggle
+        });
     }
 
     /**
@@ -382,12 +391,10 @@ public class AddMoodFragment extends Fragment {
         // get all user input fields
         String userId = auth.getCurrentUser().getUid(); // get user Id
         String reason = reasonInput.getText().toString().trim(); // get reason text
-        String trigger = triggerInput.getText().toString().trim(); // get trigger text
 
         // create mood event and set its location to provided location or null (if not
         // provided)
-        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason, null, location);
-        newMood.setTrigger(trigger); // Set the trigger
+        MoodEvent newMood = new MoodEvent(userId, selectedMoodType, reason, null, location, isPublicMood);
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             newMood.setSocialSituation(
                     (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem());
@@ -499,8 +506,8 @@ public class AddMoodFragment extends Fragment {
         moodData.put("reasonText", mood.getReasonText()); // either this or the imageData
         moodData.put("imageData", mood.getImageData()); // either this or the reasonText
         // optional
-        moodData.put("trigger", mood.getTrigger());
         moodData.put("socialSituation", mood.getSocialSituation());
+        moodData.put("isPublic", mood.isPublic());
 
         // save to firestore db
         db.collection("moods")

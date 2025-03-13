@@ -26,14 +26,15 @@ public class MoodEvent {
     private String reasonText; // Reason text (optional)
     private List<Integer> imageData; // Reason image data (optional)
     private GeoPoint location; // Location of the mood event
+    private boolean isPublic; // Visibility of the mood event
 
     // Optional attributes
-    private String trigger; // Trigger for the mood (optional)
     private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED, SURPRISED, SURPRISE
+        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED,
+        SURPRISED, SURPRISE
     }
 
     // Enum for social situations
@@ -60,14 +61,15 @@ public class MoodEvent {
     }
 
     // Constructor
-    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
-                     GeoPoint location) {
+    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData, GeoPoint location,
+            boolean isPublic) {
         this.userId = userId;
         this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
         this.reasonText = reasonText;
         this.imageData = imageData;
         this.location = location;
+        this.isPublic = isPublic;
 
         // Validate that at least one of reasonText or imageData is provided
         if (reasonText == null && (imageData == null || imageData.isEmpty())) {
@@ -127,10 +129,10 @@ public class MoodEvent {
     }
 
     public void setReasonText(String reasonText) {
-        if (reasonText != null && reasonText.length() <= 20) {
+        if (reasonText != null && reasonText.length() <= 200) {
             this.reasonText = reasonText;
         } else {
-            throw new IllegalArgumentException("Reason text must be 20 characters or less");
+            throw new IllegalArgumentException("Reason text must be 0 characters or less");
         }
     }
 
@@ -172,12 +174,12 @@ public class MoodEvent {
         this.imageData = imageData;
     }
 
-    public String getTrigger() {
-        return trigger;
+    public boolean isPublic() {
+        return isPublic;
     }
 
-    public void setTrigger(String trigger) {
-        this.trigger = trigger;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     public int getPrimaryColor(Context context) {

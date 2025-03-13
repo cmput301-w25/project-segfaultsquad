@@ -161,32 +161,6 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <!-- Trigger Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="TRIGGER"
-                    android:textColor="#666666"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/triggerTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Trigger will appear here"
-                    android:textColor="#333333"
-                    android:textSize="16sp" />
-            </LinearLayout>
 
             <!-- Location Section -->
             <LinearLayout

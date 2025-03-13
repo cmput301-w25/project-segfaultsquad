@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Gravity;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,8 +45,9 @@ import java.util.Map;
 
 /**
  * Fragment for editing an existing mood event.
- * This fragment allows users to update details of a previously created mood event including
- * the mood type, reason, trigger, social situation, and associated image.
+ * This fragment allows users to update details of a previously created mood
+ * event including
+ * the mood type, reason, social situation, and associated image.
  */
 public class EditMoodFragment extends Fragment {
     private static final String TAG = "EditMoodFragment";
@@ -54,10 +57,10 @@ public class EditMoodFragment extends Fragment {
     private GridLayout moodGrid;
     private TextView textDateTime;
     private EditText reasonInput;
-    private EditText triggerInput;
     private Spinner socialSituationSpinner;
     private ImageView imageUpload;
     private Uri selectedImageUri;
+    private Switch togglePublicPrivate;
 
     // Data
     private String moodId;
@@ -71,9 +74,12 @@ public class EditMoodFragment extends Fragment {
     /**
      * Creates and returns the view hierarchy associated with the fragment.
      *
-     * @param inflater The LayoutInflater object that can be used to inflate views
-     * @param container If non-null, this is the parent view that the fragment's UI should be attached to
-     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state
+     * @param inflater           The LayoutInflater object that can be used to
+     *                           inflate views
+     * @param container          If non-null, this is the parent view that the
+     *                           fragment's UI should be attached to
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     *                           from a previous saved state
      * @return The View for the fragment's UI
      */
     @Override
@@ -120,9 +126,10 @@ public class EditMoodFragment extends Fragment {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
         reasonInput = view.findViewById(R.id.editTextReason);
-        triggerInput = view.findViewById(R.id.editTextTrigger);
+        reasonInput.setFilters(new InputFilter[] { new InputFilter.LengthFilter(200) }); // Set max length to 200
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
         imageUpload = view.findViewById(R.id.imageUpload);
+        togglePublicPrivate = view.findViewById(R.id.togglePublicPrivate);
 
         // Update the title to "Edit Mood" instead of "Add Mood"
         TextView titleTextView = view.findViewById(R.id.textViewTitle);
@@ -233,16 +240,13 @@ public class EditMoodFragment extends Fragment {
      */
     private void setupButtons(View view) {
         // Navigation back button
-        view.findViewById(R.id.buttonBack).setOnClickListener(v ->
-                Navigation.findNavController(v).navigateUp());
+        view.findViewById(R.id.buttonBack).setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
 
         // Save changes button
-        view.findViewById(R.id.buttonConfirm).setOnClickListener(v ->
-                updateMood());
+        view.findViewById(R.id.buttonConfirm).setOnClickListener(v -> updateMood());
 
         // Cancel button
-        view.findViewById(R.id.buttonCancel).setOnClickListener(v ->
-                Navigation.findNavController(v).navigateUp());
+        view.findViewById(R.id.buttonCancel).setOnClickListener(v -> Navigation.findNavController(v).navigateUp());
     }
 
     /**
@@ -299,11 +303,6 @@ public class EditMoodFragment extends Fragment {
         // Set the reason text
         reasonInput.setText(mood.getReasonText());
 
-        // Set the trigger text if available
-        if (mood.getTrigger() != null) {
-            triggerInput.setText(mood.getTrigger());
-        }
-
         // Set the timestamp
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
         textDateTime.setText(sdf.format(mood.getTimestampDate()));
@@ -335,6 +334,9 @@ public class EditMoodFragment extends Fragment {
                 Log.e(TAG, "Error displaying image", e);
             }
         }
+
+        // Set the public/private toggle based on the mood's visibility
+        togglePublicPrivate.setChecked(mood.isPublic());
     }
 
     /**
@@ -471,8 +473,8 @@ public class EditMoodFragment extends Fragment {
      * Updates the image preview when a new image is selected.
      *
      * @param requestCode The request code passed to startActivityForResult()
-     * @param resultCode The result code returned by the child activity
-     * @param data An Intent that carries the result data
+     * @param resultCode  The result code returned by the child activity
+     * @param data        An Intent that carries the result data
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -496,18 +498,16 @@ public class EditMoodFragment extends Fragment {
         }
 
         String reason = reasonInput.getText().toString().trim();
-        String trigger = triggerInput.getText().toString().trim();
 
         // Check if reason text is within the limit
-        if (reason.length() > 20) {
-            Toast.makeText(getContext(), "Reason must be 20 characters or less", Toast.LENGTH_SHORT).show();
+        if (reason.length() > 200) {
+            Toast.makeText(getContext(), "Reason must be 200 characters or less", Toast.LENGTH_SHORT).show();
             return;
         }
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("moodType", selectedMoodType.name());
         updates.put("reasonText", reason);
-        updates.put("trigger", trigger);
 
         if (socialSituationSpinner.getSelectedItem() != null) {
             updates.put("socialSituation", socialSituationSpinner.getSelectedItem());
@@ -544,6 +544,7 @@ public class EditMoodFragment extends Fragment {
         }
 
         // Update the mood in Firestore
+        updates.put("isPublic", currentMood.isPublic()); // Update visibility
         db.collection("moods").document(moodId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {

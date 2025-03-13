@@ -15,7 +15,7 @@ public class User {
     private String userId;
     private String username;
     private String email;
-    private String profilePicUrl;
+    private List<Integer> profilePicUrl;
     private List<String> followers;
     private List<String> following;
 
@@ -24,9 +24,13 @@ public class User {
         this.userId = userId;
         this.username = username;
         this.email = email;
-        this.profilePicUrl = ""; // init as empty
-        this.followers = new ArrayList<>(); // init as empty
-        this.following = new ArrayList<>(); // init as empty
+        this.profilePicUrl = new ArrayList<>();
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+    }
+
+    public User() {
+        // Required for Firestore to be able to deserialize objects form the db
     }
 
     // Getters and setters
@@ -46,11 +50,11 @@ public class User {
         return email;
     }
 
-    public String getProfilePicUrl() {
+    public List<Integer> getProfilePicUrl() {
         return profilePicUrl;
     }
 
-    public void setProfilePicUrl(String profilePicUrl) {
+    public void setProfilePicUrl(List<Integer> profilePicUrl) {
         this.profilePicUrl = profilePicUrl;
     }
 

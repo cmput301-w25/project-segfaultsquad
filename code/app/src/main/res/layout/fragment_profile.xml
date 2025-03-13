@@ -41,15 +41,36 @@
         </LinearLayout>
 
         <!-- Profile Picture -->
-        <ImageView
-            android:id="@+id/profile_picture"
+        <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_person"
-            android:contentDescription="@string/profile_picture"
-            android:background="@drawable/circle_background"
-            android:padding="8dp" />
+            android:layout_gravity="center">
+
+            <com.example.segfaultsquadapplication.CircularImageView
+                android:id="@+id/profile_picture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_person"
+                android:contentDescription="@string/profile_picture"
+                android:background="@drawable/circle_background"
+                android:padding="8dp" />
+
+            <ImageButton
+                android:id="@+id/editProfilePictureButton"
+                android:layout_width="74dp"
+                android:layout_height="52dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="56dp"
+                android:layout_marginEnd="-18dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="edit profile picture"
+                android:maxWidth="12dp"
+                android:maxHeight="12dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_edit" />
+        </RelativeLayout>
 
         <!-- Username -->
         <TextView

@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -58,6 +59,9 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         // Setup RecyclerView
         setupRecyclerView();
 
+        // Load moods
+        loadMoods();
+
         // Setup filter button
         filterButton.setOnClickListener(v -> toggleFilterMenu());
 
@@ -74,9 +78,6 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
             NavController navController = Navigation.findNavController(view);
             navController.navigate(R.id.action_to_mood_analytics);
         });
-
-        // Load moods
-        loadMoods();
 
         return view;
     }
@@ -275,8 +276,20 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Enter Reason Keyword");
 
+        // a LinearLayout for the EditText
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        // EditText (input field)
         final EditText input = new EditText(getContext());
-        builder.setView(input);
+        input.setHint("Type search word here...");
+        // Setting margins programmatically for the input field to match the title's
+        // indent
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(40, 0, 40, 0);
+        input.setLayoutParams(params);
+        layout.addView(input); // add the EditText tot he layout
+        builder.setView(layout); // set the layout as the dialog
 
         builder.setPositiveButton("OK", (dialog, which) -> {
             String keyword = input.getText().toString();

@@ -47,7 +47,6 @@ public class MoodDetails extends Fragment {
     private ImageView reasonImageView;
     private TextView socialSituationTextView;
     private TextView locationTextView;
-    private TextView triggerTextView;
     private Button editButton;
     private Button deleteButton;
 
@@ -128,7 +127,6 @@ public class MoodDetails extends Fragment {
         reasonImageView = view.findViewById(R.id.reasonImageView);
         socialSituationTextView = view.findViewById(R.id.socialSituationTextView);
         locationTextView = view.findViewById(R.id.locationTextView);
-        triggerTextView = view.findViewById(R.id.triggerTextView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
     }
@@ -201,7 +199,7 @@ public class MoodDetails extends Fragment {
     /**
      * Populates the UI components with data from the MoodEvent object.
      * This includes setting the mood title, emoji, date/time, reason text and image,
-     * social situation, trigger, and location information.
+     * social situation, and location information.
      * Components are hidden if their corresponding data is not available.
      *
      * @param mood The MoodEvent object containing all the mood data
@@ -234,13 +232,6 @@ public class MoodDetails extends Fragment {
             reasonTextView.setVisibility(View.GONE);
         }
 
-        // Set trigger text
-        if (mood.getTrigger() != null && !mood.getTrigger().isEmpty()) {
-            triggerTextView.setText(mood.getTrigger());
-            triggerTextView.setVisibility(View.VISIBLE);
-        } else {
-            triggerTextView.setVisibility(View.GONE);
-        }
 
         // Set reason image
         if (mood.getImageData() != null && !mood.getImageData().isEmpty()) {

@@ -143,11 +143,11 @@
         <argument
             android:name="moodId"
             app:argType="string" />
+        
+        <action
+            android:id="@+id/action_moodDetails_to_editMood"
+            app:destination="@id/navigation_edit_mood" />
     </fragment>
-
-    <action
-        android:id="@+id/action_moodDetails_to_editMood"
-        app:destination="@id/navigation_edit_mood" />
 
     <action
         android:id="@+id/action_myMoodHistory_to_moodDetails"
