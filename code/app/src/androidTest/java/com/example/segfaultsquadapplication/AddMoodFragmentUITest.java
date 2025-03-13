@@ -52,22 +52,19 @@ public class AddMoodFragmentUITest {
     public GrantPermissionRule permissionRule =
             GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
-    @Before
-    public void setUp() throws InterruptedException {
+    @BeforeClass
+    public static void setup(){
         String androidLocalhost = "10.0.2.2";
 
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
-
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {  // No user is logged in
-            TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
-            Thread.sleep(500);
-        }
     }
 
     @Before //grow database, runs before each test
-    public void seedDatabase() {
+    public void seedDatabase() throws InterruptedException {
+        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
+        Thread.sleep(500);
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference moodsRef = db.collection("moods");
     }
