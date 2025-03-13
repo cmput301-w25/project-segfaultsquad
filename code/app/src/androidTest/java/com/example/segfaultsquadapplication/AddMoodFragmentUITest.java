@@ -26,6 +26,7 @@ import static java.util.regex.Pattern.matches;
 import android.graphics.Movie;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -58,8 +59,11 @@ public class AddMoodFragmentUITest {
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
 
-        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
-        Thread.sleep(1000);
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {  // No user is logged in
+            TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
+            Thread.sleep(500);
+        }
     }
 
     @Before //grow database, runs before each test
@@ -73,13 +77,15 @@ public class AddMoodFragmentUITest {
         onView(withId(R.id.fabAddMood)).perform(click());
         onView(withText("Confusion")).perform(click());
         onView(withId(R.id.editTextReason)).perform(ViewActions.typeText("Feeling Down"));
+        onView(withId(R.id.editTextTrigger)).perform(ViewActions.typeText("Android Studio"));
 
         onView(withId(R.id.scrollView)).perform(ViewActions.swipeUp());
         Thread.sleep(500);
 
-        onView(withId(R.id.editTextTrigger)).perform(ViewActions.typeText("Android Studio"));
-
         closeSoftKeyboard();
+
+        onView(withId(R.id.spinnerSocialSituation)).perform(click());
+        onView(withText("With One Person")).perform(click());
 
         onView(withId(R.id.buttonConfirm)).perform(click());
         Thread.sleep(500);
