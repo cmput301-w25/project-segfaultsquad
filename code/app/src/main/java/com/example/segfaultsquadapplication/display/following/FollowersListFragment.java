@@ -6,6 +6,7 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,6 +36,7 @@ public class FollowersListFragment extends Fragment {
     private FollowersAdapter followersAdapter;
     private List<User> followersList; // Assume User is a model class for user data
 
+    @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -48,6 +51,7 @@ public class FollowersListFragment extends Fragment {
 
         // Load followers data
         loadFollowersData();
+
 
         // Set up back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v -> {

@@ -131,7 +131,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         // debugging
         Log.d("MoodHistory", "Loading moods for user: " + DbUtils.getUserId());
 
-        // get the mods
+        // get the moods
         ArrayList<MoodEvent> temp = new ArrayList<>();
         MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp, isSuccess -> {
             if (isSuccess) {
