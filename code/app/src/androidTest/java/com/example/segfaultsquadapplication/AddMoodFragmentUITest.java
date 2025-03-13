@@ -63,9 +63,6 @@ public class AddMoodFragmentUITest {
 
     @Before //grow database, runs before each test
     public void seedDatabase() throws InterruptedException {
-        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
-        Thread.sleep(500);
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference moodsRef = db.collection("moods");
 
@@ -75,6 +72,9 @@ public class AddMoodFragmentUITest {
                 new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.SHAME, "Oh maaa Gawd", null, null)
         };
         for (MoodEvent mood : moods) moodsRef.document().set(mood);
+
+        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
+        Thread.sleep(1000);
     }
 
     @Test
