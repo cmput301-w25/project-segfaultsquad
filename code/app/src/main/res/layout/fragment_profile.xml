@@ -27,6 +27,20 @@
                 android:text="Profile"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
+            <!-- Heart to goto follow requests -->
+            <ImageButton
+                android:id="@+id/heartButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_heart" />
+
+            <!-- 3-dots drop down for logout -->
             <ImageButton
                 android:id="@+id/overflowButton"
                 android:layout_width="wrap_content"
@@ -41,18 +55,38 @@
         </LinearLayout>
 
         <!-- Profile Picture -->
-
-        <!-- Username -->
-        <ImageView
-            android:id="@+id/profile_picture"
+        <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="center"
-            android:background="@drawable/circle_background"
-            android:contentDescription="@string/profile_picture"
-            android:layout_marginTop="25dp"
-            android:src="@drawable/ic_person" />
+            android:layout_gravity="center">
 
+            <com.example.segfaultsquadapplication.display.profile.CircularImageView
+                android:id="@+id/profile_picture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_person"
+                android:contentDescription="@string/profile_picture"
+                android:background="@drawable/circle_background"
+                android:padding="8dp" />
+
+            <ImageButton
+                android:id="@+id/editProfilePictureButton"
+                android:layout_width="74dp"
+                android:layout_height="52dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="56dp"
+                android:layout_marginEnd="-18dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="edit profile picture"
+                android:maxWidth="12dp"
+                android:maxHeight="12dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_edit" />
+        </RelativeLayout>
+
+        <!-- Username -->
         <TextView
             android:id="@+id/username"
             android:layout_width="wrap_content"
@@ -61,26 +95,22 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_gravity="center"
-            android:layout_marginTop="15dp"/>
+            android:paddingTop="8dp" />
 
         <!-- Followers and Following Counts -->
-
-        <!-- Recent Activity Section -->
-
-        <!-- Grid for Mood Events -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="15dp"
-            android:orientation="horizontal">
+            android:paddingTop="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/followers_count"
@@ -102,17 +132,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:gravity="center">
 
                 <TextView
                     android:id="@+id/following_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingEnd="8dp"
                     android:text="186"
                     android:textSize="32sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:paddingEnd="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,30 +152,29 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- Recent Activity Section -->
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingStart="10dp"
-            android:paddingTop="10dp"
             android:text="Recent Activity"
-            android:textSize="25sp"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:background="@android:color/holo_blue_light"/>
+            android:layout_marginTop="24dp" />
 
+        <!-- Grid for Mood Events -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_mood_grid"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@android:color/holo_blue_light"
+            android:paddingTop="8dp"
             android:clipToPadding="false"
-            android:paddingTop="8dp" />
+            android:background="@android:color/holo_blue_light" />
 
     </LinearLayout>
 
 
-    <!-- Logout Dropdown -->
+    <!-- Profile Dropdown -->
     <androidx.cardview.widget.CardView
         android:id="@+id/logoutDropdown"
         android:layout_width="wrap_content"
@@ -156,6 +185,7 @@
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true">
 
+        <!-- Logout -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

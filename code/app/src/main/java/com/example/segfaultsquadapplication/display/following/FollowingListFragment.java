@@ -56,8 +56,8 @@ public class FollowingListFragment extends Fragment {
 
     private void loadFollowingData() {
         // Mock data for demonstration
-        followingList.add(new User("User3", "url_to_profile_picture", "user_email"));
-        followingList.add(new User("User4", "url_to_profile_picture", "user_email"));
+        followingList.add(new User("User3", "username_1", "user_email"));
+        followingList.add(new User("User4", "username_2", "user_email"));
         followingAdapter.notifyDataSetChanged();
     }
 
