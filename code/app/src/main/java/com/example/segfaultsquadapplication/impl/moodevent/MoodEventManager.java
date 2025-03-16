@@ -80,7 +80,7 @@ public class MoodEventManager {
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
         AtomicReference<GeoPoint> holder = new AtomicReference<>();
-        LocationManager.getLocation(holder, isSuccess -> {
+        LocationManager.getGeoPoint(holder, isSuccess -> {
             addMoodEvent(moodType, reason, imgBytes,
                     isSuccess ? holder.get() : null, situation, isPublic, callback);
         });

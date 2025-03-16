@@ -5,12 +5,15 @@ import static androidx.core.app.ActivityCompat.requestPermissions;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,22 +21,28 @@ import java.util.function.Consumer;
 
 public class LocationManager {
     private static final String LOG_TITLE = "LocationManager";
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+
     private static Activity currActivity = null;
     private static FusedLocationProviderClient fusedLocationClient = null;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static boolean firstLocationRequested = false;
 
     /**
      * Prepares the location provider; do this during init of activities that need location info.
      * @param activity The activity
      */
     public static void prepareLocationProvider(Activity activity) {
+        if (currActivity != null && currActivity == activity) {
+            return;
+        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
         if (! checkLocationPermission(activity) ) {
             requestLocationPermission(activity);
         }
         currActivity = activity;
+        firstLocationRequested = false;
     }
-    public static void getLocation(AtomicReference<GeoPoint> holder, Consumer<Boolean> callback) {
+    public static void getLocation(AtomicReference<Location> holder, Consumer<Boolean> callback) {
         if (fusedLocationClient == null) {
             Log.d(LOG_TITLE, "Fused Location Client not initialized");
             callback.accept(false);
@@ -44,13 +53,20 @@ public class LocationManager {
             callback.accept(false);
             return;
         }
-        fusedLocationClient.getLastLocation()
+        Task<Location> task;
+        if (firstLocationRequested) {
+            task = fusedLocationClient.getLastLocation();
+        } else {
+            task = fusedLocationClient.getCurrentLocation(
+                    new CurrentLocationRequest.Builder().build(), null);
+            firstLocationRequested = true;
+        }
+        task
                 // Location retrieved
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         Log.d(LOG_TITLE, "Location retrieved");
-                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                        holder.set(geoPoint);
+                        holder.set(location);
                         callback.accept(true);
                     } else {
                         Log.d(LOG_TITLE, "Location is null");
@@ -62,6 +78,16 @@ public class LocationManager {
                     Log.d(LOG_TITLE, "Location can not be retrieved");
                     callback.accept(false);
                 });
+    }
+    public static void getGeoPoint(AtomicReference<GeoPoint> holder, Consumer<Boolean> callback) {
+        AtomicReference<Location> locHolder = new AtomicReference<>();
+        getLocation(locHolder, isSuccess -> {
+            if (isSuccess) {
+                Location location = locHolder.get();
+                holder.set(new GeoPoint(location.getLatitude(), location.getLongitude()));
+            }
+            callback.accept(isSuccess);
+        });
     }
     /**
      * helper method to check if user gave permission for location use

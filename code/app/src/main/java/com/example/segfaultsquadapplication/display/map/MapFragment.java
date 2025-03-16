@@ -25,7 +25,12 @@ import android.Manifest;
 
 import com.example.segfaultsquadapplication.Map_api;
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.following.Following;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
+import com.example.segfaultsquadapplication.impl.location.LocationManager;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,7 +58,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 import android.graphics.Color;
+import android.widget.Toast;
+
 import org.osmdroid.views.MapView;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -68,9 +77,7 @@ import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
 public class MapFragment extends Fragment {
     // Attributes
     private GoogleMap mMap;
-    private FusedLocationProviderClient fusedLocationClient;
     private Location currentLocation;
-    private FirebaseFirestore db;
 
     // MoodEvent Lists
     private List<MoodEvent> userMoods;
@@ -105,12 +112,13 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-        db = FirebaseFirestore.getInstance();
+        LocationManager.prepareLocationProvider(getActivity());
         // init mood lists
         userMoods = new ArrayList<>();
         followedMoods = new HashMap<>();
         localMoods = new ArrayList<>();
+        // Load data
+        loadMoodData();
     }
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -233,13 +241,22 @@ public class MapFragment extends Fragment {
 
 
     private void loadMoodData() {
-        String currentUserId = getCurrentUserId(); // TODO: Implement this method to get current user's ID
+        String currentUserId = DbUtils.getUserId();
 
         // Load user's moods
-        db.collection("moods")
-                .whereEqualTo("userId", currentUserId)
-                .get()
-                .addOnSuccessListener(this::handleUserMoods);
+        ArrayList<MoodEvent> events = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(currentUserId, MoodEventManager.MoodEventFilter.ALL, events,
+                isSuccess -> {
+                    if (isSuccess) {
+                        userMoods.clear();
+                        userMoods.addAll(events);
+                        if (mapChipGroup.getCheckedChipId() == R.id.chip_my_moods) {
+                            updateMapMarkers(TAB_MY_MOODS);
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Fail loading my own mood event data", Toast.LENGTH_LONG).show();
+                    }
+                });
 
         // Load followed users' moods
         loadFollowedUsersMoods();
@@ -250,53 +267,33 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void handleUserMoods(QuerySnapshot snapshot) {
-        userMoods.clear();
-        for (var doc : snapshot.getDocuments()) {
-            MoodEvent mood = doc.toObject(MoodEvent.class);
-            if (mood != null) {
-                userMoods.add(mood);
-            }
-        }
-        if (mapChipGroup.getCheckedChipId() == R.id.chip_my_moods) {
-            updateMapMarkers(TAB_MY_MOODS);
-        }
-    }
-
     private void loadFollowedUsersMoods() {
         // First get list of followed users
-        String currentUserId = getCurrentUserId();
-        db.collection("following")
-                .whereEqualTo("followerId", currentUserId)
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    List<String> followedUsers = new ArrayList<>();
-                    for (var doc : snapshot.getDocuments()) {
-                        String followedId = doc.getString("followedId");
-                        if (followedId != null) {
-                            followedUsers.add(followedId);
-                        }
-                    }
-                    // Then get their most recent moods
-                    for (String userId : followedUsers) {
-                        db.collection("moods")
-                                .whereEqualTo("userId", userId)
-                                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                                .limit(1)
-                                .get()
-                                .addOnSuccessListener(moodSnapshot -> {
-                                    if (!moodSnapshot.isEmpty()) {
-                                        MoodEvent mood = moodSnapshot.getDocuments().get(0).toObject(MoodEvent.class);
-                                        if (mood != null) {
-                                            followedMoods.put(userId, mood);
-                                            if (mapChipGroup.getCheckedChipId() == R.id.chip_followed_moods) {
-                                                updateMapMarkers(TAB_FOLLOWED);
-                                            }
-                                        }
+        String currentUserId = DbUtils.getUserId();
+        ArrayList<Following> followedUsers = new ArrayList<>();
+        FollowingManager.getAllFollowed(currentUserId, followedUsers, getFldSucc -> {
+            if (getFldSucc) {
+                // Then get their most recent moods
+                for (Following flw : followedUsers) {
+                    ArrayList<MoodEvent> evts = new ArrayList<>();
+                    String uid = flw.getFollowedId();
+                    MoodEventManager.getAllMoodEvents(uid,
+                            MoodEventManager.MoodEventFilter.MOST_RECENT_1, evts,
+                            isSuccess -> {
+                                if (evts.size() > 0) {
+                                    followedMoods.put(uid, evts.get(0));
+                                    if (mapChipGroup.getCheckedChipId() == R.id.chip_followed_moods) {
+                                        updateMapMarkers(TAB_FOLLOWED);
                                     }
-                                });
-                    }
-                });
+                                }
+                            });
+                }
+            }
+            // Could not load list of followed users
+            else {
+                Toast.makeText(getContext(), "Fail loading the list of followed users", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void loadLocalMoods() {
@@ -307,19 +304,25 @@ public class MapFragment extends Fragment {
         GeoPoint center = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
 
         // Get all moods and filter by distance
-        db.collection("moods")
-                .get()
-                .addOnSuccessListener(snapshot -> {
-                    localMoods.clear();
-                    for (var doc : snapshot.getDocuments()) {
-                        MoodEvent mood = doc.toObject(MoodEvent.class);
-                        if (mood != null && mood.getLocation() != null &&
-                                isWithinRadius(mood.getLocation(), center, LOCAL_RADIUS_KM)) {
-                            localMoods.add(mood);
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(null,
+                MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+                    if (isSuccess) {
+                        // Clear local moods
+                        localMoods.clear();
+                        // Add moods nearby to local moods
+                        holder.forEach( mood -> {
+                            if (mood.getLocation() != null &&
+                                    isWithinRadius(mood.getLocation(), center, LOCAL_RADIUS_KM)) {
+                                localMoods.add(mood);
+                            }
+                        });
+                        // Update markers if appropriate
+                        if (mapChipGroup.getCheckedChipId() == R.id.chip_local_moods) {
+                            updateMapMarkers(TAB_LOCAL);
                         }
-                    }
-                    if (mapChipGroup.getCheckedChipId() == R.id.chip_local_moods) {
-                        updateMapMarkers(TAB_LOCAL);
+                    } else {
+                        Toast.makeText(getContext(), "Fail loading the list of local moods", Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -378,46 +381,28 @@ public class MapFragment extends Fragment {
                 float y = (float) ((mood.getLocation().getLatitude() + 90) / 180);
 
                 int color = mood.getMoodType().getPrimaryColor(requireContext());
-                //mapView.addMarker(x, y, color, mood.getMoodType().toString());
+//                mapView.addMarker(x, y, color, mood.getMoodType().toString());
             }
         }
     }
 
-    // The method to get the current user's ID
-    private String getCurrentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            return user.getUid(); // Return the unique ID of the current user
-        } else {
-            // No user is logged in
-            return null;
-        }
-    }
-
     private void updateCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return; // Exit if permission is not granted
-        }
-
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        currentLocation = location;
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
-                        Log.d("Location", "Latitude: " + latitude + ", Longitude: " + longitude);
-
-                        // Update map with user's location
-                        updateMapLocation(latitude, longitude);
-                    } else {
-                        setDefaultLocation(); // Handle case where location is null
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Location", "Failed to get location", e);
-                    setDefaultLocation(); // Handle failure case
-                });
+        AtomicReference<Location> locHolder = new AtomicReference<>();
+        LocationManager.getLocation(locHolder, isSuccess -> {
+            // A valid location is returned
+            if (isSuccess) {
+                currentLocation = locHolder.get();
+                double latitude = currentLocation.getLatitude();
+                double longitude = currentLocation.getLongitude();
+                Log.d("Location", "Latitude: " + latitude + ", Longitude: " + longitude);
+                // Update map with user's location
+                updateMapLocation(latitude, longitude);
+            }
+            // Handle case where a valid location can not be found
+            else {
+                setDefaultLocation();
+            }
+        });
     }
 
     /**
