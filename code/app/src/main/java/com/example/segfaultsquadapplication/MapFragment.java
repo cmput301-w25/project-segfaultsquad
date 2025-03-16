@@ -204,6 +204,23 @@ public class MapFragment extends Fragment {
         compassOverlay.enableCompass();
         mapView.getOverlays().add(compassOverlay);
         addRedMarker(mapView, 53.52672, -113.52877);
+        Map_api.getCoordinates("10922 88 Ave NW, Edmonton, AB T6G 0Z1", new Map_api.GeocodingListener() {
+            @Override
+            public void onLocationFound(double latitude, double longitude) {
+                // Print latitude and longitude to Logcat
+                Log.d("Coordinates", latitude + ", " + longitude);
+
+                // Now you can use these coordinates anywhere
+                addRedMarker(mapView, latitude, longitude);
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("Geocoding", "Error: " + error);
+            }
+        });
+
+
         //addRedMarker(mapView, 53.5461, -113.4937);
 
         return view;
