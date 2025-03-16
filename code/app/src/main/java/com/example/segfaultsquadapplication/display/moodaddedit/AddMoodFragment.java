@@ -213,6 +213,7 @@ public class AddMoodFragment extends Fragment {
                 selectedImageUri, isSuccess -> {
                     if (isSuccess) {
                         Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).navigateUp();
                     } else {
                         Toast.makeText(getContext(), "Could not save mood event...", Toast.LENGTH_SHORT).show();
                     }

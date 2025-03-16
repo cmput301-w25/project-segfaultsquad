@@ -39,6 +39,7 @@ import java.util.function.UnaryOperator;
  */
 public class MoodEventManager {
     private static final String LOG_TITLE = "MoodEventManager";
+    private static final int REASON_LIMIT = 200;
     public enum MoodEventFilter {
         ALL(UnaryOperator.identity()),
         MOST_RECENT_1(query -> query.limit(1) ),
@@ -68,8 +69,13 @@ public class MoodEventManager {
     public static void createMoodEvent(Context ctx, MoodEvent.MoodType moodType,
                                        String reason, boolean isPublic,
                                        @Nullable MoodEvent.SocialSituation situation, @Nullable Uri imgUri,
-                                       Consumer<Boolean> callback) throws RuntimeException {
-        validateMoodEvent(moodType, reason);
+                                       Consumer<Boolean> callback) {
+        try {
+            validateMoodEvent(moodType, reason);
+        } catch (RuntimeException e) {
+            callback.accept(false);
+            return;
+        }
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
@@ -128,7 +134,12 @@ public class MoodEventManager {
     public static void updateMoodEvent(Context ctx, MoodEvent moodEvent, MoodEvent.MoodType moodType,
                                        String reason, boolean isPublic, MoodEvent.SocialSituation situation,
                                        @Nullable Uri imgUri, Consumer<Boolean> callback) throws RuntimeException {
-        validateMoodEvent(moodType, reason);
+        try {
+            validateMoodEvent(moodType, reason);
+        } catch (RuntimeException e) {
+            callback.accept(false);
+            return;
+        }
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
@@ -156,8 +167,8 @@ public class MoodEventManager {
             throw new RuntimeException("Please select a mood");
         }
         // Check if reason text is within the limit
-        if (reason.length() > 20) {
-            throw new RuntimeException("Reason must be 20 characters or less");
+        if (reason.length() > REASON_LIMIT) {
+            throw new RuntimeException("Reason must be " + REASON_LIMIT + " characters or less");
         }
     }
 
