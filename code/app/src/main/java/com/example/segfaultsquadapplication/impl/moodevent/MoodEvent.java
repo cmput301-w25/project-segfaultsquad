@@ -19,16 +19,18 @@ import java.util.Date;
 import java.util.List;
 
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.PropertyName;
 
 public class MoodEvent implements IDbData {
     // Required attributes
-    private String dbFileId; // Unique identifier for the mood event
+    private String moodId; // Unique identifier for the mood event
     private String userId; // User ID of the person creating the mood event
     private Timestamp timestamp; // Date and time of the mood event
     private MoodType moodType; // Emotional state
     private String reasonText; // Reason text (optional)
     private List<Integer> imageData; // Reason image data (optional)
     private GeoPoint location; // Location of the mood event
+    private boolean isPublic; // Visibility of the mood event
 
     // Optional attributes
     private String trigger; // Trigger for the mood (optional)
@@ -96,14 +98,15 @@ public class MoodEvent implements IDbData {
     }
 
     // Constructor
-    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
-                     GeoPoint location) {
+    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData, GeoPoint location,
+            boolean isPublic) {
         this.userId = userId;
         this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
         this.reasonText = reasonText;
         this.imageData = imageData;
         this.location = location;
+        this.isPublic = isPublic;
 
         // Validate that at least one of reasonText or imageData is provided
         if (reasonText == null && (imageData == null || imageData.isEmpty())) {
@@ -111,6 +114,7 @@ public class MoodEvent implements IDbData {
         }
     }
 
+    // Add a no-argument constructor for Firestore
     /**
      * Add a no-argument constructor for Firestore; SHOULD NOT be used anywhere in the code.
      */
@@ -123,11 +127,11 @@ public class MoodEvent implements IDbData {
     // Getters and setters
     @Override
     public void setDbFileId(String id) {
-        this.dbFileId = id;
+        this.moodId = id;
     }
     @Override
     public String getDbFileId() {
-        return dbFileId;
+        return moodId;
     }
 
     public String getUserId() {
@@ -163,10 +167,10 @@ public class MoodEvent implements IDbData {
     }
 
     public void setReasonText(String reasonText) {
-        if (reasonText != null && reasonText.length() <= 20) {
+        if (reasonText != null && reasonText.length() <= 200) {
             this.reasonText = reasonText;
         } else {
-            throw new IllegalArgumentException("Reason text must be 20 characters or less");
+            throw new IllegalArgumentException("Reason text must be 0 characters or less");
         }
     }
 
@@ -208,11 +212,11 @@ public class MoodEvent implements IDbData {
         this.imageData = imageData;
     }
 
-    public String getTrigger() {
-        return trigger;
+    public boolean isPublic() {
+        return isPublic;
     }
 
-    public void setTrigger(String trigger) {
-        this.trigger = trigger;
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 }

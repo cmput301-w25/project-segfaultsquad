@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -146,6 +147,26 @@ public class DbUtils {
         operation.apply(
                         db.collection(collection)
                                 .document(docId))
+                .addOnSuccessListener(handler::onSuccess)
+                .addOnFailureListener(handler::onFailure);
+    }
+
+    /**
+     * Gets a document reference.
+     * @param coll The collection
+     * @param docPath The document path
+     */
+    public static DocumentReference getDocRef(String coll, String docPath) {
+        return db.collection(coll).document(docPath);
+    }
+
+    /**
+     * Operates a transaction; the operations are either all successful or all aborted.
+     * @param transaction The transaction logic.
+     * @param handler The handler defining success / failure behavior.
+     */
+    public static <T> void operateTransaction(Transaction.Function<T> transaction, DbOpResultHandler<T> handler) {
+        db.runTransaction(transaction)
                 .addOnSuccessListener(handler::onSuccess)
                 .addOnFailureListener(handler::onFailure);
     }

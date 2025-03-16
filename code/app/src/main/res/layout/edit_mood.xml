@@ -37,7 +37,6 @@
         </LinearLayout>
 
         <ScrollView
-            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
@@ -98,7 +97,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Reason (max 20 chars)"
+                            android:text="Reason (max 200 chars)"
                             android:textSize="16sp"
                             android:layout_marginBottom="8dp"/>
 
@@ -108,41 +107,11 @@
                             android:layout_height="wrap_content"
                             android:background="@null"
                             android:hint="Reason Text Value"
-                            android:maxLength="20"
+                            android:maxLength="200"
                             android:padding="8dp"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Trigger Input -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="24dp"
-                    app:cardElevation="2dp"
-                    app:cardCornerRadius="8dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Trigger (max 20 chars)"
-                            android:textSize="16sp"
-                            android:layout_marginBottom="8dp"/>
-
-                        <EditText
-                            android:id="@+id/editTextTrigger"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@null"
-                            android:hint="What triggered this mood?"
-                            android:padding="8dp"/>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Add Photo -->
                 <com.google.android.material.card.MaterialCardView
@@ -212,6 +181,13 @@
                             android:padding="8dp"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <Switch
+                    android:id="@+id/togglePublicPrivate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Public Mood"
+                    android:layout_marginTop="16dp"/>
             </LinearLayout>
         </ScrollView>
 

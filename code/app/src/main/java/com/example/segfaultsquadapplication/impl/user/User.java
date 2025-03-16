@@ -17,18 +17,24 @@ public class User implements IDbData {
     private String userId;
     private String username;
     private String email;
-    private String profilePicUrl;
+    private List<Integer> profilePicUrl;
     private List<String> followers;
     private List<String> following;
+    private List<String> followRequests;
 
     // Constructor(s)
     public User(String userId, String username, String email) {
         this.userId = userId;
         this.username = username;
         this.email = email;
-        this.profilePicUrl = ""; // init as empty
-        this.followers = new ArrayList<>(); // init as empty
-        this.following = new ArrayList<>(); // init as empty
+        this.profilePicUrl = new ArrayList<>();
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
+    }
+
+    public User() {
+        // Required for Firestore to be able to deserialize objects form the db
     }
 
     // Getters and setters
@@ -54,11 +60,11 @@ public class User implements IDbData {
         return email;
     }
 
-    public String getProfilePicUrl() {
+    public List<Integer> getProfilePicUrl() {
         return profilePicUrl;
     }
 
-    public void setProfilePicUrl(String profilePicUrl) {
+    public void setProfilePicUrl(List<Integer> profilePicUrl) {
         this.profilePicUrl = profilePicUrl;
     }
 
@@ -88,5 +94,19 @@ public class User implements IDbData {
 
     public void removeFollowing(String userId) {
         following.remove(userId);
+    }
+
+    public List<String> getFollowRequests() {
+        return followRequests;
+    }
+
+    public void addFollowRequest(String userId) {
+        if (!followRequests.contains(userId)) {
+            followRequests.add(userId);
+        }
+    }
+
+    public void removeFollowRequest(String userId) {
+        followRequests.remove(userId);
     }
 }
