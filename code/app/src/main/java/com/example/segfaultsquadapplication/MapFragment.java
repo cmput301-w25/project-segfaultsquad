@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 // imports
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -53,10 +54,12 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
+//import org.osmdroid.util.GeoPoint;
 
 public class MapFragment extends Fragment {
     // Attributes
@@ -200,6 +203,8 @@ public class MapFragment extends Fragment {
         CompassOverlay compassOverlay = new CompassOverlay(requireContext(), new InternalCompassOrientationProvider(requireContext()), mapView);
         compassOverlay.enableCompass();
         mapView.getOverlays().add(compassOverlay);
+        addRedMarker(mapView, 53.52672, -113.52877);
+        //addRedMarker(mapView, 53.5461, -113.4937);
 
         return view;
     }
@@ -405,7 +410,7 @@ public class MapFragment extends Fragment {
     }
 
     /**
-     * Sets a default location (e.g., San Francisco) when location retrieval fails.
+     * Sets a default location (e.g., Edmonton) when location retrieval fails.
      */
     private void setDefaultLocation() {
         double defaultLat = 53.52624;
@@ -448,6 +453,20 @@ public class MapFragment extends Fragment {
         }
     }
 
+    public void addRedMarker(MapView map, double latitude, double longitude) {
+        org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(latitude, longitude);
+
+        Marker marker = new Marker(map);
+        marker.setPosition(osmGeoPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+        // Set red icon
+        Drawable redIcon = ContextCompat.getDrawable(map.getContext(), R.drawable.map_icon);
+        marker.setIcon(redIcon);
+
+        map.getOverlays().add(marker);
+        map.invalidate(); // Refresh the map
+    }
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
