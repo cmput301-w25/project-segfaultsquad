@@ -41,17 +41,18 @@
         </LinearLayout>
 
         <!-- Profile Picture -->
+
+        <!-- Username -->
         <ImageView
             android:id="@+id/profile_picture"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_person"
-            android:contentDescription="@string/profile_picture"
             android:background="@drawable/circle_background"
-            android:padding="8dp" />
+            android:contentDescription="@string/profile_picture"
+            android:layout_marginTop="25dp"
+            android:src="@drawable/ic_person" />
 
-        <!-- Username -->
         <TextView
             android:id="@+id/username"
             android:layout_width="wrap_content"
@@ -60,22 +61,26 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_gravity="center"
-            android:paddingTop="8dp" />
+            android:layout_marginTop="15dp"/>
 
         <!-- Followers and Following Counts -->
+
+        <!-- Recent Activity Section -->
+
+        <!-- Grid for Mood Events -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center"
-            android:paddingTop="16dp">
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/followers_count"
@@ -97,17 +102,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:gravity="center">
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/following_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingEnd="8dp"
                     android:text="186"
                     android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:paddingEnd="8dp" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -117,24 +122,25 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Recent Activity Section -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingStart="10dp"
+            android:paddingTop="10dp"
             android:text="Recent Activity"
-            android:textSize="20sp"
+            android:textSize="25sp"
             android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:background="@android:color/holo_blue_light"/>
 
-        <!-- Grid for Mood Events -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_mood_grid"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingTop="8dp"
+            android:background="@android:color/holo_blue_light"
             android:clipToPadding="false"
-            android:background="@android:color/holo_blue_light" />
+            android:paddingTop="8dp" />
 
     </LinearLayout>
 
