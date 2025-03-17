@@ -48,6 +48,14 @@ public class User implements IDbData {
         userId = id;
     }
 
+    public String getUserId() {
+        return getDbFileId();
+    }
+
+    public void setUserId(String id) {
+        setDbFileId(id);
+    }
+
     public String getUsername() {
         return username;
     }

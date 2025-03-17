@@ -8,9 +8,11 @@
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -20,6 +22,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,10 +60,49 @@ public class FollowingListFragment extends Fragment {
     }
 
     private void loadFollowingData() {
-        // Mock data for demonstration
-        followingList.add(new User("User3", "username_1", "user_email"));
-        followingList.add(new User("User4", "username_2", "user_email"));
-        followingAdapter.notifyDataSetChanged();
+        // debugging
+        Log.d("FollowingListFragment", "Entered loadFollowingData()");
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // debugging
+        Log.d("FollowingListFragment", "currentUserID: " + currentUserId);
+
+        // Query where current user is the followerId
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    followingList.clear();
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        String followedId = document.getString("followedId");
+                        // debugging
+                        Log.d("FollowingListFragment", "followedId: " + followedId);
+
+                        // Fetch the followed user's details
+                        db.collection("users")
+                                .document(followedId)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    if (userDoc.exists()) {
+                                        User following = userDoc.toObject(User.class);
+                                        followingList.add(following);
+                                        followingAdapter.notifyDataSetChanged();
+                                        // debugging
+                                        Log.d("FollowingListFragment", "following:" + followingList);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FollowingListFragment", "Error fetching following user details", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowingListFragment", "Error fetching following list", e);
+                    Toast.makeText(getContext(), "Error loading following list", Toast.LENGTH_SHORT).show();
+                });
+
     }
 
     private void onFollowingAction(User user) {

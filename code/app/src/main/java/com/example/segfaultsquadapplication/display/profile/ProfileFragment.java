@@ -33,6 +33,7 @@ import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -50,6 +51,9 @@ import android.provider.MediaStore;
 
 import com.google.firebase.firestore.FieldValue;
 
+import android.widget.EditText;
+import android.view.inputmethod.EditorInfo;
+
 public class ProfileFragment extends Fragment {
 
     private ImageView profilePicture;
@@ -65,6 +69,11 @@ public class ProfileFragment extends Fragment {
     private User currentUser; // To hold user data
 
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    // Add new member variables
+    private String displayUserId; // ID of the user whose profile is being displayed
+    private EditText searchBar;
+    private ImageButton searchButton;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -90,8 +99,19 @@ public class ProfileFragment extends Fragment {
         // debugging
         Log.d("ProfileFragment", "-0");
 
-        // Set user data
-        fetchCurrentUser(); // Fetch user details
+        // Initialize search views
+        searchBar = view.findViewById(R.id.searchBar);
+        searchButton = view.findViewById(R.id.searchButton);
+
+        // Get arguments if any (for viewing other users' profiles)
+        Bundle args = getArguments();
+        displayUserId = args != null ? args.getString("userId") : auth.getCurrentUser().getUid();
+
+        // Set up search functionality
+        setupSearch();
+
+        // Update fetchCurrentUser to use displayUserId
+        fetchUserData(displayUserId);
 
         // debugging
         Log.d("ProfileFragment", "-1");
@@ -162,14 +182,56 @@ public class ProfileFragment extends Fragment {
         return false;
     }
 
-    private void fetchCurrentUser() {
-        String currentUserId = auth.getCurrentUser().getUid(); // Get current user ID
-        db.collection("users").document(currentUserId)
+    private void setupSearch() {
+        searchButton.setOnClickListener(v -> performSearch());
+        searchBar.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearch();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void performSearch() {
+        String searchQuery = searchBar.getText().toString().trim();
+        if (searchQuery.isEmpty())
+            return;
+
+        // Search in Firestore
+        db.collection("users")
+                .whereEqualTo("username", searchQuery) // You might want to use a more sophisticated search method
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot userDoc = queryDocumentSnapshots.getDocuments().get(0);
+                        navigateToUserProfile(userDoc.getId());
+                    } else {
+                        Toast.makeText(getContext(), "User not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error searching for user", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void navigateToUserProfile(String userId) {
+        Bundle args = new Bundle();
+        args.putString("userId", userId);
+        NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+        navController.navigate(R.id.navigation_searched_profile, args);
+    }
+
+    // Update the existing fetchCurrentUser method to be more generic
+    private void fetchUserData(String userId) {
+        db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
                         currentUser = documentSnapshot.toObject(User.class);
-                        setUserData(); // Set user data in UI
+                        setUserData();
+                        loadFollowerAndFollowingCounts();
+                        loadMoodEvents();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -200,7 +262,6 @@ public class ProfileFragment extends Fragment {
             } else {
                 profilePicture.setImageResource(R.drawable.ic_person); // Default image
             }
-            loadFollowerAndFollowingCounts();
         }
     }
 
@@ -208,11 +269,12 @@ public class ProfileFragment extends Fragment {
         String userId = auth.getCurrentUser().getUid(); // Get user ID
 
         // Load followers count
-        db.collection("followers")
+        db.collection("following")
                 .whereEqualTo("followedId", userId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     int followers = queryDocumentSnapshots.size();
+                    Log.d("ProfileFragment", userId + "num_followers: " + followers);
                     followersCount.setText(String.valueOf(followers));
                 });
 
@@ -222,6 +284,7 @@ public class ProfileFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     int following = queryDocumentSnapshots.size();
+                    Log.d("ProfileFragment", userId + "num_following: " + following);
                     followingCount.setText(String.valueOf(following));
                 });
     }
@@ -232,11 +295,10 @@ public class ProfileFragment extends Fragment {
         recyclerViewMoodGrid.setAdapter(moodGridAdapter);
     }
 
+    // Update loadMoodEvents to use displayUserId
     private void loadMoodEvents() {
-        String userId = auth.getCurrentUser().getUid(); // Get user ID
-
         db.collection("moods")
-                .whereEqualTo("userId", userId)
+                .whereEqualTo("userId", displayUserId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -245,9 +307,7 @@ public class ProfileFragment extends Fragment {
                         MoodEvent mood = doc.toObject(MoodEvent.class);
                         moodEvents.add(mood);
                     }
-                    // debugging
-                    Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
-                    moodGridAdapter.notifyDataSetChanged(); // Notify adapter of data change
+                    moodGridAdapter.notifyDataSetChanged();
                 });
     }
 
@@ -309,7 +369,7 @@ public class ProfileFragment extends Fragment {
                         Log.d("ProfileFragment", "SUCCESS updating profile picture");
                         Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
                         // Reload the user data to refresh the profile picture
-                        fetchCurrentUser();
+                        fetchUserData(displayUserId);
                     })
                     .addOnFailureListener(e -> {
                         Log.e("ProfileFragment", "Error updating profile picture", e);

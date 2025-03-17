@@ -185,6 +185,10 @@
         <action
             android:id="@+id/action_to_following_list"
             app:destination="@+id/navigation_FollowingListFragment" />
+        <!-- self referencing (for other user profiles) -->
+        <action
+            android:id="@+id/action_to_profile"
+            app:destination="@id/navigation_searched_profile" />
     </fragment>
 
     <!-- Profile Page Followers List Fragment -->
@@ -205,6 +209,9 @@
         <action
             android:id="@+id/action_to_following"
             app:destination="@id/navigation_following" />
+        <action
+            android:id="@+id/action_to_profile"
+            app:destination="@id/navigation_profile" />
     </fragment>
 
     <!-- Profile Page Following List Fragment -->
@@ -225,6 +232,19 @@
         <action
             android:id="@+id/action_to_following"
             app:destination="@id/navigation_following" />
+        <action
+            android:id="@+id/action_to_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
+
+    <!-- SearchedProfileFragment -->
+    <fragment
+        android:id="@+id/navigation_searched_profile"
+        android:name="com.example.segfaultsquadapplication.display.profile.SearchedProfileFragment"
+        android:label="Searched Profile">
+        <argument
+            android:name="userId"
+            app:argType="string" />
     </fragment>
     
 

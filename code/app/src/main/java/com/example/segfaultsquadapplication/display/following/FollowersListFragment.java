@@ -25,6 +25,7 @@ import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -52,7 +53,6 @@ public class FollowersListFragment extends Fragment {
         // Load followers data
         loadFollowersData();
 
-
         // Set up back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v -> {
             requireActivity().onBackPressed(); // Navigate back to ProfileFragment
@@ -62,10 +62,49 @@ public class FollowersListFragment extends Fragment {
     }
 
     private void loadFollowersData() {
-        // Mock data for demonstration
-        followersList.add(new User("User1", "username_1", "user_email_1"));
-        followersList.add(new User("User2", "username_2", "user_email_2"));
-        followersAdapter.notifyDataSetChanged();
+        // debugging
+        Log.d("FollowersListFragment", "Entered loadFollowersData()");
+
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // debugging
+        Log.d("FollowersListFragment", "currentUserID: " + currentUserId);
+
+        // Query where current user is the followedId
+        db.collection("following")
+                .whereEqualTo("followedId", currentUserId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    followersList.clear();
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        String followerId = document.getString("followerId");
+
+                        // debugging
+                        Log.d("FollowersListFragment", "followerId: " + followerId);
+
+                        // Fetch the follower's user details
+                        db.collection("users")
+                                .document(followerId)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    if (userDoc.exists()) {
+                                        User follower = userDoc.toObject(User.class);
+                                        followersList.add(follower);
+                                        followersAdapter.notifyDataSetChanged();
+                                        // debugging
+                                        Log.d("FollowersListFragment", "followers:" + followersList);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FollowersListFragment", "Error fetching follower details", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowersListFragment", "Error fetching followers", e);
+                    Toast.makeText(getContext(), "Error loading followers", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void onFollowerAction(User user) {

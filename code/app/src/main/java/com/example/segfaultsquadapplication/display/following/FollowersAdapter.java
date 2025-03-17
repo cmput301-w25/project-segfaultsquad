@@ -6,6 +6,7 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
@@ -73,10 +75,15 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
             // Picasso)
             // Glide.with(itemView).load(user.getProfilePictureUrl()).into(profilePicture);
 
+            // Add click listener to the entire item view
+            itemView.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("userId", user.getUserId());
+                Navigation.findNavController(v).navigate(R.id.action_to_profile, args);
+            });
+
             removeButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Unfollow
             followBackButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Follow back
-
-            itemView.setOnClickListener(v -> listener.onFollowerClick(user)); // Set click listener
         }
     }
 }

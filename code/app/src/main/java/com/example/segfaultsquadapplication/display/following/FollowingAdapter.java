@@ -6,6 +6,7 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
@@ -49,6 +51,13 @@ public class FollowingAdapter extends RecyclerView.Adapter<FollowingAdapter.View
         // Load user profile picture using an image loading library (e.g., Glide or
         // Picasso)
         // Glide.with(holder.itemView).load(user.getProfilePictureUrl()).into(holder.profilePicture);
+
+        // Add click listener to the entire item view
+        holder.itemView.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putString("userId", user.getUserId());
+            Navigation.findNavController(v).navigate(R.id.action_to_profile, args);
+        });
 
         holder.followingButton.setText("Following");
         holder.followingButton.setOnClickListener(v -> {
