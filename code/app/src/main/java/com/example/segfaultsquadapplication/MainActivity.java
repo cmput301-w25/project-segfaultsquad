@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         // During these phase, the menu is invisible.
         if (destinationId == R.id.navigation_login ||
                 destinationId == R.id.navigation_splash ||
-                destinationId == R.id.navigation_add_edit_mood ||
+                destinationId == R.id.navigation_add_mood ||
+                destinationId == R.id.navigation_edit_mood ||
                 destinationId == R.id.navigation_mood_details) {
             getBottomNavigationView().setVisibility(View.GONE);
             return;
@@ -65,10 +66,9 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
         }
         View item = getBottomNavigationView().findViewById(itemId);
         if (item != null) {
-            item.setVisibility(View.INVISIBLE);
+            item.setBackgroundColor(getResources().getColor(R. color. color_primary));
         }
     }
-
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

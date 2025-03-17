@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.hardware.lights.LightsManager;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -13,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.location.LocationManager;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.DocumentReference;
@@ -37,6 +39,7 @@ import java.util.function.UnaryOperator;
  */
 public class MoodEventManager {
     private static final String LOG_TITLE = "MoodEventManager";
+    private static final int REASON_LIMIT = 200;
     public enum MoodEventFilter {
         ALL(UnaryOperator.identity()),
         MOST_RECENT_1(query -> query.limit(1) ),
@@ -57,42 +60,30 @@ public class MoodEventManager {
      * @param ctx Android context
      * @param moodType Mood type
      * @param reason Text reason
-     * @param trigger Text trigger
-     * @param situation Social situation
+     * @param isPublic Whether the event is public
+     * @param situation Social situation; defaults to MoodEvent's default situation if is null
      * @param imgUri Image Uri (optional)
      * @param callback Callback on success/failure
      * @throws RuntimeException Exception thrown when data is invalid / encounters IO exception reading image
      */
     public static void createMoodEvent(Context ctx, MoodEvent.MoodType moodType,
-                                       String reason, String trigger,
-                                       MoodEvent.SocialSituation situation, @Nullable Uri imgUri,
-                                       Consumer<Boolean> callback) throws RuntimeException {
-        validateMoodEvent(moodType, reason);
-
-        List<Integer> imgBytes = encodeImg(ctx, imgUri);
-
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(ctx);
-        // No location permission - save without location
-        if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            addMoodEvent(moodType, reason, imgBytes, null, situation, trigger, callback);
+                                       String reason, boolean isPublic,
+                                       @Nullable MoodEvent.SocialSituation situation, @Nullable Uri imgUri,
+                                       Consumer<Boolean> callback) {
+        try {
+            validateMoodEvent(moodType, reason);
+        } catch (RuntimeException e) {
+            callback.accept(false);
             return;
         }
 
-        fusedLocationClient.getLastLocation()
-                // Location retrieved
-                .addOnSuccessListener(location -> {
-                    GeoPoint geoPoint = null;
-                    if (location != null) {
-                        geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-                    }
-                    addMoodEvent(moodType, reason, imgBytes, geoPoint, situation, trigger, callback);
-                })
-                // Location not retrieved
-                .addOnFailureListener(e -> {
-                    // Failed to get location, save mood without it
-                    addMoodEvent(moodType, reason, imgBytes, null, situation, trigger, callback);
-                });
+        List<Integer> imgBytes = encodeImg(ctx, imgUri);
+
+        AtomicReference<GeoPoint> holder = new AtomicReference<>();
+        LocationManager.getGeoPoint(holder, isSuccess -> {
+            addMoodEvent(moodType, reason, imgBytes,
+                    isSuccess ? holder.get() : null, situation, isPublic, callback);
+        });
     }
 
     /**
@@ -101,18 +92,19 @@ public class MoodEventManager {
      * @param reason String reason
      * @param imgBytes Parsed image bytes
      * @param geoPoint Geopoint info (optional)
-     * @param situation Social situation
-     * @param trigger String trigger
+     * @param situation Social situation; defaults to MoodEvent's default situation if is null
+     * @param isPublic Whether the event is publicly visible
      * @param callback Success/failure callback
      */
     private static void addMoodEvent(MoodEvent.MoodType moodType,
                                     String reason, @Nullable List<Integer> imgBytes,
                                      @Nullable GeoPoint geoPoint,
-                                    MoodEvent.SocialSituation situation, String trigger,
+                                    @Nullable MoodEvent.SocialSituation situation, boolean isPublic,
                                     Consumer<Boolean> callback) {
-        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, geoPoint);
-        moodEvent.setSocialSituation(situation);
-        moodEvent.setTrigger(trigger);
+        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, geoPoint, isPublic);
+        if (situation != null) {
+            moodEvent.setSocialSituation(situation);
+        }
         DbOpResultHandler<DocumentReference> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> {
@@ -133,24 +125,31 @@ public class MoodEventManager {
      * @param moodEvent Mood event
      * @param moodType New mood type
      * @param reason Reason text
-     * @param trigger Trigger text
+     * @param isPublic Whether the mood event is publicly visible
      * @param situation Social situation
      * @param imgUri Optional - image Uri
      * @param callback Success/failure callback
      * @throws RuntimeException Exception thrown on invalid data / IO exception
      */
     public static void updateMoodEvent(Context ctx, MoodEvent moodEvent, MoodEvent.MoodType moodType,
-                                       String reason, String trigger, MoodEvent.SocialSituation situation,
+                                       String reason, boolean isPublic, MoodEvent.SocialSituation situation,
                                        @Nullable Uri imgUri, Consumer<Boolean> callback) throws RuntimeException {
-        validateMoodEvent(moodType, reason);
+        try {
+            validateMoodEvent(moodType, reason);
+        } catch (RuntimeException e) {
+            callback.accept(false);
+            return;
+        }
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
         moodEvent.setMoodType(moodType);
         moodEvent.setReasonText(reason);
-        moodEvent.setTrigger(trigger);
+        moodEvent.setPublic(isPublic);
         moodEvent.setSocialSituation(situation);
-        moodEvent.setImageData(imgBytes);
+        if (imgBytes != null) {
+            moodEvent.setImageData(imgBytes);
+        }
 
         updateMoodEventById(moodEvent, callback);
     }
@@ -168,8 +167,8 @@ public class MoodEventManager {
             throw new RuntimeException("Please select a mood");
         }
         // Check if reason text is within the limit
-        if (reason.length() > 20) {
-            throw new RuntimeException("Reason must be 20 characters or less");
+        if (reason.length() > REASON_LIMIT) {
+            throw new RuntimeException("Reason must be " + REASON_LIMIT + " characters or less");
         }
     }
 
@@ -267,7 +266,7 @@ public class MoodEventManager {
      * @param moodEvent The mood event object.
      * @param callback The callback when the file is saved(true) or can not be saved(false).
      */
-    public static void updateMoodEventById(MoodEvent moodEvent, Consumer<Boolean> callback) {
+    private static void updateMoodEventById(MoodEvent moodEvent, Consumer<Boolean> callback) {
         DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
