@@ -26,6 +26,8 @@ import static java.util.regex.Pattern.matches;
 import android.graphics.Movie;
 import android.util.Log;
 
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -51,21 +53,28 @@ public class AddMoodFragmentUITest {
     public GrantPermissionRule permissionRule =
             GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
-    @Before
-    public void setUp() throws InterruptedException {
+    @BeforeClass
+    public static void setup(){
         String androidLocalhost = "10.0.2.2";
 
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
-
-        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
-        Thread.sleep(1000);
     }
 
     @Before //grow database, runs before each test
-    public void seedDatabase() {
+    public void seedDatabase() throws InterruptedException {
+        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
+        Thread.sleep(500);
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference moodsRef = db.collection("moods");
+
+        MoodEvent[] moods = {
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.ANGER, "I don't wanna", null, null),
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.DISGUST, "Ewwwww", null, null),
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.SHAME, "Oh maaa Gawd", null, null)
+        };
+        for (MoodEvent mood : moods) moodsRef.document().set(mood);
     }
 
     @Test
@@ -73,13 +82,15 @@ public class AddMoodFragmentUITest {
         onView(withId(R.id.fabAddMood)).perform(click());
         onView(withText("Confusion")).perform(click());
         onView(withId(R.id.editTextReason)).perform(ViewActions.typeText("Feeling Down"));
+        onView(withId(R.id.editTextTrigger)).perform(ViewActions.typeText("Android Studio"));
 
         onView(withId(R.id.scrollView)).perform(ViewActions.swipeUp());
         Thread.sleep(500);
 
-        onView(withId(R.id.editTextTrigger)).perform(ViewActions.typeText("Android Studio"));
-
         closeSoftKeyboard();
+
+        onView(withId(R.id.spinnerSocialSituation)).perform(click());
+        onView(withText("With One Person")).perform(click());
 
         onView(withId(R.id.buttonConfirm)).perform(click());
         Thread.sleep(500);

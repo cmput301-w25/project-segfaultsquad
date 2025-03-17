@@ -5,7 +5,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.map;
 
 import android.content.Context;
 import android.graphics.Canvas;

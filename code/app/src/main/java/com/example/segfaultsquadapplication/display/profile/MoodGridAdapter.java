@@ -1,4 +1,4 @@
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.profile;
 
 import android.content.Context;
 import android.util.Log;
@@ -9,6 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
 
 import java.util.List;
 
@@ -32,13 +35,13 @@ public class MoodGridAdapter extends RecyclerView.Adapter<MoodGridAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MoodEvent mood = moodEvents.get(position);
-        holder.moodEmoji.setText(getEmojiString(mood.getMoodType())); // Set the emoji as text
-        holder.itemView.setBackgroundColor(mood.getSecondaryColor(context)); // Use the context variable
+        holder.moodEmoji.setText(mood.getMoodType().getEmoticon()); // Set the emoji as text
+        holder.itemView.setBackgroundColor(mood.getMoodType().getSecondaryColor(context)); // Use the context variable
 
         // debugging
         // Log to check if binding is happening correctly
         Log.d("MoodGridAdapter", "Binding mood at position " + position + ": " + mood.getMoodType()
-                + getEmojiString(mood.getMoodType()));
+                + mood.getMoodType().getEmoticon());
     }
 
     @Override
@@ -52,29 +55,6 @@ public class MoodGridAdapter extends RecyclerView.Adapter<MoodGridAdapter.ViewHo
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             moodEmoji = itemView.findViewById(R.id.mood_emoji); // Ensure this is a TextView in your layout
-        }
-    }
-
-    private String getEmojiString(MoodEvent.MoodType moodType) {
-        switch (moodType) {
-            case ANGER:
-                return "😡";
-            case CONFUSION:
-                return "😵‍💫";
-            case DISGUST:
-                return "🤢";
-            case FEAR:
-                return "😨";
-            case HAPPINESS:
-                return "😀";
-            case SADNESS:
-                return "😭";
-            case SHAME:
-                return "😳";
-            case SURPRISE:
-                return "🤯";
-            default:
-                return "😶"; // Default emoji as string
         }
     }
 }

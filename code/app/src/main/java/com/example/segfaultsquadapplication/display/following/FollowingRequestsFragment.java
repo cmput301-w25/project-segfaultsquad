@@ -7,7 +7,7 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

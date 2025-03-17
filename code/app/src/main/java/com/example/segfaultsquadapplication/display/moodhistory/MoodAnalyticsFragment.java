@@ -1,4 +1,4 @@
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -8,7 +8,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,17 +32,12 @@ import android.graphics.Color;
 import com.github.mikephil.charting.data.Entry;
 import android.widget.FrameLayout;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
-import android.widget.LinearLayout;
 
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private TextView mostCommonMoodText;
     private TextView averageMoodText;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
     private LineChart moodTrendChart;
@@ -54,10 +53,6 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
                 bottomNav.setVisibility(View.GONE);
             }
         }
-
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         mostCommonMoodText = view.findViewById(R.id.mostCommonMoodText);
@@ -87,23 +82,20 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void loadAnalyticsData() {
-        String userId = auth.getCurrentUser().getUid();
-        db.collection("moods")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        MoodEvent mood = doc.toObject(MoodEvent.class);
-                        // debugging
-                        Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType()); // Log the mood type
-                        moodEvents.add(mood);
-                    }
-                    displayAnalytics(moodEvents);
-                    startEmojiRain();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
-                });
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+            if (isSuccess) {
+                for (MoodEvent mood : holder) {
+                    Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType()); // Log the mood type
+                    moodEvents.add(mood);
+                }
+                displayAnalytics(moodEvents);
+                startEmojiRain();
+            }
+            else {
+                Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -163,7 +155,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void startEmojiRain() {
-        final String[] emojis = { "😡", "😭", "😀", "😆", "😴", "😱", "🤯" };
+        final String[] emojis = MoodEvent.MoodType.getAllEmoticons();
         FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
         if (emojiRainContainer == null)
             return;
@@ -225,7 +217,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
             if (moodEvent != null) {
                 entries.add(new PieEntry(count, moodType.name()));
-                colors.add(moodEvent.getPrimaryColor(requireContext())); // Get the corresponding color
+                colors.add(moodEvent.getMoodType().getPrimaryColor(requireContext())); // Get the corresponding color
             }
         }
 

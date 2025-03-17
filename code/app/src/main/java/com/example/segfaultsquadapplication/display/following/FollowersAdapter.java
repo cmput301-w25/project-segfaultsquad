@@ -4,7 +4,7 @@
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.following;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.user.User;
 
 import java.util.List;
 

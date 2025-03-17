@@ -5,12 +5,14 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.impl.user;
+
+import com.example.segfaultsquadapplication.impl.db.IDbData;
 
 import java.util.List;
 import java.util.ArrayList;
 
-public class User {
+public class User implements IDbData {
     // atteibutes
     private String userId;
     private String username;
@@ -36,8 +38,14 @@ public class User {
     }
 
     // Getters and setters
-    public String getUserId() {
+    @Override
+    public String getDbFileId() {
         return userId;
+    }
+
+    @Override
+    public void setDbFileId(String id) {
+        userId = id;
     }
 
     public String getUsername() {

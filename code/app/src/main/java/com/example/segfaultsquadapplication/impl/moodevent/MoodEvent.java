@@ -5,36 +5,72 @@
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
 
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.impl.moodevent;
 
 // imports
-import android.util.Log;
 import android.content.Context;
 
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.IDbData;
 import com.google.firebase.firestore.GeoPoint;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.PropertyName;
 
-public class MoodEvent {
+import com.google.firebase.Timestamp;
+
+public class MoodEvent implements IDbData {
     // Required attributes
-    private String moodId; // Unique identifier for the mood event
+    private String dbFileId; // Unique identifier for the mood event
     private String userId; // User ID of the person creating the mood event
     private Timestamp timestamp; // Date and time of the mood event
     private MoodType moodType; // Emotional state
     private String reasonText; // Reason text (optional)
     private List<Integer> imageData; // Reason image data (optional)
     private GeoPoint location; // Location of the mood event
-    private boolean isPublic; // Visibility of the mood event
 
     // Optional attributes
+    private String trigger; // Trigger for the mood (optional)
     private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types
     public enum MoodType {
-        ANGER, CONFUSION, DISGUST, FEAR, HAPPINESS, SADNESS, SHAME, ANGRY, SAD, HAPPY, EXCITED, TIRED, SCARED,
-        SURPRISED, SURPRISE
+        ANGER(R.color.mood_anger, R.color.mood_anger_light, "😡"),
+        CONFUSION(R.color.mood_confusion, R.color.mood_confusion_light, "😵‍💫"),
+        DISGUST(R.color.mood_disgust, R.color.mood_disgust_light, "🤢"),
+        FEAR(R.color.mood_fear, R.color.mood_fear_light, "😨"),
+        HAPPINESS(R.color.mood_happiness, R.color.mood_happiness_light, "😀"),
+        SADNESS(R.color.mood_sadness, R.color.mood_sadness_light, "😭"),
+        SHAME(R.color.mood_shame, R.color.mood_shame_light, "😳"),
+        SURPRISE(R.color.mood_surprise, R.color.mood_surprise_light, "🤯");
+
+        final int colorId, colorSecondaryId;
+        final String emoticon;
+
+        MoodType(int colorId, int colorSecondaryId, String emoticon) {
+            this.colorId = colorId;
+            this.colorSecondaryId = colorSecondaryId;
+            this.emoticon = emoticon;
+        }
+
+        public int getPrimaryColor(Context ctx) {
+            return ctx.getColor(colorId);
+        }
+
+        public int getSecondaryColor(Context ctx) {
+            return ctx.getColor(colorSecondaryId);
+        }
+
+        public String getEmoticon() {
+            return emoticon;
+        }
+
+        public static String[] getAllEmoticons() {
+            return Arrays.stream(values())
+                    .map(MoodType::getEmoticon)
+                    .toArray(String[]::new);
+        }
     }
 
     // Enum for social situations
@@ -61,15 +97,14 @@ public class MoodEvent {
     }
 
     // Constructor
-    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData, GeoPoint location,
-            boolean isPublic) {
+    public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData,
+            GeoPoint location) {
         this.userId = userId;
         this.timestamp = new Timestamp(new Date());
         this.moodType = moodType;
         this.reasonText = reasonText;
         this.imageData = imageData;
         this.location = location;
-        this.isPublic = isPublic;
 
         // Validate that at least one of reasonText or imageData is provided
         if (reasonText == null && (imageData == null || imageData.isEmpty())) {
@@ -77,23 +112,25 @@ public class MoodEvent {
         }
     }
 
-    // Add a no-argument constructor for Firestore
     /**
-     * Constructor. Was needed in earlier iteration of code. Not being used
-     * anywhere.
+     * Add a no-argument constructor for Firestore; SHOULD NOT be used anywhere in
+     * the code.
      */
+    @Deprecated
     public MoodEvent() {
         // Required empty constructor for Firestore
     }
 
     // Other Methods
     // Getters and setters
-    public String getMoodId() {
-        return moodId;
+    @Override
+    public void setDbFileId(String id) {
+        this.dbFileId = id;
     }
 
-    public void setMoodId(String moodId) {
-        this.moodId = moodId;
+    @Override
+    public String getDbFileId() {
+        return dbFileId;
     }
 
     public String getUserId() {
@@ -129,10 +166,10 @@ public class MoodEvent {
     }
 
     public void setReasonText(String reasonText) {
-        if (reasonText != null && reasonText.length() <= 200) {
+        if (reasonText != null && reasonText.length() <= 20) {
             this.reasonText = reasonText;
         } else {
-            throw new IllegalArgumentException("Reason text must be 0 characters or less");
+            throw new IllegalArgumentException("Reason text must be 20 characters or less");
         }
     }
 
@@ -174,58 +211,11 @@ public class MoodEvent {
         this.imageData = imageData;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public String getTrigger() {
+        return trigger;
     }
 
-    public void setPublic(boolean isPublic) {
-        this.isPublic = isPublic;
-    }
-
-    public int getPrimaryColor(Context context) {
-        switch (moodType) {
-            case ANGER:
-                Log.d("MoodEvent", "RECOGNIZED ANGER");
-                return context.getColor(R.color.mood_anger);
-            case CONFUSION:
-                return context.getColor(R.color.mood_confusion);
-            case DISGUST:
-                return context.getColor(R.color.mood_disgust);
-            case FEAR:
-                return context.getColor(R.color.mood_fear);
-            case HAPPINESS:
-                return context.getColor(R.color.mood_happiness);
-            case SADNESS:
-                return context.getColor(R.color.mood_sadness);
-            case SHAME:
-                return context.getColor(R.color.mood_shame);
-            case SURPRISE:
-                return context.getColor(R.color.mood_surprise);
-            default:
-                return context.getColor(R.color.mood_default);
-        }
-    }
-
-    public int getSecondaryColor(Context context) {
-        switch (moodType) {
-            case ANGER:
-                return context.getColor(R.color.mood_anger_light);
-            case CONFUSION:
-                return context.getColor(R.color.mood_confusion_light);
-            case DISGUST:
-                return context.getColor(R.color.mood_disgust_light);
-            case FEAR:
-                return context.getColor(R.color.mood_fear_light);
-            case HAPPINESS:
-                return context.getColor(R.color.mood_happiness_light);
-            case SADNESS:
-                return context.getColor(R.color.mood_sadness_light);
-            case SHAME:
-                return context.getColor(R.color.mood_shame_light);
-            case SURPRISE:
-                return context.getColor(R.color.mood_surprise_light);
-            default:
-                return context.getColor(R.color.mood_default);
-        }
+    public void setTrigger(String trigger) {
+        this.trigger = trigger;
     }
 }

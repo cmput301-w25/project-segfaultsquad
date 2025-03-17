@@ -4,7 +4,7 @@
  * Date: Feb 16, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
-package com.example.segfaultsquadapplication;
+package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +17,11 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -30,7 +35,7 @@ import android.app.AlertDialog;
 import android.widget.EditText;
 import java.util.Calendar;
 import java.util.Date;
-import android.widget.Button;
+
 import androidx.navigation.NavController;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -40,16 +45,12 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     private boolean isFilterMenuVisible = false;
     private RecyclerView moodRecyclerView;
     private MoodAdapter moodAdapter;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
-    private List<MoodEvent> allMoods = new ArrayList<>();
+    // Use static arraylist, so subsequent visits to history page will not start out blank
+    private static List<MoodEvent> allMoods = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_mood_history, container, false);
-
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         filterButton = view.findViewById(R.id.filterButton);
@@ -90,6 +91,8 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         moodAdapter = new MoodAdapter(this);
         moodRecyclerView.setAdapter(moodAdapter);
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        // Display with last fetched moods for now, will be updated when new moods are fetched
+        moodAdapter.updateMoods(allMoods);
     }
 
     /**
@@ -126,46 +129,30 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      * helper method to get this user's moods, sorted in reverse chronological order
      */
     private void loadMoods() {
-        String userId = auth.getCurrentUser().getUid(); // user id
         // debugging
-        Log.d("MoodHistory", "Loading moods for user: " + userId);
+        Log.d("MoodHistory", "Loading moods for user: " + DbUtils.getUserId());
 
-        // get the mods
-        db.collection("moods")
-                .whereEqualTo("userId", userId) // of this user
-                .orderBy("timestamp", Query.Direction.DESCENDING) // reverse chrono sort
-                .addSnapshotListener((value, error) -> {
-                    // error handling and toast loggin for failed mood events
-                    if (error != null) {
-                        Log.e("MoodHistory", "Error loading moods", error);
-                        Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        // get the moods
+        ArrayList<MoodEvent> temp = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp, isSuccess -> {
+            if (isSuccess) {
+                allMoods.clear(); // Clear previous moods
+                // debugging
+                Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
 
-                    // construct moods arraylist
-                    allMoods.clear(); // Clear previous moods
-                    if (value != null) {
-                        // debugging
-                        Log.d("MoodHistory", "Number of moods retrieved: " + value.size());
+                for (MoodEvent mood : temp) {
+                    allMoods.add(mood); // add to arraylist
+                    Log.d("MoodHistory",
+                            "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
+                }
 
-                        for (QueryDocumentSnapshot doc : value) {
-                            try {
-                                MoodEvent mood = doc.toObject(MoodEvent.class); // make MoodEvent object per fetched
-                                                                                // mood
-                                mood.setMoodId(doc.getId());
-                                allMoods.add(mood); // add to arraylist
-                                Log.d("MoodHistory",
-                                        "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getMoodId());
-                            } catch (Exception e) {
-                                Log.e("MoodHistory", "Error converting document: " + doc.getId(), e);
-                            }
-                        }
-
-                        // Sort the moods in memory instead
-                        Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
-                    }
-                    moodAdapter.updateMoods(allMoods);
-                });
+//                // Sort the moods in memory instead
+//                Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+                moodAdapter.updateMoods(allMoods);
+            } else {
+                Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -177,7 +164,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     @Override
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
-        args.putString("moodId", mood.getMoodId());
+        args.putString("moodId", mood.getDbFileId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_myMoodHistory_to_moodDetails, args);
     }
