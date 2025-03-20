@@ -190,6 +190,25 @@
                     android:text="University of Alberta, AB"
                     android:textColor="#333333"
                     android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="VISBILITY"
+                    android:textColor="#666666"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/mood_visibility"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:drawablePadding="8dp"
+                    android:gravity="center_vertical"
+                    android:text="Private"
+                    android:textColor="#333333"
+                    android:textSize="16sp" />
             </LinearLayout>
 
         </LinearLayout>
