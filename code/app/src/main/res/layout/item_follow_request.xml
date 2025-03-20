@@ -11,13 +11,15 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Username"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:layout_marginRight="10dp"/>
 
     <Button
         android:id="@+id/acceptButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Accept" />
+        android:text="Accept"
+        android:layout_marginRight="15dp"/>
 
     <Button
         android:id="@+id/denyButton"

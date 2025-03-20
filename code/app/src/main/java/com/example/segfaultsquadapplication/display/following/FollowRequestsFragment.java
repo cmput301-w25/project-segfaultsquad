@@ -1,6 +1,7 @@
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +44,33 @@ public class FollowRequestsFragment extends Fragment {
         return view;
     }
 
+    private List<User> getDummyRequests() {
+        List<User> dummyUsers = new ArrayList<>();
+
+        for (int i = 1; i <= 5; i++) {
+            User user = new User();
+            user.setDbFileId("UserUser" + i);
+            user.setUsername("UserUser2" + i);
+            dummyUsers.add(user);
+        }
+        return dummyUsers;
+    }
+
     private void loadFollowRequests() {
         String currentUserId = auth.getCurrentUser().getUid();
+        Log.d("MoodAdapter", "Loading Requests");
+
+        //-- dummy follow requests for testing --//
+        List<User> dummyRequests = getDummyRequests();
+        if (dummyRequests != null && !dummyRequests.isEmpty()) {
+            followRequests.clear();
+            followRequests.addAll(dummyRequests);
+            requestsAdapter.updateRequests(followRequests);
+        } else {
+            Toast.makeText(getContext(), "No follow requests", Toast.LENGTH_SHORT).show();
+        }
+        //-- dummy follow requests for testing --//
+
         db.collection("users").document(currentUserId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
