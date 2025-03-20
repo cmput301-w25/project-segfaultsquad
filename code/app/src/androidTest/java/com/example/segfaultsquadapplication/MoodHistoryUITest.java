@@ -94,7 +94,6 @@ public class MoodHistoryUITest {
         onView(withId(R.id.fabAddMood)).perform(click());
         onView(withText("Confusion")).perform(click());
         onView(withId(R.id.editTextReason)).perform(ViewActions.typeText("Feeling Down"));
-        onView(withId(R.id.editTextTrigger)).perform(ViewActions.typeText("Android Studio"));
 
         onView(withId(R.id.scrollView)).perform(ViewActions.swipeUp());
         Thread.sleep(500);

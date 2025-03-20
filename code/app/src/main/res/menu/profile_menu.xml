@@ -5,4 +5,10 @@
         android:title="Logout"
         android:icon="@drawable/ic_logout"
         android:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/action_to_follow_requests"
+        android:title="Follow Requests"
+        android:icon="@drawable/ic_heart"
+        android:showAsAction="ifRoom" />
 </menu>
