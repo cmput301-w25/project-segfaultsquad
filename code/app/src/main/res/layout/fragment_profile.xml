@@ -58,16 +58,17 @@
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp">
 
-            <com.example.segfaultsquadapplication.display.profile.CircularImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile_picture"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:src="@drawable/ic_person"
-                android:contentDescription="@string/profile_picture"
-                android:background="@drawable/circle_background"
-                android:padding="8dp" />
+                android:scaleType="centerCrop"
+                app:strokeWidth="2dp"
+                app:shapeAppearanceOverlay="@style/CircleShape" />
 
             <ImageButton
                 android:id="@+id/editProfilePictureButton"
@@ -170,6 +171,15 @@
             android:paddingTop="8dp"
             android:clipToPadding="false"
             android:background="@android:color/holo_blue_light" />
+        <!-- RecyclerView for mood list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/moodRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="16dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"/>
 
     </LinearLayout>
 

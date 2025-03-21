@@ -179,7 +179,8 @@ public class ProfileFragment extends Fragment {
 
     private void setUserData() {
         if (currentUser != null) {
-            username.setText(currentUser.getUsername());
+            username.setText(currentUser.getUsername());            // username
+            loadFollowerAndFollowingCounts();                       // follower and following count
 
             // Load profile picture if available
             List<Integer> profilePicData = currentUser.getProfilePicUrl();
@@ -200,7 +201,7 @@ public class ProfileFragment extends Fragment {
             } else {
                 profilePicture.setImageResource(R.drawable.ic_person); // Default image
             }
-            loadFollowerAndFollowingCounts();
+
         }
     }
 

@@ -57,16 +57,29 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
             return;
         }
         getBottomNavigationView().setVisibility(View.VISIBLE);
-        // Hide the selected button
+        // Distinguish the selected button
         int itemId = destinationId;
         // These fragments use the same as its parent, the profile fragment
         if (destinationId == R.id.navigation_FollowersListFragment ||
                 destinationId == R.id.navigation_FollowingListFragment) {
             itemId = R.id.navigation_profile;
         }
+
+        // Reset background color for all items
+        BottomNavigationView bottomNavigationView = getBottomNavigationView();
+        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+            MenuItem menuItem = bottomNavigationView.getMenu().getItem(i);
+            // Reset the background color (for inactive items)
+            View itemView = bottomNavigationView.findViewById(menuItem.getItemId());
+            if (itemView != null) {
+                // reset bgcolor to transparent
+                itemView.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+            }
+        }
+
         View item = getBottomNavigationView().findViewById(itemId);
         if (item != null) {
-            item.setBackgroundColor(getResources().getColor(R. color. color_primary));
+            item.setBackgroundColor(getResources().getColor(R.color.color_primary));
         }
     }
 
