@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/holo_red_light" >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -92,7 +91,7 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="John Doe"
+            android:text=" "
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -118,7 +117,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingEnd="8dp"
-                    android:text="248"
+                    android:text=" "
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
@@ -140,7 +139,7 @@
                     android:id="@+id/following_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="186"
+                    android:text=" "
                     android:textSize="32sp"
                     android:textStyle="bold"
                     android:paddingEnd="8dp" />
@@ -154,23 +153,34 @@
         </LinearLayout>
 
         <!-- Recent Activity Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Recent Activity"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
-
-        <!-- Grid for Mood Events -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_mood_grid"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingTop="8dp"
-            android:clipToPadding="false"
-            android:background="@android:color/holo_blue_light" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <!-- subheading -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="My Mood History"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp" />
+
+            <ImageButton
+                android:id="@+id/filterButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/filter_icon" />
+        </LinearLayout>
+
         <!-- RecyclerView for mood list -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/moodRecyclerView"
@@ -182,7 +192,6 @@
             android:scrollbars="vertical"/>
 
     </LinearLayout>
-
 
     <!-- Profile Dropdown -->
     <androidx.cardview.widget.CardView
@@ -214,6 +223,53 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="8dp"
                 android:text="Logout" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Dropdown cards -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/filterMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="400dp"
+        android:visibility="gone"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/filter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Last Week" />
+
+            <TextView
+                android:id="@+id/filter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Mood" />
+
+            <TextView
+                android:id="@+id/filter3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Reason" />
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear All Filters" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

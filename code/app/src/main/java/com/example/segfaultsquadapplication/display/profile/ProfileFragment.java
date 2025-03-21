@@ -8,7 +8,6 @@ package com.example.segfaultsquadapplication.display.profile;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,16 +25,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.display.moodhistory.MoodAdapter;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,18 +46,23 @@ import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.MediaStore;
 
-import com.google.firebase.firestore.FieldValue;
+import android.app.AlertDialog;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-public class ProfileFragment extends Fragment {
+import java.util.Calendar;
+import java.util.Date;
+
+public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
 
     private ImageView profilePicture;
     private TextView username;
     private TextView followersCount;
     private TextView followingCount;
-    private RecyclerView recyclerViewMoodGrid;
-    private MoodGridAdapter moodGridAdapter;
+    private RecyclerView moodRecyclerView;
+    private MoodAdapter moodAdapter;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -65,6 +70,10 @@ public class ProfileFragment extends Fragment {
     private User currentUser; // To hold user data
 
     private static final int PICK_IMAGE_REQUEST = 1;
+
+    private ImageButton filterButton;
+    private CardView filterMenu;
+    private boolean isFilterMenuVisible = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -76,37 +85,27 @@ public class ProfileFragment extends Fragment {
         username = view.findViewById(R.id.username);
         followersCount = view.findViewById(R.id.followers_count);
         followingCount = view.findViewById(R.id.following_count);
-        recyclerViewMoodGrid = view.findViewById(R.id.recycler_view_mood_grid);
+        moodRecyclerView = view.findViewById(R.id.moodRecyclerView);
         ImageButton overflowButton = view.findViewById(R.id.overflowButton);
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
         TextView logoutOption = view.findViewById(R.id.logoutOption);
         ImageButton editProfilePictureButton = view.findViewById(R.id.editProfilePictureButton);
         ImageButton heartButton = view.findViewById(R.id.heartButton);
+        filterButton = view.findViewById(R.id.filterButton);
+        filterMenu = view.findViewById(R.id.filterMenu);
 
         // Initialize Firestore and Auth
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
 
-        // debugging
-        Log.d("ProfileFragment", "-0");
-
         // Set user data
         fetchCurrentUser(); // Fetch user details
 
-        // debugging
-        Log.d("ProfileFragment", "-1");
-
-        // Set up RecyclerView for mood grid
+        // Set up RecyclerView for mood list
         setupRecyclerView();
-
-        // debugging
-        Log.d("ProfileFragment", "-2");
 
         // Load mood events
         loadMoodEvents();
-
-        // debugging
-        Log.d("ProfileFragment", "-3");
 
         // Set click listeners
         followersCount.setOnClickListener(v -> navigateToFollowersList());
@@ -135,8 +134,11 @@ public class ProfileFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.action_to_follow_requests);
         });
 
-        // debugging
-        Log.d("ProfileFragment", "-99");
+        // Setup filter button
+        filterButton.setOnClickListener(v -> toggleFilterMenu());
+
+        // Setup filter options
+        setupFilterOptions(view);
 
         return view;
     }
@@ -179,8 +181,8 @@ public class ProfileFragment extends Fragment {
 
     private void setUserData() {
         if (currentUser != null) {
-            username.setText(currentUser.getUsername());            // username
-            loadFollowerAndFollowingCounts();                       // follower and following count
+            username.setText(currentUser.getUsername()); // username
+            loadFollowerAndFollowingCounts(); // follower and following count
 
             // Load profile picture if available
             List<Integer> profilePicData = currentUser.getProfilePicUrl();
@@ -201,15 +203,18 @@ public class ProfileFragment extends Fragment {
             } else {
                 profilePicture.setImageResource(R.drawable.ic_person); // Default image
             }
-
         }
     }
 
+    /**
+     * method to update the counts of followers and following on the profile page,
+     * as well as set those to the
+     */
     private void loadFollowerAndFollowingCounts() {
         String userId = auth.getCurrentUser().getUid(); // Get user ID
 
         // Load followers count
-        db.collection("followers")
+        db.collection("following")
                 .whereEqualTo("followedId", userId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -228,28 +233,37 @@ public class ProfileFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        moodGridAdapter = new MoodGridAdapter(getContext(), moodEvents);
-        recyclerViewMoodGrid.setLayoutManager(new GridLayoutManager(getContext(), 3)); // 3 columns
-        recyclerViewMoodGrid.setAdapter(moodGridAdapter);
+        moodAdapter = new MoodAdapter(this);
+        moodRecyclerView.setAdapter(moodAdapter);
+        moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
     private void loadMoodEvents() {
         String userId = auth.getCurrentUser().getUid(); // Get user ID
 
-        db.collection("moods")
-                .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    moodEvents.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        MoodEvent mood = doc.toObject(MoodEvent.class);
-                        moodEvents.add(mood);
-                    }
-                    // debugging
-                    Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
-                    moodGridAdapter.notifyDataSetChanged(); // Notify adapter of data change
-                });
+        // Use MoodEventManager to get all mood events for the current user
+        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, moodEvents, isSuccess -> {
+            if (isSuccess) {
+                Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
+                moodAdapter.updateMoods(moodEvents); // Update the adapter with the fetched mood events
+            } else {
+                Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * mood event click listener handling method
+     * 
+     * @param mood
+     *             the clicked on MoodEvent object instance
+     */
+    @Override
+    public void onMoodClick(MoodEvent mood) {
+        Bundle args = new Bundle();
+        args.putString("moodId", mood.getDbFileId());
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_to_moodDetails, args);
     }
 
     private void navigateToFollowersList() {
@@ -320,5 +334,107 @@ public class ProfileFragment extends Fragment {
             Log.e("ProfileFragment", "Error uploading image", e);
             Toast.makeText(getContext(), "Error uploading image", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void toggleFilterMenu() {
+        isFilterMenuVisible = !isFilterMenuVisible;
+        filterMenu.setVisibility(isFilterMenuVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void setupFilterOptions(View view) {
+        view.findViewById(R.id.filter1).setOnClickListener(v -> {
+            filterLastWeek();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter2).setOnClickListener(v -> {
+            showMoodFilterDialog();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter3).setOnClickListener(v -> {
+            showReasonFilterDialog();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.clearFilters).setOnClickListener(v -> {
+            clearAllFilters();
+            toggleFilterMenu();
+        });
+    }
+
+    private void filterLastWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date lastWeekDate = calendar.getTime();
+
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : moodEvents) {
+            if (mood.getTimestamp().toDate().after(lastWeekDate)) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void showMoodFilterDialog() {
+        String[] moods = { "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Select Mood")
+                .setItems(moods, (dialog, which) -> {
+                    String selectedMood = moods[which];
+                    filterByMood(selectedMood);
+                });
+        builder.show();
+    }
+
+    private void filterByMood(String moodType) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : moodEvents) {
+            if (mood.getMoodType().name().equals(moodType)) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void showReasonFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Enter Reason Keyword");
+
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText input = new EditText(getContext());
+        input.setHint("Type search word here...");
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(40, 0, 40, 0);
+        input.setLayoutParams(params);
+        layout.addView(input);
+
+        builder.setView(layout);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String keyword = input.getText().toString();
+            filterByReason(keyword);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void filterByReason(String keyword) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : moodEvents) {
+            if (mood.getReasonText() != null &&
+                    mood.getReasonText().toLowerCase().contains(keyword.toLowerCase())) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void clearAllFilters() {
+        moodAdapter.updateMoods(moodEvents);
     }
 }
