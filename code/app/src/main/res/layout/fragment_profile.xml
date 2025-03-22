@@ -26,6 +26,19 @@
                 android:text="Profile"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
+            <!-- Search icon to toggle searchbar visibility-->
+            <ImageButton
+                android:id="@+id/headerSearchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_search" />
+
             <!-- Heart to goto follow requests -->
             <ImageButton
                 android:id="@+id/heartButton"
@@ -51,6 +64,39 @@
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_more_vert" />
+        </LinearLayout>
+
+        <!-- Search Section -->
+        <LinearLayout
+            android:id="@+id/searchSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_section_background"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/search_edit_text_background"
+                android:hint="Search users..."
+                android:padding="8dp" />
+
+            <ImageButton
+                android:id="@+id/searchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_search" />
         </LinearLayout>
 
         <!-- Profile Picture -->
@@ -271,6 +317,29 @@
                 android:padding="8dp"
                 android:text="Clear All Filters" />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Search Results Dropdown -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchResultsCard"
+        android:layout_width="336dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="128dp"
+        android:visibility="visible"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResultsRecyclerView"
+            android:layout_width="336dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:clipToPadding="false"
+            android:maxHeight="200dp"
+            android:padding="8dp" />
+
     </androidx.cardview.widget.CardView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

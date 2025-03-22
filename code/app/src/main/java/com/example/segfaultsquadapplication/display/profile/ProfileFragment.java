@@ -9,6 +9,8 @@ package com.example.segfaultsquadapplication.display.profile;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +38,8 @@ import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -75,6 +79,17 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private CardView filterMenu;
     private boolean isFilterMenuVisible = false;
 
+    private EditText searchEditText;
+    private RecyclerView searchResultsRecyclerView;
+    private SearchResultAdapter searchResultAdapter;
+
+    private ImageButton searchButton;
+
+    private LinearLayout searchSection;
+    private ImageButton headerSearchButton;
+
+    private CardView searchResultsCard;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -93,6 +108,12 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         ImageButton heartButton = view.findViewById(R.id.heartButton);
         filterButton = view.findViewById(R.id.filterButton);
         filterMenu = view.findViewById(R.id.filterMenu);
+        searchEditText = view.findViewById(R.id.searchEditText);
+        searchResultsRecyclerView = view.findViewById(R.id.searchResultsRecyclerView);
+        searchButton = view.findViewById(R.id.searchButton);
+        searchSection = view.findViewById(R.id.searchSection);
+        headerSearchButton = view.findViewById(R.id.headerSearchButton);
+        searchResultsCard = view.findViewById(R.id.searchResultsCard);
 
         // Initialize Firestore and Auth
         db = FirebaseFirestore.getInstance();
@@ -139,6 +160,53 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
 
         // Setup filter options
         setupFilterOptions(view);
+
+        // Setup search functionality
+        searchResultAdapter = new SearchResultAdapter(this::onSearchResultClick);
+        searchResultsRecyclerView.setAdapter(searchResultAdapter);
+        searchResultsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Toggle functionality for search section
+        headerSearchButton.setOnClickListener(v -> {
+            if (searchSection.getVisibility() == View.VISIBLE) {
+                searchSection.setVisibility(View.GONE);
+                searchResultsCard.setVisibility(View.GONE);
+                searchEditText.setText(""); // Clear search when hiding
+            } else {
+                searchSection.setVisibility(View.VISIBLE);
+                searchEditText.requestFocus(); // Automatically focus the search field
+            }
+        });
+
+        // Replace the existing search button click listener with this
+        searchButton.setOnClickListener(v -> {
+            String query = searchEditText.getText().toString().trim();
+            if (!query.isEmpty()) {
+                // Search for exact username match
+                searchExactUsername(query);
+            }
+        });
+
+        // Add TextWatcher to searchEditText for real-time search
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString().trim();
+                if (query.isEmpty()) {
+                    searchResultsCard.setVisibility(View.GONE);
+                } else {
+                    performSearch(query);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
 
         return view;
     }
@@ -436,5 +504,82 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
 
     private void clearAllFilters() {
         moodAdapter.updateMoods(moodEvents);
+    }
+
+    private void performSearch(String query) {
+        String currentUserId = auth.getCurrentUser().getUid();
+        Log.d("Search", "Performing search with query: " + query);
+
+        if (query.isEmpty()) {
+            searchResultsCard.setVisibility(View.GONE);
+            return;
+        }
+
+        db.collection("users")
+                .orderBy("username")
+                .startAt(query.toLowerCase()) // Convert to lowercase for case-insensitive search
+                .endAt(query.toLowerCase() + "\uf8ff")
+                .limit(3)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Log.d("Search", "Query returned " + queryDocumentSnapshots.size() + " results");
+                    List<User> results = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        Log.d("Search", "Processing user: " + document.getString("username"));
+                        if (!document.getId().equals(currentUserId)) {
+                            User user = document.toObject(User.class);
+                            user.setDbFileId(document.getId());
+                            results.add(user);
+                        }
+                    }
+
+                    if (!results.isEmpty()) {
+                        Log.d("Search", "Showing " + results.size() + " results");
+                        searchResultsCard.setVisibility(View.VISIBLE);
+                        searchResultAdapter.updateResults(results);
+                    } else {
+                        Log.d("Search", "No results to show");
+                        searchResultsCard.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("Search", "Error performing search", e);
+                    searchResultsCard.setVisibility(View.GONE);
+                });
+    }
+
+    private void searchExactUsername(String username) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .whereEqualTo("username", username)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        if (!document.getId().equals(currentUserId)) {
+                            User user = document.toObject(User.class);
+                            user.setDbFileId(document.getId());
+                            navigateToSearchedProfile(user);
+                        }
+                    }
+                });
+    }
+
+    private void onSearchResultClick(User user) {
+        navigateToSearchedProfile(user);
+    }
+
+    private void navigateToSearchedProfile(User user) {
+        Bundle args = new Bundle();
+        args.putString("userId", user.getDbFileId());
+        Navigation.findNavController(requireView())
+                .navigate(R.id.action_profile_to_searched_profile, args);
+
+        // Clear search
+        searchEditText.setText("");
+        searchResultsCard.setVisibility(View.GONE);
+        searchSection.setVisibility(View.GONE);
     }
 }
