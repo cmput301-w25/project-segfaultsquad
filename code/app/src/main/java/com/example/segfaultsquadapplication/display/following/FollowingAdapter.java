@@ -6,6 +6,8 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,9 +48,26 @@ public class FollowingAdapter extends RecyclerView.Adapter<FollowingAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User user = followingList.get(position);
         holder.username.setText(user.getUsername());
-        // Load user profile picture using an image loading library (e.g., Glide or
-        // Picasso)
-        // Glide.with(holder.itemView).load(user.getProfilePictureUrl()).into(holder.profilePicture);
+
+        // Set profile picture
+        List<Integer> profilePicData = user.getProfilePicUrl();
+        if (profilePicData != null && !profilePicData.isEmpty()) {
+            // Convert List<Integer> back to byte array
+            byte[] imageBytes = new byte[profilePicData.size()];
+            for (int i = 0; i < profilePicData.size(); i++) {
+                imageBytes[i] = profilePicData.get(i).byteValue();
+            }
+
+            // Convert to Bitmap and set
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            if (bitmap != null) {
+                holder.profilePicture.setImageBitmap(bitmap);
+            } else {
+                holder.profilePicture.setImageResource(R.drawable.ic_person);
+            }
+        } else {
+            holder.profilePicture.setImageResource(R.drawable.ic_person);
+        }
 
         holder.followingButton.setText("Following");
         holder.followingButton.setOnClickListener(v -> {
