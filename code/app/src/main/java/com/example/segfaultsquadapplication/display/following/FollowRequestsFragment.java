@@ -135,7 +135,7 @@ public class FollowRequestsFragment extends Fragment {
             db.collection("users").document(currentUserId) //remove user follow request list
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));
 
-            followRequests.remove(user);
+            followRequests.remove(user); //update UI for the thing
             requestsAdapter.notifyItemRemoved(followRequests.indexOf(user));
 
             Toast.makeText(getContext(), user.getUsername() + " is now following you", Toast.LENGTH_SHORT).show();

@@ -100,6 +100,10 @@ public class User implements IDbData {
         return followRequests;
     }
 
+    public int getFollowRequestCount() {
+        return followRequests.size();
+    }
+
     public void addFollowRequest(String userId) {
         if (!followRequests.contains(userId)) {
             followRequests.add(userId);
