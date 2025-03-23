@@ -45,7 +45,7 @@ public class User implements IDbData {
 
     @Override
     public void setDbFileId(String id) {
-        userId = id;
+        this.userId = id;
     }
 
     public String getUsername() {
