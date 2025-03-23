@@ -132,6 +132,7 @@
             app:destination="@+id/MyMoodHistory" />
     </fragment>
 
+    <!-- Edit Mood -->
     <fragment
         android:id="@+id/navigation_edit_mood"
         android:name="com.example.segfaultsquadapplication.display.moodaddedit.EditMoodFragment"
@@ -141,6 +142,7 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Mood Details -->
     <fragment
         android:id="@+id/navigation_mood_details"
         android:name="com.example.segfaultsquadapplication.display.MoodDetailsFragment"
@@ -185,6 +187,12 @@
         <action
             android:id="@+id/action_to_following_list"
             app:destination="@+id/navigation_FollowingListFragment" />
+        <action
+            android:id="@+id/action_to_moodDetails"
+            app:destination="@id/navigation_mood_details" />
+        <action
+            android:id="@+id/action_profile_to_searched_profile"
+            app:destination="@id/searchedProfileFragment" />
     </fragment>
 
     <!-- Profile Page Followers List Fragment -->
@@ -227,5 +235,27 @@
             app:destination="@id/navigation_following" />
     </fragment>
     
+    <!-- Searched Profile Fragment -->
+    <fragment
+        android:id="@+id/searchedProfileFragment"
+        android:name="com.example.segfaultsquadapplication.display.profile.SearchedProfileFragment"
+        android:label="Searched Profile">
+        <argument
+            android:name="userId"
+            app:argType="string" />
+        <!-- bottom nav -->
+        <action
+            android:id="@+id/action_to_my_mood_history"
+            app:destination="@+id/navigation_my_mood_history" />
+        <action
+            android:id="@+id/action_to_map"
+            app:destination="@id/navigation_map" />
+        <action
+            android:id="@+id/action_to_follow_requests"
+            app:destination="@id/navigation_follow_requests" />
+        <action
+            android:id="@+id/action_to_following"
+            app:destination="@id/navigation_following" />
+    </fragment>
 
 </navigation>

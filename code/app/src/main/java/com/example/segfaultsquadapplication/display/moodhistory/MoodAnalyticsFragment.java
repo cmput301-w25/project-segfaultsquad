@@ -9,15 +9,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.charts.LineChart;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,21 +22,27 @@ import android.widget.ImageButton;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import android.graphics.Color;
-import com.github.mikephil.charting.data.Entry;
 import android.widget.FrameLayout;
 import android.animation.ObjectAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
-    private TextView mostCommonMoodText;
-    private TextView averageMoodText;
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
-    private LineChart moodTrendChart;
+    private HorizontalBarChart recentMoodsChart;
+    private ChipGroup moodDistributionChipGroup;
+    private ChipGroup recentMoodsChipGroup;
+    private Chip myMoodsChip, communityMoodsChip;
+    private Chip myRecentMoodsChip, communityRecentMoodsChip;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,18 +57,19 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         }
 
         // Initialize views
-        mostCommonMoodText = view.findViewById(R.id.mostCommonMoodText);
-        averageMoodText = view.findViewById(R.id.averageMoodText);
         moodDistributionChart = view.findViewById(R.id.moodDistributionChart);
-        moodTrendChart = view.findViewById(R.id.moodTrendChart);
+        recentMoodsChart = view.findViewById(R.id.recentMoodsChart);
+        moodDistributionChipGroup = view.findViewById(R.id.moodDistributionChipGroup);
+        recentMoodsChipGroup = view.findViewById(R.id.recentMoodsChipGroup);
+        myMoodsChip = view.findViewById(R.id.myMoodsChip);
+        communityMoodsChip = view.findViewById(R.id.communityMoodsChip);
+        myRecentMoodsChip = view.findViewById(R.id.myRecentMoodsChip);
+        communityRecentMoodsChip = view.findViewById(R.id.communityRecentMoodsChip);
 
-        // Set initial transparency for smooth fade-in
-        mostCommonMoodText.setAlpha(0f);
-        averageMoodText.setAlpha(0f);
-        moodDistributionChart.setAlpha(0f);
-        moodTrendChart.setAlpha(0f);
+        // Set up chip listeners
+        setupChipListeners();
 
-        // Load and display analytics data
+        // Load initial data
         loadAnalyticsData();
 
         // Set up back button with animation
@@ -81,21 +84,155 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         return view;
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Start emoji rain after view is created
+        startEmojiRain();
+    }
+
+    /**
+     * listener setup for the chips to toggle between personal and global mood event data
+     */
+    private void setupChipListeners() {
+        myMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                loadMoodDistribution(true);
+            }
+        });
+
+        communityMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                loadMoodDistribution(false);
+            }
+        });
+
+        myRecentMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                loadRecentMoods(true);
+            }
+        });
+
+        communityRecentMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                loadRecentMoods(false);
+            }
+        });
+    }
+
+    /**
+     * method to load in analytics data (just calls sub methods to load in data and create graphs)
+     */
     private void loadAnalyticsData() {
+        // Load personal moods by default
+        loadMoodDistribution(true);
+        loadRecentMoods(true);
+    }
+
+    /**
+     * method to load in mood events and create pie chart
+     * @param personalOnly
+     * bool to load in only current user's (true) or all (false) mood events
+     */
+    private void loadMoodDistribution(boolean personalOnly) {
+        String userId = personalOnly ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
         ArrayList<MoodEvent> holder = new ArrayList<>();
-        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+
+        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
             if (isSuccess) {
                 for (MoodEvent mood : holder) {
-                    Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType()); // Log the mood type
+                    Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType());
                     moodEvents.add(mood);
                 }
                 displayAnalytics(moodEvents);
-                startEmojiRain();
-            }
-            else {
-                Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Error loading mood distribution", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * method to load in recent mood events for bar chart
+     * @param personalOnly
+     * bool to load in only current user's (true) or all (false) mood events
+     */
+    private void loadRecentMoods(boolean personalOnly) {
+        String userId = personalOnly ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+
+        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
+            if (isSuccess) {
+                updateBarChart(holder);
+            } else {
+                Toast.makeText(getContext(), "Error loading recent moods", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * method to update the recent moods count bar chart
+     * @param moodEvents
+     * list of mood events to be displayed
+     */
+    private void updateBarChart(List<MoodEvent> moodEvents) {
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        Map<MoodEvent.MoodType, Integer> moodCounts = new HashMap<>();
+
+        // Count occurrences of each mood type
+        for (MoodEvent mood : moodEvents) {
+            moodCounts.put(mood.getMoodType(),
+                    moodCounts.getOrDefault(mood.getMoodType(), 0) + 1);
+        }
+
+        // Create entries for the bar chart
+        int index = 0;
+        ArrayList<String> labels = new ArrayList<>();
+        for (MoodEvent.MoodType moodType : MoodEvent.MoodType.values()) {
+            int count = moodCounts.getOrDefault(moodType, 0);
+            entries.add(new BarEntry(index++, count));
+            labels.add(moodType.name());
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, "Mood Counts");
+        dataSet.setColors(getMoodColors());
+
+        BarData barData = new BarData(dataSet);
+        recentMoodsChart.setData(barData);
+
+        // Configure X-axis
+        XAxis xAxis = recentMoodsChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setLabelRotationAngle(-45);
+        xAxis.setDrawGridLines(false);
+        // Add left padding to prevent label cutoff, i dont know why its happening to be
+        // honest
+        xAxis.setSpaceMin(0.5f);
+
+        // Configure Y-axis
+        recentMoodsChart.getAxisLeft().setAxisMinimum(0f); // Start at 0
+        recentMoodsChart.getAxisRight().setEnabled(false); // Disable right axis
+
+        // Other chart settings
+        recentMoodsChart.setDrawValueAboveBar(true);
+        recentMoodsChart.setDescription(null);
+        recentMoodsChart.setExtraLeftOffset(15f); // Add extra left margin
+        recentMoodsChart.setExtraBottomOffset(10f); // Add extra bottom margin for labels
+
+        // Animate chart
+        recentMoodsChart.animateY(500);
+        recentMoodsChart.invalidate();
+    }
+
+    private int[] getMoodColors() {
+        // Return an array of colors corresponding to each mood type
+        MoodEvent.MoodType[] moodTypes = MoodEvent.MoodType.values();
+        int[] colors = new int[moodTypes.length];
+        for (int i = 0; i < moodTypes.length; i++) {
+            colors[i] = moodTypes[i].getPrimaryColor(requireContext());
+        }
+        return colors;
     }
 
     /**
@@ -105,89 +242,80 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
      *                   list of this user's mood events
      */
     private void displayAnalytics(List<MoodEvent> moodEvents) {
-        Map<MoodEvent.MoodType, Integer> moodCountMap = new HashMap<>();
-        for (MoodEvent mood : moodEvents) {
-            moodCountMap.put(mood.getMoodType(), moodCountMap.getOrDefault(mood.getMoodType(), 0) + 1);
-        }
-
-        MoodEvent.MoodType mostCommonMood = null;
-        int maxCount = 0;
-        boolean isTie = false;
-
-        for (Map.Entry<MoodEvent.MoodType, Integer> entry : moodCountMap.entrySet()) {
-            if (entry.getValue() > maxCount) {
-                maxCount = entry.getValue();
-                mostCommonMood = entry.getKey();
-                isTie = false; // Reset tie flag
-            } else if (entry.getValue() == maxCount) {
-                isTie = true; // Set tie flag
-            }
-        }
-
-        if (isTie) {
-            mostCommonMoodText.setText("Most Common Mood: It's a tie!");
-        } else {
-            mostCommonMoodText
-                    .setText("Most Common Mood: " + (mostCommonMood != null ? mostCommonMood.name() : "None"));
-        }
-
-        // Calculate average mood
-        int totalMoodValue = 0;
-        for (MoodEvent mood : moodEvents) {
-            totalMoodValue += mood.getMoodType().ordinal() + 1;
-        }
-        double averageMood = moodEvents.size() > 0 ? (double) totalMoodValue / moodEvents.size() : 0;
-
-        averageMoodText.setText("Average Mood: " + String.format("%.2f", averageMood));
-
         setupPieChart(moodEvents);
-        setupLineChart(moodEvents);
-
         fadeInViews();
     }
 
-    private void fadeInViews() {
-        mostCommonMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
-        averageMoodText.animate().alpha(1f).setDuration(600).setInterpolator(new DecelerateInterpolator()).start();
-        moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator())
-                .start();
-        moodTrendChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator()).start();
-    }
-
+    /**
+     * method to setup and activate the emoji rain animation effect
+     */
     private void startEmojiRain() {
         final String[] emojis = MoodEvent.MoodType.getAllEmoticons();
-        FrameLayout emojiRainContainer = getView().findViewById(R.id.emojiRainContainer);
+        final FrameLayout emojiRainContainer = requireView().findViewById(R.id.emojiRainContainer);
         if (emojiRainContainer == null)
             return;
 
-        for (int i = 0; i < 50; i++) {
-            final TextView emojiView = new TextView(getContext());
-            emojiView.setText(emojis[(int) (Math.random() * emojis.length)]);
-            emojiView.setTextSize(32);
-            emojiView.setTranslationX((float) (Math.random() * emojiRainContainer.getWidth()));
-            emojiView.setTranslationY(-100);
-            emojiRainContainer.addView(emojiView);
+        // Wait for layout to be measured
+        emojiRainContainer.post(() -> {
+            // Get actual container dimensions
+            final int containerWidth = emojiRainContainer.getWidth();
+            final int containerHeight = emojiRainContainer.getHeight();
 
-            float rotation = (float) (Math.random() * 360);
-            float scale = 0.8f + (float) Math.random() * 0.5f;
-            emojiView.setScaleX(scale);
-            emojiView.setScaleY(scale);
-            emojiView.setRotation(rotation);
+            // Ensure we have valid dimensions before proceeding
+            if (containerWidth <= 0 || containerHeight <= 0)
+                return;
 
-            ObjectAnimator fallAnimation = ObjectAnimator.ofFloat(emojiView, "translationY",
-                    emojiRainContainer.getHeight() + 100);
-            fallAnimation.setDuration(3000 + (long) (Math.random() * 2000));
-            fallAnimation.setInterpolator(new AccelerateInterpolator());
-            fallAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(android.animation.Animator animation) {
-                    emojiRainContainer.removeView(emojiView);
-                }
-            });
+            // Create 100 emojis
+            for (int i = 0; i < 100; i++) {
+                final TextView emojiView = new TextView(getContext());
+                emojiView.setText(emojis[(int) (Math.random() * emojis.length)]);
+                emojiView.setTextSize(32);
 
-            fallAnimation.setStartDelay(i * 50);
-            fallAnimation.start();
-        }
+                // Position horizontally across the width
+                float xPosition = (float) (Math.random() * containerWidth);
+                emojiView.setTranslationX(xPosition);
+
+                // Start from above the visible area
+                emojiView.setTranslationY(-2000);
+
+                // Add to container
+                emojiRainContainer.addView(emojiView);
+
+                // Apply rotation and scaling
+                float rotation = (float) (Math.random() * 720) - 360;
+                float scale = 0.6f + (float) Math.random() * 0.8f;
+                emojiView.setScaleX(scale);
+                emojiView.setScaleY(scale);
+                emojiView.setRotation(rotation);
+
+                // Calculate a distance that guarantees the emoji will be fully off-screen
+                float endY = containerHeight + 300; // Extra buffer to ensure it's gone
+
+                // Create the falling animation
+                ObjectAnimator fallAnimation = ObjectAnimator.ofFloat(
+                        emojiView,
+                        "translationY",
+                        -200, // Clearly off-screen at top
+                        endY // Clearly off-screen at bottom
+                );
+
+                // Set animation parameters
+                fallAnimation.setDuration(2000 + (long) (Math.random() * 3000));
+                fallAnimation.setInterpolator(new AccelerateInterpolator(1.2f));
+
+                // Remove view when animation is complete
+                fallAnimation.addListener(new android.animation.AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(android.animation.Animator animation) {
+                        emojiRainContainer.removeView(emojiView);
+                    }
+                });
+
+                // Stagger start times
+                fallAnimation.setStartDelay(i * 30);
+                fallAnimation.start();
+            }
+        });
     }
 
     /**
@@ -224,46 +352,25 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
         PieDataSet dataSet = new PieDataSet(entries, "Mood Distribution");
         dataSet.setColors(colors); // Set the custom colors
         PieData pieData = new PieData(dataSet);
+
+        // Configure the pie chart
+        moodDistributionChart.setUsePercentValues(true); // Show percentage values
+        moodDistributionChart.setEntryLabelTextSize(12f);
+        // moodDistributionChart.setDrawHole(true); // Create a hole in the middle
+        moodDistributionChart.setHoleRadius(35f); // Size of the hole
+        moodDistributionChart.setTransparentCircleRadius(40f); // Size of the transparent circle
         moodDistributionChart.setData(pieData);
-        moodDistributionChart.invalidate(); // Refresh
+
+        // Add animations
+        moodDistributionChart.animateY(1000, com.github.mikephil.charting.animation.Easing.EaseInOutQuad); // Vertical
+        moodDistributionChart.spin(1000, 0, 360f, com.github.mikephil.charting.animation.Easing.EaseInOutQuad); // Spin
+
+        moodDistributionChart.invalidate();
     }
 
-    /**
-     * Trend of mood counts over time
-     *
-     * @param moodEvents
-     *                   list of all of this user's mood events
-     */
-    private void setupLineChart(List<MoodEvent> moodEvents) {
-        List<Entry> entries = new ArrayList<>();
-        Map<Long, Integer> moodCountMap = new HashMap<>();
-
-        // Count moods by timestamp
-        for (MoodEvent mood : moodEvents) {
-            // Convert Firebase Timestamp to milliseconds
-            long timestamp = mood.getTimestamp().toDate().getTime(); // Convert to milliseconds
-            moodCountMap.put(timestamp, moodCountMap.getOrDefault(timestamp, 0) + 1);
-        }
-
-        // Create entries for the line chart
-        for (Map.Entry<Long, Integer> entry : moodCountMap.entrySet()) {
-            entries.add(new Entry(entry.getKey(), entry.getValue())); // Use timestamp as X value
-        }
-
-        LineDataSet dataSet = new LineDataSet(entries, "Mood Trend");
-        dataSet.setColor(Color.BLUE); // Set your desired color
-        dataSet.setValueTextColor(Color.BLACK); // Set value text color
-        dataSet.setLineWidth(2f); // Set line width
-        dataSet.setCircleColor(Color.RED); // Set circle color
-        dataSet.setCircleRadius(4f); // Set circle radius
-        dataSet.setDrawCircleHole(true); // Draw circle hole
-        dataSet.setDrawValues(true); // Show values on the line
-
-        LineData lineData = new LineData(dataSet);
-        moodTrendChart.setData(lineData);
-        moodTrendChart.getDescription().setEnabled(false); // Disable description
-        moodTrendChart.getLegend().setEnabled(false); // Disable legend
-        moodTrendChart.invalidate(); // Refresh
+    private void fadeInViews() {
+        moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator())
+                .start();
     }
 
     @Override

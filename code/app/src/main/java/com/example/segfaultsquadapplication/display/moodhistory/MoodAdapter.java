@@ -116,6 +116,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         private TextView textReason;
         private TextView textTimestamp;
         private TextView textSocialSituation;
+        private TextView textMoodVisibility;
         private ImageView profilePicture;
         private TextView username;
 
@@ -133,6 +134,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             textReason = itemView.findViewById(R.id.textReason);
             textTimestamp = itemView.findViewById(R.id.textTimestamp);
             textSocialSituation = itemView.findViewById(R.id.textSocialSituation);
+            textMoodVisibility = itemView.findViewById(R.id.textMoodVisibility);
             profilePicture = itemView.findViewById(R.id.profile_picture);
             username = itemView.findViewById(R.id.username);
 
@@ -164,12 +166,22 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault());
             textTimestamp.setText(sdf.format(mood.getTimestampDate()));
 
+
             if (mood.getSocialSituation() != null) {
                 textSocialSituation.setText(mood.getSocialSituation().toString());
                 textSocialSituation.setVisibility(View.VISIBLE);
             } else {
                 textSocialSituation.setVisibility(View.GONE);
             }
+
+            if (mood.isPublic()) {
+                textMoodVisibility.setText("Public");
+                textMoodVisibility.setVisibility(View.VISIBLE);
+            } else {
+                textMoodVisibility.setText("Private");
+                textMoodVisibility.setVisibility(View.VISIBLE);
+            }
+
 
             // Set profile picture
             if (currentUser != null) {

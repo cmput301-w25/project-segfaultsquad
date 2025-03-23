@@ -64,6 +64,7 @@ public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAd
             acceptButton.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
+                    acceptButton.setText("Following");
                     listener.onFollowRequest(requests.get(position), true);
                 }
             });
@@ -71,6 +72,7 @@ public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAd
             denyButton.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
+                    denyButton.setText("Denied");
                     listener.onFollowRequest(requests.get(position), false);
                 }
             });

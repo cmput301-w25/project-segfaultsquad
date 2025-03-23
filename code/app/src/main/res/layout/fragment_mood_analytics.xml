@@ -37,7 +37,8 @@ android:orientation="vertical">
         android:id="@+id/emojiRainContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:visibility="visible">
 
         <!-- Contents -->
         <ScrollView
@@ -50,29 +51,81 @@ android:orientation="vertical">
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Mood Distribution Section -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Mood Distribution"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/moodDistributionChipGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/myMoodsChip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="My Moods" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/communityMoodsChip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Community Moods" />
+                </com.google.android.material.chip.ChipGroup>
+
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/moodDistributionChart"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp" />
+                    android:layout_height="300dp"
+                    android:layout_marginBottom="24dp" />
 
-                <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/moodTrendChart"
+                <!-- Recent Moods Section -->
+                <TextView
                     android:layout_width="match_parent"
-                    android:layout_height="300dp" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Recent Moods"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/mostCommonMoodText"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/recentMoodsChipGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Most Common Mood: "
-                    android:textSize="18sp" />
+                    android:layout_marginBottom="8dp"
+                    app:singleSelection="true">
 
-                <TextView
-                    android:id="@+id/averageMoodText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Average Mood: "
-                    android:textSize="18sp" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/myRecentMoodsChip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="My Moods" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/communityRecentMoodsChip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Community Moods" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <com.github.mikephil.charting.charts.HorizontalBarChart
+                    android:id="@+id/recentMoodsChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:layout_marginBottom="24dp" />
             </LinearLayout>
         </ScrollView>
     </FrameLayout>

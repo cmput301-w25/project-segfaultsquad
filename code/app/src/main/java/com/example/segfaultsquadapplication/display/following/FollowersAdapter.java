@@ -6,6 +6,8 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +29,9 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
     private OnFollowerClickListener listener;
 
     public interface OnFollowerClickListener {
-        void onFollowerClick(User user);
+        void onRemoveFollower(User user);
+
+        void onFollowBack(User user);
     }
 
     public FollowersAdapter(List<User> followersList, OnFollowerClickListener listener) {
@@ -69,14 +73,35 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
 
         public void bind(User user, OnFollowerClickListener listener) {
             username.setText(user.getUsername());
-            // Load user profile picture using an image loading library (e.g., Glide or
-            // Picasso)
-            // Glide.with(itemView).load(user.getProfilePictureUrl()).into(profilePicture);
 
-            removeButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Unfollow
-            followBackButton.setOnClickListener(v -> listener.onFollowerClick(user)); // Follow back
+            // Set profile picture
+            List<Integer> profilePicData = user.getProfilePicUrl();
+            if (profilePicData != null && !profilePicData.isEmpty()) {
+                // Convert List<Integer> back to byte array
+                byte[] imageBytes = new byte[profilePicData.size()];
+                for (int i = 0; i < profilePicData.size(); i++) {
+                    imageBytes[i] = profilePicData.get(i).byteValue();
+                }
 
-            itemView.setOnClickListener(v -> listener.onFollowerClick(user)); // Set click listener
+                // Convert to Bitmap and set
+                Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                if (bitmap != null) {
+                    profilePicture.setImageBitmap(bitmap);
+                } else {
+                    profilePicture.setImageResource(R.drawable.ic_person);
+                }
+            } else {
+                profilePicture.setImageResource(R.drawable.ic_person);
+            }
+
+            // Set click listeners for buttons
+            removeButton.setOnClickListener(v -> listener.onRemoveFollower(user));
+            followBackButton.setOnClickListener(v -> listener.onFollowBack(user));
+        }
+
+        // Add method to control button visibility
+        public void setFollowBackButtonVisibility(boolean show) {
+            followBackButton.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
 }

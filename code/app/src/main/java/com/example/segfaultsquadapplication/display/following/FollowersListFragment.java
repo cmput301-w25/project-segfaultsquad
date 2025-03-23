@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,58 +27,188 @@ import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FollowersListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private FollowersAdapter followersAdapter;
-    private List<User> followersList; // Assume User is a model class for user data
+    private List<User> followersList;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_followers_list, container, false);
+
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+
+        // Initialize views and adapter
         recyclerView = view.findViewById(R.id.recycler_view_followers);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // Initialize the followers list and adapter
         followersList = new ArrayList<>();
-        followersAdapter = new FollowersAdapter(followersList, this::onFollowerAction);
+        followersAdapter = new FollowersAdapter(followersList, new FollowersAdapter.OnFollowerClickListener() {
+            @Override
+            public void onRemoveFollower(User user) {
+                Log.d("FollowersListFragment", "Remove follower clicked for: " + user.getUsername());
+                showRemoveFollowerDialog(user);
+            }
+
+            @Override
+            public void onFollowBack(User user) {
+                Log.d("FollowersListFragment", "Follow back clicked for: " + user.getUsername());
+                followUser(user);
+            }
+        });
         recyclerView.setAdapter(followersAdapter);
 
         // Load followers data
         loadFollowersData();
 
-
         // Set up back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v -> {
-            requireActivity().onBackPressed(); // Navigate back to ProfileFragment
+            requireActivity().onBackPressed();
         });
 
         return view;
     }
 
     private void loadFollowersData() {
-        // Mock data for demonstration
-        followersList.add(new User("User1", "username_1", "user_email_1"));
-        followersList.add(new User("User2", "username_2", "user_email_2"));
-        followersAdapter.notifyDataSetChanged();
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Add debug logging
+        Log.d("FollowersListFragment", "Loading followers for user: " + currentUserId);
+
+        db.collection("following")
+                .whereEqualTo("followedId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    // Debug log the number of followers found
+                    Log.d("FollowersListFragment", "Found " + querySnapshot.size() + " followers");
+
+                    List<String> followerUserIds = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        String followerId = document.getString("followerId");
+                        followerUserIds.add(followerId);
+                        // Debug log each follower ID
+                        Log.d("FollowersListFragment", "Found follower with ID: " + followerId);
+                    }
+
+                    // Now fetch the user details for each follower
+                    for (String userId : followerUserIds) {
+                        db.collection("users")
+                                .document(userId)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    if (userDoc.exists()) {
+                                        User user = userDoc.toObject(User.class);
+                                        // Set the user ID explicitly
+                                        user.setDbFileId(userDoc.getId());
+                                        // Debug log the user details
+                                        Log.d("FollowersListFragment", "Loaded follower: " + user.getUsername()
+                                                + " with ID: " + user.getDbFileId());
+                                        followersList.add(user);
+                                        followersAdapter.notifyDataSetChanged();
+                                    } else {
+                                        Log.e("FollowersListFragment", "User document doesn't exist for ID: " + userId);
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FollowersListFragment", "Error fetching user details for ID: " + userId, e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowersListFragment", "Error fetching followers data", e);
+                });
     }
 
-    private void onFollowerAction(User user) {
-        // Check if the user is following
-        FollowingManager.checkIfCurrentUserFollowing(user, isFollowing -> {
-            if (isFollowing) {
-                // Unfollow logic
-                Toast.makeText(getContext(), "Unfollowed " + user.getUsername(), Toast.LENGTH_SHORT).show();
-            } else {
-                // Follow back logic
-                Toast.makeText(getContext(), "Followed " + user.getUsername(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    /**
+     * method to check if the current user is following a given (other) user
+     * 
+     * @param follower
+     *                 the other useer
+     * @param position
+     *                 the index position other this other user (User obj) in the
+     *                 current user's followers list
+     */
+    private void checkIfFollowing(User follower, int position) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .whereEqualTo("followedId", follower.getDbFileId())
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    boolean isFollowing = !querySnapshot.isEmpty();
+                    // Update the Follow Back button visibility
+                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
+                    if (viewHolder instanceof FollowersAdapter.ViewHolder) {
+                        ((FollowersAdapter.ViewHolder) viewHolder).setFollowBackButtonVisibility(isFollowing);
+                    }
+                });
+    }
+
+    private void showRemoveFollowerDialog(User follower) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Remove Follower")
+                .setMessage("Are you sure you want to remove " + follower.getUsername() + " as a follower?")
+                .setPositiveButton("Yes", (dialog, which) -> removeFollower(follower))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void removeFollower(User follower) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Delete the following relationship from Firestore
+        db.collection("following")
+                .whereEqualTo("followerId", follower.getDbFileId())
+                .whereEqualTo("followedId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    followersList.remove(follower);
+                                    followersAdapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(),
+                                            "Removed " + follower.getUsername() + " from followers",
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                });
+    }
+
+    private void followUser(User userToFollow) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Create new following relationship
+        Map<String, Object> followingData = new HashMap<>();
+        followingData.put("followerId", currentUserId);
+        followingData.put("followedId", userToFollow.getDbFileId());
+        followingData.put("timestamp", FieldValue.serverTimestamp());
+
+        db.collection("following")
+                .add(followingData)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(getContext(),
+                            "Now following " + userToFollow.getUsername(),
+                            Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(),
+                            "Error following user",
+                            Toast.LENGTH_SHORT).show();
+                });
     }
 }

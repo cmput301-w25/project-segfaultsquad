@@ -53,7 +53,7 @@ public class AddMoodFragment extends Fragment {
     private Uri selectedImageUri;
     private MoodEvent.MoodType selectedMoodType = null;
     private Switch togglePublicPrivate; // Declare the Switch
-    private boolean isPublicMood = true; // Default to public
+    private boolean isPublicMood = false; // Default to private
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,6 +102,7 @@ public class AddMoodFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
         textDateTime.setText(sdf.format(new Date()));
     }
+
 
     /**
      * helper method to setup image upload for mood reason (picture)
@@ -196,6 +197,9 @@ public class AddMoodFragment extends Fragment {
         MoodEvent.SocialSituation situation = null;
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             situation = (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem();
+        }
+        if (togglePublicPrivate.isChecked()) { // set optional social situation field if provided
+            isPublicMood = true;
         }
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
                 reasonInput.getText().toString().trim(), isPublicMood, situation,
