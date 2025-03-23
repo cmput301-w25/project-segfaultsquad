@@ -10,6 +10,7 @@
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +75,12 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     }
 
     private void loadMoods() {
+        // debugging
+        Log.d("FollowingFragment", "entered loadMoods()");
+
         String currentUserId = auth.getCurrentUser().getUid(); // Get current user ID
+        // debugging
+        Log.d("FollowingFragment", "currentUserId: "+currentUserId);
 
         // Fetch the list of users that the current user follows
         db.collection("users").document(currentUserId)
@@ -84,6 +90,8 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
                         User currentUser = documentSnapshot.toObject(User.class);
                         if (currentUser != null) {
                             List<String> followingList = currentUser.getFollowing(); // Get the following list
+                            // debugging
+                            Log.d("FollowingFragment", "followingList: "+followingList);
                             if (followingList != null && !followingList.isEmpty()) {
                                 // Load the most recent moods of followed users
                                 loadFollowedUsersMoods(followingList);
@@ -100,6 +108,9 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     }
 
     private void loadFollowedUsersMoods(List<String> followingList) {
+        // debugging
+        Log.d("FollowingFragment", "loadFollowedUsersMoods()");
+
         // Fetch the moods of followed users
         for (String userId : followingList) {
             db.collection("moods")

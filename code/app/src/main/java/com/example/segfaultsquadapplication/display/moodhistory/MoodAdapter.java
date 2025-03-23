@@ -23,8 +23,10 @@ import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -44,10 +46,16 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     private OnMoodClickListener listener;
     private String currentUserId;
     private User currentUser; // To hold user data
+    private Map<String, User> userCache; // Cache to store users we've already fetched
 
     // interfaces
     public interface OnMoodClickListener {
         void onMoodClick(MoodEvent mood);
+    }
+
+    // Interface for receiving user data from Firestore
+    public interface UserCallback {
+        void onUserLoaded(User user);
     }
 
     // methods
@@ -62,6 +70,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         this.moodList = new ArrayList<>();
         this.listener = listener;
         this.currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
+        this.userCache = new HashMap<>();
         fetchCurrentUser(); // Fetch user details
     }
 
@@ -70,7 +79,13 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         AtomicReference<User> holder = new AtomicReference<>();
         DbUtils.getObjectByDocId(DbUtils.COLL_USERS, currentUserId, User.class, holder,
                 new DbOpResultHandler<>(
-                        result -> currentUser = holder.get(),
+                        result -> {
+                            currentUser = holder.get();
+                            // Add current user to cache
+                            if (currentUser != null) {
+                                userCache.put(currentUserId, currentUser);
+                            }
+                        },
                         e -> Log.e("MoodAdapter", "Error fetching user data", e)));
     }
 
@@ -86,7 +101,12 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     @Override
     public void onBindViewHolder(@NonNull MoodViewHolder holder, int position) {
         MoodEvent mood = moodList.get(position);
-        holder.bind(mood);
+
+        // Get the user who created this mood
+        getMoodUser(mood, user -> {
+            // We now have the user, update the view with this information
+            holder.bind(mood, user);
+        });
     }
 
     @Override
@@ -103,6 +123,44 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     public void updateMoods(List<MoodEvent> newMoods) {
         this.moodList = newMoods;
         notifyDataSetChanged();
+    }
+
+    /**
+     * helper method to get the user of the moodevent arg
+     * 
+     * @param m        the passed mood event object whose user we want to get
+     * @param callback callback to receive the user when loaded
+     */
+    public void getMoodUser(MoodEvent m, UserCallback callback) {
+        // get the userId field of this mood event
+        String moodUserId = m.getUserId();
+
+        // First check if we already have this user in cache
+        if (userCache.containsKey(moodUserId)) {
+            callback.onUserLoaded(userCache.get(moodUserId));
+            return;
+        }
+
+        // Use DbUtils to get the user
+        AtomicReference<User> holder = new AtomicReference<>();
+        DbUtils.getObjectByDocId(DbUtils.COLL_USERS, moodUserId, User.class, holder,
+                new DbOpResultHandler<>(
+                        result -> {
+                            User user = holder.get();
+                            if (user != null) {
+                                // Store in cache for future use
+                                userCache.put(moodUserId, user);
+                                Log.d("MoodAdapter", "Loaded user: " + user.getUsername() + " for mood");
+                                callback.onUserLoaded(user);
+                            } else {
+                                Log.e("MoodAdapter", "User object is null for ID: " + moodUserId);
+                                callback.onUserLoaded(null);
+                            }
+                        },
+                        e -> {
+                            Log.e("MoodAdapter", "Error fetching user data for ID: " + moodUserId, e);
+                            callback.onUserLoaded(null);
+                        }));
     }
 
     /**
@@ -150,9 +208,11 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
          * method to create the UI of the mood event
          *
          * @param mood
-         *             mood information object (MoodEvent)
+         *                 mood information object (MoodEvent)
+         * @param moodUser
+         *                 user who created the mood
          */
-        public void bind(MoodEvent mood) {
+        public void bind(MoodEvent mood, User moodUser) {
             // Set mood emoji
             moodEmoji.setText(mood.getMoodType().getEmoticon());
             // set reason text ("IMAGE if image reason)")
@@ -165,7 +225,6 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
             SimpleDateFormat sdf = new SimpleDateFormat("MMM d, yyyy • h:mm a", Locale.getDefault());
             textTimestamp.setText(sdf.format(mood.getTimestampDate()));
-
 
             if (mood.getSocialSituation() != null) {
                 textSocialSituation.setText(mood.getSocialSituation().toString());
@@ -182,30 +241,49 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
                 textMoodVisibility.setVisibility(View.VISIBLE);
             }
 
-
+            // Set username
+            username.setText(moodUser.getUsername());
             // Set profile picture
-            if (currentUser != null) {
-                List<Integer> profilePicData = currentUser.getProfilePicUrl();
-                if (profilePicData != null && !profilePicData.isEmpty()) {
-                    // Convert List<Integer> back to byte array
-                    byte[] imageBytes = new byte[profilePicData.size()];
-                    for (int i = 0; i < profilePicData.size(); i++) {
-                        imageBytes[i] = profilePicData.get(i).byteValue();
-                    }
+            if (moodUser != null) {
+                List<Integer> profilePicData = moodUser.getProfilePicUrl();
+                // debugging
+                Log.d("MoodAdapter", "profilePicData: " + profilePicData);
+                if (profilePicData != null) {
+                    // debugging
+                    Log.d("MoodAdapter", "profilePicData.isEmpty(): " + profilePicData.isEmpty());
 
-                    // Decode byte array to Bitmap
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    if (bitmap != null) {
-                        profilePicture.setImageBitmap(bitmap);
+                    // if its empty (should even be possible...)
+                    if (profilePicData.isEmpty()) {
+                        // set to the default pfp
+                        profilePicture.setImageResource(R.drawable.profile_icon); // Default image
                     } else {
-                        profilePicture.setImageResource(R.drawable.ic_person); // Default image
-                    }
-                } else {
-                    profilePicture.setImageResource(R.drawable.ic_person); // Default image
-                }
+                        // construct the image from data
 
-                // Set username
-                username.setText(currentUser.getUsername());
+                        // Convert List<Integer> back to byte array
+                        byte[] imageBytes = new byte[profilePicData.size()];
+                        for (int i = 0; i < profilePicData.size(); i++) {
+                            imageBytes[i] = profilePicData.get(i).byteValue();
+                        }
+
+                        // Decode byte array to Bitmap
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                        if (bitmap != null) {
+                            profilePicture.setImageBitmap(bitmap);
+                        } else {
+                            profilePicture.setImageResource(R.drawable.profile_icon); // Default image
+                        }
+                    }
+
+                } else {
+                    // debugging
+                    Log.d("MoodAdapter", "profilePicData was null: " + profilePicData);
+                    profilePicture.setImageResource(R.drawable.profile_icon); // Default image
+                }
+            } else {
+                Log.d("MoodAdapter", "Fialed to get user info for moodevent: " + mood.getDbFileId());
+                // If user data couldn't be loaded, use default image and "Unknown" username
+                profilePicture.setImageResource(R.drawable.profile_icon);
+                username.setText("Unknown");
             }
 
             // Set mood colors

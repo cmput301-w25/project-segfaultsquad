@@ -266,10 +266,10 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                 if (bitmap != null) {
                     profilePicture.setImageBitmap(bitmap);
                 } else {
-                    profilePicture.setImageResource(R.drawable.ic_person); // Default image
+                    profilePicture.setImageResource(R.drawable.profile_icon); // Default image
                 }
             } else {
-                profilePicture.setImageResource(R.drawable.ic_person); // Default image
+                profilePicture.setImageResource(R.drawable.profile_icon); // Default image
             }
         }
     }
