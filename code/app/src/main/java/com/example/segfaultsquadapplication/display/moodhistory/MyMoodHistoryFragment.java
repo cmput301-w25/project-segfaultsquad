@@ -22,7 +22,9 @@ import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -68,6 +70,8 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
 
         // Setup filter options
         setupFilterOptions(view);
+
+        showFollowRequestCount();
 
         // Setup FAB for adding new mood
         view.findViewById(R.id.fabAddMood).setOnClickListener(
@@ -301,6 +305,37 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
             }
         }
         moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void showFollowRequestCount() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String currentUserId = null;
+
+        if (currentUser != null) {
+            currentUserId = currentUser.getUid();
+        }
+
+        if (currentUserId != null) {
+            db.collection("users").document(currentUserId) //get user doc
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            User currentUserData = documentSnapshot.toObject(User.class);
+
+                            // Check if follow requests exist
+                            if (currentUserData != null && currentUserData.getFollowRequests() != null &&
+                                    !currentUserData.getFollowRequests().isEmpty()) {
+                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " new follow requests", Toast.LENGTH_LONG).show();
+
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("Firestore", "Error fetching user data", e);
+                        Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
+                    });
+        }
     }
 
     /**
