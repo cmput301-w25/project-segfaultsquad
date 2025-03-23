@@ -135,11 +135,17 @@ public class FollowRequestsFragment extends Fragment {
             db.collection("users").document(currentUserId) //remove user follow request list
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));
 
-            Toast.makeText(getContext(), user.getUsername() + "is now following you", Toast.LENGTH_SHORT).show();
+            followRequests.remove(user);
+            requestsAdapter.notifyItemRemoved(followRequests.indexOf(user));
+
+            Toast.makeText(getContext(), user.getUsername() + " is now following you", Toast.LENGTH_SHORT).show();
 
         } else { //if denied
             db.collection("users").document(currentUserId)
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));
+
+            followRequests.remove(user);
+            requestsAdapter.notifyItemRemoved(followRequests.indexOf(user));
 
             Toast.makeText(getContext(), user.getUsername() + "'s follow request denied", Toast.LENGTH_SHORT).show();
         }
