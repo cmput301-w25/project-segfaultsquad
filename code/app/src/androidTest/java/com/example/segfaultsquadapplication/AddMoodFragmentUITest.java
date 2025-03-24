@@ -70,9 +70,9 @@ public class AddMoodFragmentUITest {
         CollectionReference moodsRef = db.collection("moods");
 
         MoodEvent[] moods = {
-                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.ANGER, "I don't wanna", null, null),
-                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.DISGUST, "Ewwwww", null, null),
-                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.SHAME, "Oh maaa Gawd", null, null)
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.ANGER, "I don't wanna", null, null, true),
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.DISGUST, "Ewwwww", null, null, true),
+                new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.SHAME, "Oh maaa Gawd", null, null, true)
         };
         for (MoodEvent mood : moods) moodsRef.document().set(mood);
     }

@@ -33,7 +33,6 @@ public class MoodEvent implements IDbData {
     private boolean isPublic; // Visibility of the mood event
 
     // Optional attributes
-    private String trigger; // Trigger for the mood (optional)
     private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types

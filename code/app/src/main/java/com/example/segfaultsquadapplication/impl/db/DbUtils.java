@@ -16,6 +16,7 @@ import com.google.firebase.firestore.Transaction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -28,12 +29,34 @@ import java.util.function.Function;
  * and additional logic (e.g. additional castings / success checks), if necessary. </br>
  */
 public class DbUtils {
-    private static FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private static FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static FirebaseAuth mAuth = null;
+    private static FirebaseFirestore db = null;
     public static final String
             COLL_FOLLOWERS = "followers",
             COLL_MOOD_EVENTS = "moods",
             COLL_USERS = "users";
+    /*
+     * UNIT TEST WIRING FUNCTIONS
+     */
+    public static void wireMockDb(FirebaseFirestore firestore) {
+        db = firestore;
+    }
+    public static void wireMockAuth(FirebaseAuth auth) {
+        mAuth = auth;
+    }
+
+    /**
+     * If the database has not been mocked, lazy-initialize it as the default.
+     */
+    private static void requireDb() {
+        if (db == null) db = FirebaseFirestore.getInstance();
+    }
+    /**
+     * If the auth has not been mocked, lazy-initialize it as the default.
+     */
+    private static void requireAuth() {
+        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+    }
 
     /*
      * DOCUMENT HELPER FUNCTIONS
@@ -54,6 +77,7 @@ public class DbUtils {
                                                         Class<T> tClass,
                                                         @Nullable Collection<T> holder,
                                                         DbOpResultHandler<QuerySnapshot> handler) {
+        requireDb();
         specifications.apply( db.collection(collection) )
                 .get()
                 .addOnCompleteListener(task -> {
@@ -63,8 +87,9 @@ public class DbUtils {
                         try {
                             // Create objects from the documents if needed
                             if (holder != null) {
-                                ArrayList<T> temp = new ArrayList<>(task.getResult().getDocuments().size() + 1);
-                                for (DocumentSnapshot documentSnapshot : task.getResult().getDocuments()) {
+                                List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
+                                ArrayList<T> temp = new ArrayList<>(snapshots.size() + 1);
+                                for (DocumentSnapshot documentSnapshot : snapshots) {
                                     T obj = documentSnapshot.toObject(tClass);
                                     if (obj != null) {
                                         obj.setDbFileId(documentSnapshot.getId());
@@ -89,6 +114,16 @@ public class DbUtils {
                     }
                     handler.onFailure(exception);
                 });
+    }
+
+    /**
+     * Gets a document reference.
+     * @param coll The collection
+     * @param docPath The document path
+     */
+    public static DocumentReference getDocRef(String coll, String docPath) {
+        requireDb();
+        return db.collection(coll).document(docPath);
     }
 
     /**
@@ -144,20 +179,19 @@ public class DbUtils {
     public static <T> void operateDocumentById(String collection, String docId,
                                                 Function<DocumentReference, Task<T>> operation,
                                                 DbOpResultHandler<T> handler) {
-        operation.apply(
-                        db.collection(collection)
-                                .document(docId))
-                .addOnSuccessListener(handler::onSuccess)
-                .addOnFailureListener(handler::onFailure);
-    }
-
-    /**
-     * Gets a document reference.
-     * @param coll The collection
-     * @param docPath The document path
-     */
-    public static DocumentReference getDocRef(String coll, String docPath) {
-        return db.collection(coll).document(docPath);
+        requireDb();
+        try {
+            operation.apply(getDocRef(collection, docId))
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            handler.onSuccess(task.getResult());
+                        } else {
+                            handler.onFailure(task.getException());
+                        }
+                    });
+        } catch (Exception e) {
+            handler.onFailure(e);
+        }
     }
 
     /**
@@ -166,9 +200,15 @@ public class DbUtils {
      * @param handler The handler defining success / failure behavior.
      */
     public static <T> void operateTransaction(Transaction.Function<T> transaction, DbOpResultHandler<T> handler) {
+        requireDb();
         db.runTransaction(transaction)
-                .addOnSuccessListener(handler::onSuccess)
-                .addOnFailureListener(handler::onFailure);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        handler.onSuccess(task.getResult());
+                    } else {
+                        handler.onFailure(task.getException());
+                    }
+                });
     }
 
     /**
@@ -180,6 +220,7 @@ public class DbUtils {
      */
     public static <T extends IDbData> void addObjectToCollection(String collection, T data,
                                                                  DbOpResultHandler<DocumentReference> handler) {
+        requireDb();
         db.collection(collection)
                 .add(data)
                 .addOnCompleteListener(task -> {
@@ -203,6 +244,7 @@ public class DbUtils {
      */
     @Nullable
     public static FirebaseUser getUser() {
+        requireAuth();
         return mAuth.getCurrentUser();
     }
 
@@ -241,6 +283,7 @@ public class DbUtils {
      * @param handler The handler for success/failure
      */
     public static void login(String email, String pwd, DbOpResultHandler<AuthResult> handler) {
+        requireAuth();
         mAuth.signInWithEmailAndPassword(email, pwd)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
