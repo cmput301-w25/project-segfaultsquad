@@ -122,6 +122,13 @@
                 android:layout_height="wrap_content"
                 android:padding="8dp"
                 android:text="By Reason" />
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear Filters" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
