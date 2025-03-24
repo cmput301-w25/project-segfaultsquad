@@ -42,8 +42,10 @@ import java.util.function.Function;
  * Reference: https://www.baeldung.com/mockito-behavior
  */
 public class MockDb {
+    // Gave up wiring emulator for mock unit tests.
     private static final boolean USE_EMULATOR = false;
-    private static final boolean DEBUG_LOG = true;
+    // Whether to log wiring events etc.
+    private static final boolean DEBUG_LOG = false;
 
     @Mock
     FirebaseFirestore mockFirestore = Mockito.mock(FirebaseFirestore.class);
@@ -124,6 +126,11 @@ public class MockDb {
      * BELOW: WIRING FUNCTIONS
      */
 
+    /**
+     * Mocks the transaction method for the entire database.
+     * ONLY WIRED UP UPDATE METHODS as they are the ones being used in the project.
+     * @param mockDb The database to wire.
+     */
     private void wireTransaction(FirebaseFirestore mockDb) {
         doAnswer(invocation -> {
             // Mock transaction logic
@@ -171,6 +178,11 @@ public class MockDb {
         }).when(mockColl).document(anyString());
     }
 
+    /**
+     * Wraps the result into a task.
+     * @param result The result to wrap up with
+     * @return The wrapped tasks
+     */
     private <T> Task<T> wrapTask(T result) {
         Task<T> task = Mockito.mock(Task.class);
         Mockito.when(task.isSuccessful()).thenReturn(true);
@@ -250,6 +262,12 @@ public class MockDb {
         return docRef;
     }
 
+    /**
+     * Gets the mocked document snapshot for the document in the collection.
+     * @param mockColl The collection
+     * @param docId Document id
+     * @return Mock document snapshot
+     */
     private DocumentSnapshot getDocSnapshot(CollectionReference mockColl, String docId) {
         DocumentSnapshot snapshot = Mockito.mock(DocumentSnapshot.class);
         doAnswer(getIdInvoc -> docId).when(snapshot).getId();
