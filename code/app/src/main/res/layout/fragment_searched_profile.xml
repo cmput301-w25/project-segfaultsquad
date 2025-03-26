@@ -110,4 +110,23 @@
                 android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Follow/Unfollow -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/follow_profile_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:backgroundTint="#252E7E"
+            android:text="Follow" />
+    </LinearLayout>
 </LinearLayout> 
