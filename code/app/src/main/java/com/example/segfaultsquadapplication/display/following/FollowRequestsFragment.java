@@ -15,14 +15,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class FollowRequestsFragment extends Fragment {
     private RecyclerView requestsRecyclerView;
@@ -127,10 +133,24 @@ public class FollowRequestsFragment extends Fragment {
         String currentUserId = auth.getCurrentUser().getUid();
 
         if (accept) {
-            db.collection("users").document(currentUserId) //update current user followers
+            db.collection("users").document(currentUserId) //update current user followers profile
                     .update("followers", FieldValue.arrayUnion(user.getDbFileId()));
-            db.collection("users").document(user.getDbFileId()) //update user that followed following
+            db.collection("users").document(user.getDbFileId()) //update user that followed following profile
                     .update("following", FieldValue.arrayUnion(currentUserId));
+
+            Map<String, Object> newFollow = new HashMap<>();
+            newFollow.put("followerId", user.getDbFileId());
+            newFollow.put("followedId", currentUserId);
+            newFollow.put("timestamp", FieldValue.serverTimestamp());
+
+            db.collection("following")
+                    .add(newFollow)  // Automatically generates a document ID
+                    .addOnSuccessListener(documentReference -> {
+                        Log.d("Firestore", "DocumentSnapshot added with ID: " + documentReference.getId());
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("Firestore", "Error adding document", e);
+                    });
 
             db.collection("users").document(currentUserId) //remove user follow request list
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));

@@ -2,19 +2,26 @@ package com.example.segfaultsquadapplication.display.profile;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -26,6 +33,10 @@ public class SearchedProfileFragment extends Fragment {
     private TextView followingCount;
     private FirebaseFirestore db;
     private String searchedUserId;
+    private String currentUserId;
+    private Button followButton;
+    private boolean currentUserFollowingSearched; //if current user already searched
+    private boolean followRequestSent; //if follow request has from current user to searched
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -33,7 +44,7 @@ public class SearchedProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_searched_profile, container, false);
 
         // Get searched user ID from arguments
-        searchedUserId = getArguments().getString("userId");
+        searchedUserId = getArguments().getString("searchedUserID");
 
         // Initialize views
         profilePicture = view.findViewById(R.id.profile_picture);
@@ -41,6 +52,11 @@ public class SearchedProfileFragment extends Fragment {
         followersCount = view.findViewById(R.id.followers_count);
         followingCount = view.findViewById(R.id.following_count);
         ImageButton backButton = view.findViewById(R.id.backButton);
+
+        // Variables pertaining to current user
+        currentUserId = getArguments().getString("currentUserID");
+        followButton = view.findViewById(R.id.follow_profile_button);
+        currentUserFollowingSearched = false;
 
         // Initialize Firestore
         db = FirebaseFirestore.getInstance();
@@ -50,6 +66,8 @@ public class SearchedProfileFragment extends Fragment {
 
         // Set back button click listener
         backButton.setOnClickListener(v -> requireActivity().onBackPressed());
+
+        followButton.setOnClickListener(v -> sendFollowRequest());
 
         return view;
     }
@@ -95,6 +113,7 @@ public class SearchedProfileFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     followersCount.setText(String.valueOf(queryDocumentSnapshots.size()));
+                    checkIfFollowing(); //to check if current follows searched
                 });
 
         // Load following count
@@ -105,4 +124,55 @@ public class SearchedProfileFragment extends Fragment {
                     followingCount.setText(String.valueOf(queryDocumentSnapshots.size()));
                 });
     }
+
+    private void checkIfFollowing() {
+        //checkifFollowing
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)//check if current user is following
+                .whereEqualTo("followedId", searchedUserId)
+                .limit(1) // Optimize by limiting results to 1
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        currentUserFollowingSearched = true;
+                        updateFollowButton();
+                    }
+                });
+
+        db.collection("users")
+                .document(searchedUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                        List<String> followRequests = (List<String>) documentSnapshot.get("followRequests");
+                        if (followRequests != null && followRequests.contains(currentUserId)) {
+                            followRequestSent = true;
+                            updateFollowButton();
+                        } else {
+                            Log.d("FollowRequestCheck", "No follow request found.");
+                        }
+                });
+
+    }
+
+    private void updateFollowButton() {
+        if (currentUserFollowingSearched) {
+            followButton.setText("Following");
+            followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+        }
+        if (followRequestSent) {
+            followButton.setText("Requested to Follow");
+            followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+        }
+    }
+
+    private void sendFollowRequest() {
+        if (!currentUserFollowingSearched & !followRequestSent) {
+            db.collection("users").document(searchedUserId) //update current user followers profile
+                    .update("followRequests", FieldValue.arrayUnion(currentUserId));
+            Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+            followRequestSent = true;
+            updateFollowButton();
+        }
+    }
+
 }
