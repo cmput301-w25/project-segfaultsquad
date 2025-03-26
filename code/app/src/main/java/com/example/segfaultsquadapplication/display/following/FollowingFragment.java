@@ -80,7 +80,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
         String currentUserId = auth.getCurrentUser().getUid(); // Get current user ID
         // debugging
-        Log.d("FollowingFragment", "currentUserId: "+currentUserId);
+        Log.d("FollowingFragment", "currentUserId: " + currentUserId);
 
         // Fetch the list of users that the current user follows
         db.collection("users").document(currentUserId)
@@ -91,7 +91,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
                         if (currentUser != null) {
                             List<String> followingList = currentUser.getFollowing(); // Get the following list
                             // debugging
-                            Log.d("FollowingFragment", "followingList: "+followingList);
+                            Log.d("FollowingFragment", "followingList: " + followingList);
                             if (followingList != null && !followingList.isEmpty()) {
                                 // Load the most recent moods of followed users
                                 loadFollowedUsersMoods(followingList);
@@ -115,6 +115,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         for (String userId : followingList) {
             db.collection("moods")
                     .whereEqualTo("userId", userId)
+                    .whereEqualTo("public", true);
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .limit(3) // Get the 3 most recent moods
                     .get()
