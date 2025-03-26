@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
@@ -39,7 +41,7 @@ public class SearchedProfileFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_searched_profile, container, false);
 
         // Get searched user ID from arguments
-        searchedUserId = getArguments().getString("searchedUserId");
+        searchedUserId = getArguments().getString("searchedUserID");
 
         // Initialize views
         profilePicture = view.findViewById(R.id.profile_picture);
@@ -49,7 +51,7 @@ public class SearchedProfileFragment extends Fragment {
         ImageButton backButton = view.findViewById(R.id.backButton);
 
         // Variables pertaining to current user
-        currentUserId = getArguments().getString("currentUserId");
+        currentUserId = getArguments().getString("currentUserID");
         followButton = view.findViewById(R.id.follow_profile_button);
         currentUserFollowingSearched = false;
 
@@ -61,6 +63,8 @@ public class SearchedProfileFragment extends Fragment {
 
         // Set back button click listener
         backButton.setOnClickListener(v -> requireActivity().onBackPressed());
+
+        followButton.setOnClickListener(v -> sendFollowRequest());
 
         return view;
     }
@@ -125,8 +129,22 @@ public class SearchedProfileFragment extends Fragment {
                 .limit(1) // Optimize by limiting results to 1
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    currentUserFollowingSearched = !queryDocumentSnapshots.isEmpty();
-                    followButton.setText("Following");
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        currentUserFollowingSearched = true;
+                        updateFollowButton();
+                    }
                 });
     }
+
+    private void updateFollowButton() {
+        if (currentUserFollowingSearched) {
+            followButton.setText("Following");
+            followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+        }
+    }
+
+    private void sendFollowRequest() {
+
+    }
+
 }

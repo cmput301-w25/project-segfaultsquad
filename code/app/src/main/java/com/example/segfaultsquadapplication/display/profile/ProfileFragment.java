@@ -573,8 +573,8 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
 
     private void navigateToSearchedProfile(User user) {
         Bundle args = new Bundle();
-        args.putString("searchedUserId", user.getDbFileId());
-        args.putString("currentUserID", currentUser.getDbFileId());
+        args.putString("searchedUserID", user.getDbFileId());
+        args.putString("currentUserID", auth.getCurrentUser().getUid());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_profile_to_searched_profile, args);
 
