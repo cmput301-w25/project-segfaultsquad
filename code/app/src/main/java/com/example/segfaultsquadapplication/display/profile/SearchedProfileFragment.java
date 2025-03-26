@@ -126,6 +126,7 @@ public class SearchedProfileFragment extends Fragment {
     }
 
     private void checkIfFollowing() {
+        //checkifFollowing
         db.collection("following")
                 .whereEqualTo("followerId", currentUserId)//check if current user is following
                 .whereEqualTo("followedId", searchedUserId)
@@ -137,6 +138,20 @@ public class SearchedProfileFragment extends Fragment {
                         updateFollowButton();
                     }
                 });
+
+        db.collection("users")
+                .document(searchedUserId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                        List<String> followRequests = (List<String>) documentSnapshot.get("followRequests");
+                        if (followRequests != null && followRequests.contains(currentUserId)) {
+                            followRequestSent = true;
+                            updateFollowButton();
+                        } else {
+                            Log.d("FollowRequestCheck", "No follow request found.");
+                        }
+                });
+
     }
 
     private void updateFollowButton() {
@@ -145,7 +160,7 @@ public class SearchedProfileFragment extends Fragment {
             followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
         }
         if (followRequestSent) {
-            followButton.setText("Follow Request Already Send");
+            followButton.setText("Requested to Follow");
             followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
         }
     }
