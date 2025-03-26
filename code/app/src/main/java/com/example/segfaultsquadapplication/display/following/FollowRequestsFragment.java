@@ -139,8 +139,8 @@ public class FollowRequestsFragment extends Fragment {
                     .update("following", FieldValue.arrayUnion(currentUserId));
 
             Map<String, Object> newFollow = new HashMap<>();
-            newFollow.put("followerId", "yourFollowerId");
-            newFollow.put("followedId", "yourFollowedId");
+            newFollow.put("followerId", currentUserId);
+            newFollow.put("followedId", user.getDbFileId());
             newFollow.put("timestamp", FieldValue.serverTimestamp());
 
             db.collection("following")
