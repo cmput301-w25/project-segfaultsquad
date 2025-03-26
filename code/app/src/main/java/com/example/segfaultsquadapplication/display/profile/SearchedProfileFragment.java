@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -20,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
@@ -33,7 +35,8 @@ public class SearchedProfileFragment extends Fragment {
     private String searchedUserId;
     private String currentUserId;
     private Button followButton;
-    private boolean currentUserFollowingSearched;
+    private boolean currentUserFollowingSearched; //if current user already searched
+    private boolean followRequestSent; //if follow request has from current user to searched
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -141,10 +144,20 @@ public class SearchedProfileFragment extends Fragment {
             followButton.setText("Following");
             followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
         }
+        if (followRequestSent) {
+            followButton.setText("Follow Request Already Send");
+            followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+        }
     }
 
     private void sendFollowRequest() {
-
+        if (!currentUserFollowingSearched & !followRequestSent) {
+            db.collection("users").document(searchedUserId) //update current user followers profile
+                    .update("followRequests", FieldValue.arrayUnion(currentUserId));
+            Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+            followRequestSent = true;
+            updateFollowButton();
+        }
     }
 
 }
