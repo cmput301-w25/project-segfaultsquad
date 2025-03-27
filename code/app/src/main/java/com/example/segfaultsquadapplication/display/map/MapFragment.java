@@ -228,7 +228,6 @@ public class MapFragment extends Fragment {
                 // Print latitude and longitude to Logcat
                 Log.d("Coordinates", latitude + ", " + longitude);
 
-                // Now you can use these coordinates anywhere
                 addRedMarker(mapView, latitude, longitude);
             }
 
