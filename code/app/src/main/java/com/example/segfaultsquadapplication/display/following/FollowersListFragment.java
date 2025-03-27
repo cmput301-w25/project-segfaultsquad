@@ -6,24 +6,22 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,9 +29,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FollowersListFragment extends Fragment {
 
@@ -42,6 +38,8 @@ public class FollowersListFragment extends Fragment {
     private List<User> followersList;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private boolean isFollowing = false; //if current user following user
+    private boolean followRequestSent = false; //if current user sent request to  user
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -66,7 +64,7 @@ public class FollowersListFragment extends Fragment {
             @Override
             public void onFollowBack(User user) {
                 Log.d("FollowersListFragment", "Follow back clicked for: " + user.getUsername());
-                followUser(user);
+                checkIfFollowing(user);
             }
         });
         recyclerView.setAdapter(followersAdapter);
@@ -134,26 +132,25 @@ public class FollowersListFragment extends Fragment {
 
     /**
      * method to check if the current user is following a given (other) user
-     * 
-     * @param follower
-     *                 the other useer
-     * @param position
+     *
+     * @param follower the other useer
      *                 the index position other this other user (User obj) in the
      *                 current user's followers list
      */
-    private void checkIfFollowing(User follower, int position) {
+    private void checkIfFollowing(User follower) {
         String currentUserId = auth.getCurrentUser().getUid();
 
         db.collection("following")
                 .whereEqualTo("followerId", currentUserId)
                 .whereEqualTo("followedId", follower.getDbFileId())
+                .limit(1)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     boolean isFollowing = !querySnapshot.isEmpty();
-                    // Update the Follow Back button visibility
-                    RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(position);
-                    if (viewHolder instanceof FollowersAdapter.ViewHolder) {
-                        ((FollowersAdapter.ViewHolder) viewHolder).setFollowBackButtonVisibility(isFollowing);
+                    if (!isFollowing) {
+                        sendFollowRequest(follower);
+                    } else {
+//                        updateFollowBackButton();
                     }
                 });
     }
@@ -189,26 +186,25 @@ public class FollowersListFragment extends Fragment {
                 });
     }
 
-    private void followUser(User userToFollow) {
+//    private void updateFollowBackButton() {
+//        if (isFollowing) {
+//            followBackButton.setText("Following");
+//            followBackButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+//        }
+//        if (followRequestSent) {
+//            followBackButton.setText("Requested to Follow");
+//            followBackButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
+//        }
+//    }
+
+    private void sendFollowRequest(User userToFollow) {
         String currentUserId = auth.getCurrentUser().getUid();
-
-        // Create new following relationship
-        Map<String, Object> followingData = new HashMap<>();
-        followingData.put("followerId", currentUserId);
-        followingData.put("followedId", userToFollow.getDbFileId());
-        followingData.put("timestamp", FieldValue.serverTimestamp());
-
-        db.collection("following")
-                .add(followingData)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(),
-                            "Now following " + userToFollow.getUsername(),
-                            Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(),
-                            "Error following user",
-                            Toast.LENGTH_SHORT).show();
-                });
+        if (!isFollowing) {
+            db.collection("users").document(userToFollow.getDbFileId()) //update current user followers profile
+                    .update("followRequests", FieldValue.arrayUnion(currentUserId));
+            followRequestSent = true;
+//            updateFollowBackButton();
+            Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+        }
     }
 }
