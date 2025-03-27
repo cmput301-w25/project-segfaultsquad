@@ -73,6 +73,7 @@ import android.widget.Toast;
 import androidx.navigation.Navigation;
 
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.overlay.Marker;
@@ -151,26 +152,6 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
-
-        // Chip group view
-        mapChipGroup = view.findViewById(R.id.map_chip_group); // find it
-        mapChipGroup.check(R.id.chip_my_moods); // Set default selection
-        // Chip click listener
-        mapChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.chip_my_moods) {
-                // Handle My Mood History selection
-                currentTab = TAB_MY_MOODS;
-                updateMapMarkers(TAB_MY_MOODS);
-            } else if (checkedId == R.id.chip_followed_moods) {
-                // Handle Followed Moods selection
-                currentTab = TAB_FOLLOWED;
-                updateMapMarkers(TAB_FOLLOWED);
-            } else if (checkedId == R.id.chip_local_moods) {
-                // Handle Local Moods selection
-                currentTab = TAB_LOCAL;
-                updateMapMarkers(TAB_LOCAL);
-            }
-        });
 
         // Initialize filter views
         filterButton = view.findViewById(R.id.filterButton);
@@ -737,9 +718,31 @@ public class MapFragment extends Fragment {
         }
     }
     private void clearMoodMarkers() {
-        mapView.getOverlays().clear(); // Remove all markers from the map
-        mapView.invalidate(); // Refresh the map view
-        allMoods.clear(); // Clear the list of mood events
+        // Get the current overlays from the map
+        List<Overlay> overlays = mapView.getOverlays();
+
+        // Find the MyLocationNewOverlay (location overlay) if it exists
+        MyLocationNewOverlay locationOverlay = null;
+        for (Overlay overlay : overlays) {
+            if (overlay instanceof MyLocationNewOverlay) {
+                locationOverlay = (MyLocationNewOverlay) overlay;
+                break;
+            }
+        }
+
+        // Clear all other overlays from the map
+        mapView.getOverlays().clear();
+
+        // If a location overlay exists, add it back to the map
+        if (locationOverlay != null) {
+            mapView.getOverlays().add(locationOverlay);
+        }
+
+        // Refresh the map view
+        mapView.invalidate();
+
+        // Clear the list of mood events
+        allMoods.clear();
     }
 }
 
