@@ -115,7 +115,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         for (String userId : followingList) {
             db.collection("moods")
                     .whereEqualTo("userId", userId)
-                    .whereEqualTo("public", true);
+                    .whereEqualTo("public", true)
                     .orderBy("timestamp", Query.Direction.DESCENDING)
                     .limit(3) // Get the 3 most recent moods
                     .get()
