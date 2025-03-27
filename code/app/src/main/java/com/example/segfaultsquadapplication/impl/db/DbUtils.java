@@ -2,8 +2,8 @@ package com.example.segfaultsquadapplication.impl.db;
 
 import androidx.annotation.Nullable;
 
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -15,9 +15,7 @@ import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
@@ -29,20 +27,23 @@ import java.util.function.Function;
  * and additional logic (e.g. additional castings / success checks), if necessary. </br>
  */
 public class DbUtils {
-    private static FirebaseAuth mAuth = null;
     private static FirebaseFirestore db = null;
     public static final String
             COLL_FOLLOWERS = "followers",
             COLL_MOOD_EVENTS = "moods",
             COLL_USERS = "users";
-    /*
-     * UNIT TEST WIRING FUNCTIONS
+
+    /**
+     * UNIT TEST WIRING FUNCTION
      */
     public static void wireMockDb(FirebaseFirestore firestore) {
         db = firestore;
     }
+
+    // TODO: after merging all branches to main, refactor - inline method
+    @Deprecated
     public static void wireMockAuth(FirebaseAuth auth) {
-        mAuth = auth;
+        UserManager.wireMockAuth(auth);
     }
 
     /**
@@ -50,12 +51,6 @@ public class DbUtils {
      */
     private static void requireDb() {
         if (db == null) db = FirebaseFirestore.getInstance();
-    }
-    /**
-     * If the auth has not been mocked, lazy-initialize it as the default.
-     */
-    private static void requireAuth() {
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
     }
 
     /*
@@ -76,7 +71,7 @@ public class DbUtils {
     public static <T extends IDbData> void queryObjects(String collection, Function<Query, Query> specifications,
                                                         Class<T> tClass,
                                                         @Nullable Collection<T> holder,
-                                                        DbOpResultHandler<QuerySnapshot> handler) {
+                                                        TaskResultHandler<QuerySnapshot> handler) {
         requireDb();
         specifications.apply( db.collection(collection) )
                 .get()
@@ -112,12 +107,14 @@ public class DbUtils {
                     } else {
                         exception = new RuntimeException("Error retrieving documents", task.getException());
                     }
+                    exception.printStackTrace(System.err);
                     handler.onFailure(exception);
                 });
     }
 
     /**
-     * Gets a document reference.
+     * Gets a document reference. RECOMMENDED FOR TRANSACTION ONLY!
+     * For other usages, consider using other helper functions.
      * @param coll The collection
      * @param docPath The document path
      */
@@ -137,8 +134,8 @@ public class DbUtils {
      */
     public static <T extends IDbData> void getObjectByDocId(String collection, String docId,
                                             Class<T> tClass, AtomicReference<T> holder,
-                                            DbOpResultHandler<DocumentSnapshot> handler) {
-        DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
+                                            TaskResultHandler<DocumentSnapshot> handler) {
+        TaskResultHandler<DocumentSnapshot> opHandler = new TaskResultHandler<>(
                 // Success
                 documentSnapshot -> {
                     Exception exception;
@@ -178,7 +175,7 @@ public class DbUtils {
      */
     public static <T> void operateDocumentById(String collection, String docId,
                                                 Function<DocumentReference, Task<T>> operation,
-                                                DbOpResultHandler<T> handler) {
+                                                TaskResultHandler<T> handler) {
         requireDb();
         try {
             operation.apply(getDocRef(collection, docId))
@@ -186,10 +183,12 @@ public class DbUtils {
                         if (task.isSuccessful()) {
                             handler.onSuccess(task.getResult());
                         } else {
+                            task.getException().printStackTrace(System.err);
                             handler.onFailure(task.getException());
                         }
                     });
         } catch (Exception e) {
+            e.printStackTrace(System.err);
             handler.onFailure(e);
         }
     }
@@ -199,13 +198,14 @@ public class DbUtils {
      * @param transaction The transaction logic.
      * @param handler The handler defining success / failure behavior.
      */
-    public static <T> void operateTransaction(Transaction.Function<T> transaction, DbOpResultHandler<T> handler) {
+    public static <T> void operateTransaction(Transaction.Function<T> transaction, TaskResultHandler<T> handler) {
         requireDb();
         db.runTransaction(transaction)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         handler.onSuccess(task.getResult());
                     } else {
+                        task.getException().printStackTrace(System.err);
                         handler.onFailure(task.getException());
                     }
                 });
@@ -219,7 +219,7 @@ public class DbUtils {
      * @param handler Handler to encapsulate success/failure callback.
      */
     public static <T extends IDbData> void addObjectToCollection(String collection, T data,
-                                                                 DbOpResultHandler<DocumentReference> handler) {
+                                                                 TaskResultHandler<DocumentReference> handler) {
         requireDb();
         db.collection(collection)
                 .add(data)
@@ -229,122 +229,42 @@ public class DbUtils {
                         handler.onSuccess(task.getResult());
                     }
                     else {
+                        task.getException().printStackTrace(System.err);
                         handler.onFailure(task.getException());
                     }
                 });
     }
 
     /*
+    // TODO: for methods below, after merging all branches to main, refactor - inline method
      * USER HELPER FUNCTIONS
      */
 
-    /**
-     * Gets the current user; returns null if not logged in.
-     * @return The Firebase User. MIGHT BE NULL if not logged in.
-     */
+    // TODO: after merging all branches to main, refactor - inline method
+    @Deprecated
     @Nullable
     public static FirebaseUser getUser() {
-        requireAuth();
-        return mAuth.getCurrentUser();
+        return UserManager.getCurrUser();
     }
 
-    /**
-     * Gets the user's username.
-     * @return The user name for the user.
-     */
+    // TODO: after merging all branches to main, refactor - inline method
+    @Deprecated
     @Nullable
     public static String getUsername(@Nullable FirebaseUser user) {
-        return user == null ? null : user.getEmail().split("@")[0];
+        return UserManager.getUsername(user);
     }
 
-    /**
-     * Gets the CURRENT user's id.
-     * @return The user id for the current user.
-     */
+    // TODO: after merging all branches to main, refactor - inline method
+    @Deprecated
     @Nullable
     public static String getUserId() {
-        return getUserId(getUser());
+        return DbUtils.getUserId();
     }
 
-    /**
-     * Gets the SPECIFIED user's id. Use this instead of the raw getUid for consistency & null handling.
-     * @param user The user to retrieve the ID from.
-     * @return The user id for the specified user.
-     */
+    // TODO: after merging all branches to main, refactor - inline method
+    @Deprecated
     @Nullable
     public static String getUserId(@Nullable FirebaseUser user) {
-        return user == null ? null : user.getUid();
-    }
-
-    /**
-     * Sign in to a user account in the firebase authentication system.
-     * @param email The user's email
-     * @param pwd The user's password
-     * @param handler The handler for success/failure
-     */
-    public static void login(String email, String pwd, DbOpResultHandler<AuthResult> handler) {
-        requireAuth();
-        mAuth.signInWithEmailAndPassword(email, pwd)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        // Check if user document exists in Firestore
-                        FirebaseUser user = getUser();
-                        if (user != null) {
-                            checkUserDocument(user, task, handler);
-                        } else {
-                            handler.onFailure(new Exception("Error during login - please try again"));
-                        }
-                    } else {
-                        handler.onFailure(new Exception(
-                                "Authentication failed", task.getException() ));
-                    }
-                });
-    }
-
-    /**
-     * Method to check for existance otherwise create a user in the db
-     * @param firebaseUser The user we are checking for
-     * @param task The task for which we were checking this document for
-     * @param handler The handler for the result
-     */
-    private static void checkUserDocument(FirebaseUser firebaseUser, Task<AuthResult> task, DbOpResultHandler<AuthResult> handler) {
-        DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
-                // Success
-                documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        createUserDocument(firebaseUser, task, handler);
-                    } else {
-                        // user document was already there
-                        handler.onSuccess(task.getResult());
-                    }
-                },
-                // Failure
-                e -> handler.onFailure( new RuntimeException("Error checking user profile") )
-        );
-        operateDocumentById(COLL_USERS, firebaseUser.getUid(),
-                DocumentReference::get, opHandler);
-    }
-
-    /**
-     * Method to create a user in the db
-     * @param firebaseUser The user we are checking for
-     * @param task The task for which we were checking this document for
-     * @param handler The handler for the result
-     */
-    private static void createUserDocument(FirebaseUser firebaseUser, Task<AuthResult> task, DbOpResultHandler<AuthResult> handler) {
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("username", getUsername(firebaseUser));
-        userData.put("followers", new ArrayList<String>()); // Initialize as empty
-        userData.put("following", new ArrayList<String>()); // Initialize as empty
-
-        DbOpResultHandler<Void> opHandler = new DbOpResultHandler<>(
-                // Success
-                aVoid -> handler.onSuccess(task.getResult()),
-                // Failure
-                e -> handler.onFailure(
-                        new RuntimeException("Error creating user profile") )
-        );
-        operateDocumentById(COLL_USERS, firebaseUser.getUid(),
-                dr -> dr.set(userData), opHandler);
+        return DbUtils.getUserId(user);
     }
 }

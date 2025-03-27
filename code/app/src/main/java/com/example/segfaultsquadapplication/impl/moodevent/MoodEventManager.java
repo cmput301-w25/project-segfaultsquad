@@ -1,22 +1,15 @@
 package com.example.segfaultsquadapplication.impl.moodevent;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.lights.LightsManager;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
@@ -38,7 +31,6 @@ import java.util.function.UnaryOperator;
  * Only the logic to handle mood events and respond to exceptions are needed.
  */
 public class MoodEventManager {
-    private static final String LOG_TITLE = "MoodEventManager";
     private static final int REASON_LIMIT = 200;
     public enum MoodEventFilter {
         ALL(UnaryOperator.identity()),
@@ -105,14 +97,14 @@ public class MoodEventManager {
         if (situation != null) {
             moodEvent.setSocialSituation(situation);
         }
-        DbOpResultHandler<DocumentReference> handler = new DbOpResultHandler<>(
+        TaskResultHandler<DocumentReference> handler = new TaskResultHandler<>(
                 // Success
                 Void -> {
                     callback.accept(true);
                 },
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not add mood event", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -232,10 +224,10 @@ public class MoodEventManager {
 
         DbUtils.queryObjects(DbUtils.COLL_MOOD_EVENTS,
                 operator, MoodEvent.class, holder,
-                new DbOpResultHandler<>(
+                new TaskResultHandler<>(
                         success -> onComplete.accept(true),
                         error -> {
-                            Log.e(LOG_TITLE, "Error retrieving my mood events: ", error);
+                            error.printStackTrace(System.err);
                             onComplete.accept(false);
                         }
                 )
@@ -249,12 +241,12 @@ public class MoodEventManager {
      * @param callback Called when finished, whether the retrieval is a success(true) or failure(false).
      */
     public static void getMoodEventById(String moodId, AtomicReference<MoodEvent> holder, Consumer<Boolean> callback) {
-        DbOpResultHandler<DocumentSnapshot> handler = new DbOpResultHandler<>(
+        TaskResultHandler<DocumentSnapshot> handler = new TaskResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Error getting mood event by ID: ", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -267,12 +259,12 @@ public class MoodEventManager {
      * @param callback The callback when the file is saved(true) or can not be saved(false).
      */
     private static void updateMoodEventById(MoodEvent moodEvent, Consumer<Boolean> callback) {
-        DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
+        TaskResultHandler<Void> handler = new TaskResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not update mood event by ID", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -286,12 +278,12 @@ public class MoodEventManager {
      * @param callback The callback when the file is deleted(true) or can not be deleted(false).
      */
     public static void deleteMoodEventById(String id, Consumer<Boolean> callback) {
-        DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
+        TaskResultHandler<Void> handler = new TaskResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not delete mood event by id", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );

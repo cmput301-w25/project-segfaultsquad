@@ -5,13 +5,18 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,8 +25,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
+import com.google.rpc.context.AttributeContext;
 
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
@@ -39,13 +46,17 @@ import java.util.function.Function;
  * Initialize an instance of this class before doing tests to wire things appropriately. </br>
  * WARNING: This DB impl is simple and mimics the actual firebase for mock unit tests only. </br>
  * Objects are stored as-is in the internal environment; DO NOT modify instances after adding them. </br>
- * Reference: https://www.baeldung.com/mockito-behavior
+ * <a href="https://www.baeldung.com/mockito-behavior">Reference</a>
  */
 public class MockDb {
     // Gave up wiring emulator for mock unit tests.
     private static final boolean USE_EMULATOR = false;
     // Whether to log wiring events etc.
     private static final boolean DEBUG_LOG = false;
+
+    // Records the current user
+    String currUserMail = null;
+
 
     @Mock
     FirebaseFirestore mockFirestore = Mockito.mock(FirebaseFirestore.class);
@@ -83,10 +94,25 @@ public class MockDb {
             return;
         }
 
+        // Wire up google auth
+        {
+            FirebaseUser mockUser = mock(FirebaseUser.class);
+            Mockito.when( mockUser.getUid() ).thenReturn("id" + currUserMail);
+            Mockito.when( mockUser.getEmail() ).thenReturn(currUserMail);
+
+            FirebaseAuth mockAuth = mock(FirebaseAuth.class);
+            Mockito.when(mockAuth.getCurrentUser()).thenReturn(mockUser);
+            Task<AuthResult> mockTask = wrapTask(null);
+            doAnswer(invoc -> {
+                currUserMail = invoc.getArgument(0);
+                return mockTask;
+            }).when(mockAuth).signInWithEmailAndPassword(anyString(), anyString());
+            DbUtils.wireMockAuth(mockAuth);
+        }
         // Wire up firestore
         DbUtils.wireMockDb(mockFirestore);
         wireTransaction(mockFirestore);
-        // add collections
+        // Add mock collections
         for (String coll : colls) {
             if (DEBUG_LOG) System.out.println("Coll " + coll);
             // Mock collection
@@ -374,7 +400,8 @@ public class MockDb {
         }).when(mockQry).whereEqualTo(anyString(), any());
         // Mocks the query's order-by mechanisms
         doAnswer(invocation -> {
-            List<DocumentReference> docRefs = queryResults.get(mockQry);
+            ArrayList<DocumentReference> docRefs = new ArrayList<>();
+            docRefs.addAll( queryResults.get(mockQry) );
             if (! docRefs.isEmpty()) {
                 // Apply filtering
                 String fieldName = invocation.getArgument(0);
@@ -393,6 +420,8 @@ public class MockDb {
                             }
                         },
                         dir, 0, docRefs.size());
+                // Update
+                queryResults.put(mockQry, docRefs);
             }
             // Return the qry itself
             return mockQry;

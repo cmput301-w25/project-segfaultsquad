@@ -15,11 +15,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,13 +26,11 @@ import java.util.List;
 import java.util.Locale;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.util.Log;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,10 +65,12 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     // Method to fetch current user details from Firestore
     private void fetchCurrentUser() {
         AtomicReference<User> holder = new AtomicReference<>();
-        DbUtils.getObjectByDocId(DbUtils.COLL_USERS, currentUserId, User.class, holder,
-                new DbOpResultHandler<>(
-                        result -> currentUser = holder.get(),
-                        e -> Log.e("MoodAdapter", "Error fetching user data", e)));
+        UserManager.loadUserData(currentUserId, holder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        currentUser = holder.get();
+                    }
+                });
     }
 
     // parent class methods

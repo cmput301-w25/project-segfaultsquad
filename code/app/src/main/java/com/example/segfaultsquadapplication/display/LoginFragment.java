@@ -17,8 +17,9 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.navigation.NavController;
@@ -104,16 +105,16 @@ public class LoginFragment extends Fragment {
         // Disable login button while processing
         loginButton.setEnabled(false);
 
-        DbUtils.login(email, password, new DbOpResultHandler<>(
-                // Success
-                result -> navigateToHome(),
-                // Failure
-                e -> {
-                    loginButton.setEnabled(true);
-                    Log.w("login", e);
-                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+        UserManager.login(email, password,
+                (isSuccess, failureReason) -> {
+                    if (isSuccess) {
+                        navigateToHome();
+                    } else {
+                        loginButton.setEnabled(true);
+                        Toast.makeText(getActivity(), failureReason, Toast.LENGTH_LONG).show();
+                    }
                 }
-        ));
+        );
     }
 
     /**
