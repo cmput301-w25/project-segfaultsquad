@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -31,7 +33,7 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
     public interface OnFollowerClickListener {
         void onRemoveFollower(User user);
 
-        void onFollowBack(User user);
+        void onFollowBack(User user, ViewHolder viewHolder);
     }
 
     public FollowersAdapter(List<User> followersList, OnFollowerClickListener listener) {
@@ -62,6 +64,8 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
         ImageView profilePicture;
         Button removeButton;
         Button followBackButton;
+        private boolean isFollowing = false;
+        private boolean followRequestSent = false;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -94,14 +98,62 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
                 profilePicture.setImageResource(R.drawable.ic_person);
             }
 
+            checkFollowStatus(user);
+
             // Set click listeners for buttons
             removeButton.setOnClickListener(v -> listener.onRemoveFollower(user));
-            followBackButton.setOnClickListener(v -> listener.onFollowBack(user));
+            followBackButton.setOnClickListener(v -> {
+                if (!isFollowing && !followRequestSent) {
+                    listener.onFollowBack(user, this);
+                }
+            });
         }
 
-        // Add method to control button visibility
-        public void setFollowBackButtonVisibility(boolean show) {
-            followBackButton.setVisibility(show ? View.VISIBLE : View.GONE);
+        public void updateFollowStatus(boolean isFollowing, boolean followRequestSent) {
+            this.isFollowing = isFollowing;
+            this.followRequestSent = followRequestSent;
+            setFollowBackButtonState();
+        }
+
+        private void setFollowBackButtonState() {
+            if (isFollowing) {
+                followBackButton.setText("Following");
+                followBackButton.setEnabled(false);
+            } else if (followRequestSent) {
+                followBackButton.setText("Requested");
+                followBackButton.setEnabled(false);
+            } else {
+                followBackButton.setText("Follow Back");
+                followBackButton.setEnabled(true);
+            }
+        }
+
+
+        private void checkFollowStatus(User user) {
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String currentUserId = auth.getCurrentUser().getUid();
+
+            db.collection("following")
+                    .whereEqualTo("followerId", currentUserId)
+                    .whereEqualTo("followedId", user.getDbFileId())
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        boolean isFollowingNow = !querySnapshot.isEmpty();
+
+                        db.collection("users")
+                                .document(user.getDbFileId())
+                                .get()
+                                .addOnSuccessListener(documentSnapshot -> {
+                                    List<String> followRequests = (List<String>) documentSnapshot.get("followRequests");
+                                    boolean followRequestSentNow = followRequests != null && followRequests.contains(currentUserId);
+
+                                    this.isFollowing = isFollowingNow;
+                                    this.followRequestSent = followRequestSentNow;
+                                    setFollowBackButtonState();
+                                });
+                    });
         }
     }
 }

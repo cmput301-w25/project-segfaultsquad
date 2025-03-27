@@ -11,12 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,8 +36,6 @@ public class FollowersListFragment extends Fragment {
     private List<User> followersList;
     private FirebaseFirestore db;
     private FirebaseAuth auth;
-    private boolean isFollowing = false; //if current user following user
-    private boolean followRequestSent = false; //if current user sent request to  user
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -62,9 +58,10 @@ public class FollowersListFragment extends Fragment {
             }
 
             @Override
-            public void onFollowBack(User user) {
+            public void onFollowBack(User user, FollowersAdapter.ViewHolder holder) {
                 Log.d("FollowersListFragment", "Follow back clicked for: " + user.getUsername());
-                checkIfFollowing(user);
+
+                sendFollowRequest(user, holder); //when button pressed
             }
         });
         recyclerView.setAdapter(followersAdapter);
@@ -130,31 +127,6 @@ public class FollowersListFragment extends Fragment {
                 });
     }
 
-    /**
-     * method to check if the current user is following a given (other) user
-     *
-     * @param follower the other useer
-     *                 the index position other this other user (User obj) in the
-     *                 current user's followers list
-     */
-    private void checkIfFollowing(User follower) {
-        String currentUserId = auth.getCurrentUser().getUid();
-
-        db.collection("following")
-                .whereEqualTo("followerId", currentUserId)
-                .whereEqualTo("followedId", follower.getDbFileId())
-                .limit(1)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    boolean isFollowing = !querySnapshot.isEmpty();
-                    if (!isFollowing) {
-                        sendFollowRequest(follower);
-                    } else {
-//                        updateFollowBackButton();
-                    }
-                });
-    }
-
     private void showRemoveFollowerDialog(User follower) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Remove Follower")
@@ -186,25 +158,24 @@ public class FollowersListFragment extends Fragment {
                 });
     }
 
-//    private void updateFollowBackButton() {
-//        if (isFollowing) {
-//            followBackButton.setText("Following");
-//            followBackButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
-//        }
-//        if (followRequestSent) {
-//            followBackButton.setText("Requested to Follow");
-//            followBackButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
-//        }
-//    }
-
-    private void sendFollowRequest(User userToFollow) {
+    /**
+     * method to send follow request if not already following
+     *
+     * @param userToFollow the other user
+     *                 user id for the user to follow
+     * @param holder view holder for adapter
+     *                 check variables in adapter to change adatpter followback button
+     */
+    private void sendFollowRequest(User userToFollow, FollowersAdapter.ViewHolder holder) {
         String currentUserId = auth.getCurrentUser().getUid();
-        if (!isFollowing) {
-            db.collection("users").document(userToFollow.getDbFileId()) //update current user followers profile
-                    .update("followRequests", FieldValue.arrayUnion(currentUserId));
-            followRequestSent = true;
-//            updateFollowBackButton();
-            Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
-        }
+
+        db.collection("users").document(userToFollow.getDbFileId())
+                .update("followRequests", FieldValue.arrayUnion(currentUserId))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("FollowersListFragment", "Follow request sent to " + userToFollow.getUsername());
+                    holder.updateFollowStatus(false, true);
+                    Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Log.e("FollowersListFragment", "Error sending follow request", e));
     }
 }
