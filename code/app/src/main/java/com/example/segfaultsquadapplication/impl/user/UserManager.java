@@ -18,6 +18,7 @@ import java.util.function.Consumer;
  */
 public class UserManager {
     private static FirebaseAuth mAuth = null;
+    private static final boolean SAVE_USER_GMAIL = false;
 
     /**
      * UNIT TEST WIRING FUNCTION
@@ -85,6 +86,7 @@ public class UserManager {
                         // Check if user document exists in Firestore
                         FirebaseUser user = getCurrUser();
                         if (user != null) {
+                            System.out.println("User ID: " + user.getUid());
                             checkUserDocument(user, callback);
                         } else {
                             callback.accept(false, "Error during login - please try again");
@@ -105,6 +107,7 @@ public class UserManager {
         TaskResultHandler<DocumentSnapshot> opHandler = new TaskResultHandler<>(
                 // Success
                 documentSnapshot -> {
+                    System.out.println("SUCCESS, EXIST? " + documentSnapshot.exists());
                     if (!documentSnapshot.exists()) {
                         createUserDocument(firebaseUser, callback);
                     } else {
@@ -118,7 +121,7 @@ public class UserManager {
                     callback.accept(false, "Error checking user profile");
                 }
         );
-        DbUtils.operateDocumentById(DbUtils.COLL_USERS, firebaseUser.getUid(),
+        DbUtils.operateDocumentById(DbUtils.COLL_USERS, getUserId(firebaseUser),
                 DocumentReference::get, opHandler);
     }
 
@@ -128,9 +131,12 @@ public class UserManager {
      * @param callback The handler for the result
      */
     private static void createUserDocument(FirebaseUser firebaseUser, BiConsumer<Boolean, String> callback) {
-        User newUser = new User(getUserId(firebaseUser), getUsername(firebaseUser), firebaseUser.getEmail());
+        String uid = getUserId(firebaseUser);
+        System.out.println("NEW UID" + uid);
+        User newUser = new User(uid, getUsername(firebaseUser),
+                SAVE_USER_GMAIL ? firebaseUser.getEmail() : null);
 
-        TaskResultHandler<DocumentReference> opHandler = new TaskResultHandler<>(
+        TaskResultHandler<Void> opHandler = new TaskResultHandler<>(
                 // Success
                 aVoid -> callback.accept(true, null),
                 // Failure
@@ -139,7 +145,8 @@ public class UserManager {
                     callback.accept(false, "Error creating user profile");
                 }
         );
-        DbUtils.addObjectToCollection(DbUtils.COLL_USERS, newUser, opHandler);
+        DbUtils.operateDocumentById(DbUtils.COLL_USERS, uid,
+                docRef -> docRef.set(newUser), opHandler);
     }
 
 //    // This function is the previous impl. It is more hacky than it should've been.

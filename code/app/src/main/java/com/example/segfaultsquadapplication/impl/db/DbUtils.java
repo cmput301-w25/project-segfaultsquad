@@ -258,13 +258,13 @@ public class DbUtils {
     @Deprecated
     @Nullable
     public static String getUserId() {
-        return DbUtils.getUserId();
+        return UserManager.getUserId();
     }
 
     // TODO: after merging all branches to main, refactor - inline method
     @Deprecated
     @Nullable
     public static String getUserId(@Nullable FirebaseUser user) {
-        return DbUtils.getUserId(user);
+        return UserManager.getUserId(user);
     }
 }

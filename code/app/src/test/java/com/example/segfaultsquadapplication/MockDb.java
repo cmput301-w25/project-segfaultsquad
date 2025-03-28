@@ -5,10 +5,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,20 +18,16 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
-import com.google.rpc.context.AttributeContext;
 
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +49,7 @@ public class MockDb {
     private static final boolean DEBUG_LOG = false;
 
     // Records the current user
-    String currUserMail = null;
-
+    FirebaseUser currMockUser = null;
 
     @Mock
     FirebaseFirestore mockFirestore = Mockito.mock(FirebaseFirestore.class);
@@ -96,15 +89,17 @@ public class MockDb {
 
         // Wire up google auth
         {
-            FirebaseUser mockUser = mock(FirebaseUser.class);
-            Mockito.when( mockUser.getUid() ).thenReturn("id" + currUserMail);
-            Mockito.when( mockUser.getEmail() ).thenReturn(currUserMail);
-
             FirebaseAuth mockAuth = mock(FirebaseAuth.class);
-            Mockito.when(mockAuth.getCurrentUser()).thenReturn(mockUser);
-            Task<AuthResult> mockTask = wrapTask(null);
             doAnswer(invoc -> {
-                currUserMail = invoc.getArgument(0);
+                return currMockUser;
+            }).when( mockAuth ).getCurrentUser();
+
+            Task<AuthResult> mockTask = wrapTask(null);
+            doAnswer(invocLogin -> {
+                String mail = invocLogin.getArgument(0);
+                currMockUser = mock(FirebaseUser.class);
+                doAnswer(invoc -> mail).when( currMockUser ).getEmail();
+                doAnswer(invoc -> "id" + mail).when( currMockUser ).getUid();
                 return mockTask;
             }).when(mockAuth).signInWithEmailAndPassword(anyString(), anyString());
             DbUtils.wireMockAuth(mockAuth);
@@ -200,7 +195,8 @@ public class MockDb {
         doAnswer(invocation -> {
             String param = invocation.getArgument(0);
             // Return the document reference
-            return docRefs.get(mockColl.getId()).get(param);
+            return docRefs.get(mockColl.getId()).getOrDefault(param,
+                    initMockDocRef(mockColl, param));
         }).when(mockColl).document(anyString());
     }
 
@@ -297,7 +293,8 @@ public class MockDb {
     private DocumentSnapshot getDocSnapshot(CollectionReference mockColl, String docId) {
         DocumentSnapshot snapshot = Mockito.mock(DocumentSnapshot.class);
         doAnswer(getIdInvoc -> docId).when(snapshot).getId();
-        doAnswer(getIdInvoc -> docContents.get(mockColl.getId()).containsKey(docId)).when(snapshot).exists();
+        doAnswer(getIdInvoc -> docContents.get(mockColl.getId()).containsKey(docId))
+                .when(snapshot).exists();
         doAnswer(toObjectInvoc -> {
             Class<?> param = toObjectInvoc.getArgument(0);
             return param.cast( getObjFromDocRef(mockColl, docId) );

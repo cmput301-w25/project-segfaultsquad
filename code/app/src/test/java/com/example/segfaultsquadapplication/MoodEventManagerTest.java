@@ -311,11 +311,11 @@ public class MoodEventManagerTest {
     public void deleteMoodEventByIdTest() throws InterruptedException {
         System.out.println("=> deleteMoodEventByIdTest");
 
-        System.out.println("  - flags error for non-existing document");
+        System.out.println("  - does nothing for non-existing document");
         MockDb.await( (finishCallback) ->
                 () -> MoodEventManager.deleteMoodEventById("1234567544678",
                         isSuccess -> {
-                            assertFalse("Deleting non-existing mood event by Id should fail", isSuccess);
+                            assertTrue("Deleting non-existing mood event by Id should do nothing, not fail", isSuccess);
                             finishCallback.run();
                         }));
 

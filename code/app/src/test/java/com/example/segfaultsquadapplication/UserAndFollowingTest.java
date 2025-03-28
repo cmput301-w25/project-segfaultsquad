@@ -9,12 +9,20 @@ import static org.junit.Assert.assertTrue;
 import androidx.test.filters.LargeTest;
 
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
+import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Runs tests for User-related and Following content.
@@ -29,11 +37,11 @@ public class UserAndFollowingTest {
     @Before
     public void setup() throws InterruptedException {
         new MockDb(DbUtils.COLL_MOOD_EVENTS, DbUtils.COLL_USERS);
-        MockDb.await(callback ->
+        MockDb.await(finishCallback ->
                 () -> UserManager.login(
                         "user1@gmail.com",
                         "Why did I still type in this password when mock auth simply accepts anything?",
-                        (isSuccess, failureReason) -> callback.run()));
+                        (isSuccess, failureReason) -> finishCallback.run()));
     }
 
     /*
@@ -65,18 +73,49 @@ public class UserAndFollowingTest {
         System.out.println("=> userLoginTest");
 
         System.out.println("  - user file created");
-        MockDb.await(callback ->
+        MockDb.await(finishCallback ->
                 () -> UserManager.login(
                         "user2@gmail.com",
                         "PWD...",
-                        (isSuccess, failureReason) -> callback.run()));
-        // TODO: check user file created.
+                        (isSuccess, failureReason) -> finishCallback.run()));
+        // Check user file created.
+        AtomicReference<User> holder = new AtomicReference<>();
+        MockDb.await(finishCallback ->
+                () -> UserManager.loadUserData(UserManager.getUserId(), holder,
+                        isSuccess -> {
+                            assertTrue("User file not created after login", isSuccess);
+                            finishCallback.run();
+                        }));
+        User dbUser = holder.get();
+        FirebaseUser firebaseUser = UserManager.getCurrUser();
+        assertEquals(UserManager.getUsername(firebaseUser), dbUser.getUsername());
+        assertEquals(UserManager.getUserId(firebaseUser), dbUser.getDbFileId());
+        // Should not save user's email for security reasons; we won't need it anyways.
+        assertEquals(null, dbUser.getEmail());
 
         System.out.println("  - user file kept intact upon further logins");
-        MockDb.await(callback ->
+        // Add a follower
+        MockDb.await( (finishCallback) ->
+                () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, UserManager.getUserId(),
+                        docRef -> docRef.update("followers",
+                                FieldValue.arrayUnion("user1")),
+                        new TaskResultHandler<>(
+                                Void -> finishCallback.run(),
+                                e -> assertNull("Failed to add follower to user", e)
+                        )));
+        // Login again
+        MockDb.await(finishCallback ->
                 () -> UserManager.login(
                         "user2@gmail.com",
                         "Why did I type in such a long password when mock auth simply accepts anything?",
-                        (isSuccess, failureReason) -> callback.run()));
+                        (isSuccess, failureReason) -> finishCallback.run()));
+        // Check for follower
+        MockDb.await(finishCallback ->
+                () -> UserManager.loadUserData(UserManager.getUserId(), holder,
+                        isSuccess -> {
+                            assertTrue("User file disappeared after second login", isSuccess);
+                            finishCallback.run();
+                        }));
+        assertEquals(List.of("user1"), holder.get().getFollowers());
     }
 }
