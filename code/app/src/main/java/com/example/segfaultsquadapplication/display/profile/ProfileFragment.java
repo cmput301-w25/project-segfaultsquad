@@ -32,10 +32,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.display.moodhistory.MoodAdapter;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -58,6 +60,7 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
 
@@ -68,8 +71,6 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private RecyclerView moodRecyclerView;
     private MoodAdapter moodAdapter;
 
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private User currentUser; // To hold user data
 
@@ -114,10 +115,6 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         searchSection = view.findViewById(R.id.searchSection);
         headerSearchButton = view.findViewById(R.id.headerSearchButton);
         searchResultsCard = view.findViewById(R.id.searchResultsCard);
-
-        // Initialize Firestore and Auth
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Set user data
         fetchCurrentUser(); // Fetch user details
@@ -233,17 +230,14 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     }
 
     private void fetchCurrentUser() {
-        String currentUserId = auth.getCurrentUser().getUid(); // Get current user ID
-        db.collection("users").document(currentUserId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        currentUser = documentSnapshot.toObject(User.class);
+        String currentUserId = UserManager.getUserId(); // Get current user ID
+        AtomicReference<User> userHolder = new AtomicReference<>();
+        UserManager.loadUserData(currentUserId, userHolder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        currentUser = userHolder.get();
                         setUserData(); // Set user data in UI
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("ProfileFragment", "Error fetching user data", e);
                 });
     }
 
@@ -279,25 +273,13 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
      * as well as set those to the
      */
     private void loadFollowerAndFollowingCounts() {
-        String userId = auth.getCurrentUser().getUid(); // Get user ID
-
         // Load followers count
-        db.collection("following")
-                .whereEqualTo("followedId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int followers = queryDocumentSnapshots.size();
-                    followersCount.setText(String.valueOf(followers));
-                });
+        int followers = currentUser.getFollowers().size();
+        followersCount.setText(String.valueOf(followers));
 
         // Load following count
-        db.collection("following")
-                .whereEqualTo("followerId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int following = queryDocumentSnapshots.size();
-                    followingCount.setText(String.valueOf(following));
-                });
+        int following = currentUser.getFollowing().size();
+        followingCount.setText(String.valueOf(following));
     }
 
     private void setupRecyclerView() {
@@ -307,7 +289,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     }
 
     private void loadMoodEvents() {
-        String userId = auth.getCurrentUser().getUid(); // Get user ID
+        String userId = UserManager.getUserId(); // Get user ID
 
         // Use MoodEventManager to get all mood events for the current user
         MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, moodEvents, isSuccess -> {
@@ -385,19 +367,24 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
             }
 
             // Update Firestore with the image data
-            String currentUserId = auth.getCurrentUser().getUid();
-            db.collection("users").document(currentUserId)
-                    .update("profilePicUrl", byteList) // Store image data as List<Integer>
-                    .addOnSuccessListener(aVoid -> {
-                        Log.d("ProfileFragment", "SUCCESS updating profile picture");
-                        Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
-                        // Reload the user data to refresh the profile picture
-                        fetchCurrentUser();
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.e("ProfileFragment", "Error updating profile picture", e);
-                        Toast.makeText(getContext(), "Error updating profile picture", Toast.LENGTH_SHORT).show();
-                    });
+            String currentUserId = UserManager.getUserId();
+            DbUtils.operateDocumentById(DbUtils.COLL_USERS, currentUserId,
+                    docRef -> docRef.update("profilePicUrl", byteList), // Store image data as List<Integer>
+                    new DbOpResultHandler<>(
+                            aVoid -> {
+                                Log.d("ProfileFragment", "SUCCESS updating profile picture");
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), "Profile picture updated", Toast.LENGTH_SHORT).show();
+                                    // Reload the user data to refresh the profile picture
+                                    fetchCurrentUser();
+                                }
+                            },
+                            e -> {
+                                Log.e("ProfileFragment", "Error updating profile picture", e);
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), "Error updating profile picture", Toast.LENGTH_SHORT).show();
+                                }
+                            }));
         } catch (Exception e) {
             Log.e("ProfileFragment", "Error uploading image", e);
             Toast.makeText(getContext(), "Error uploading image", Toast.LENGTH_SHORT).show();
@@ -507,7 +494,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     }
 
     private void performSearch(String query) {
-        String currentUserId = auth.getCurrentUser().getUid();
+        String currentUserId = UserManager.getUserId();
         Log.d("Search", "Performing search with query: " + query);
 
         if (query.isEmpty()) {
@@ -515,56 +502,49 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
             return;
         }
 
-        db.collection("users")
-                .orderBy("username")
-                .startAt(query.toLowerCase()) // Convert to lowercase for case-insensitive search
-                .endAt(query.toLowerCase() + "\uf8ff")
-                .limit(3)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    Log.d("Search", "Query returned " + queryDocumentSnapshots.size() + " results");
-                    List<User> results = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Log.d("Search", "Processing user: " + document.getString("username"));
-                        if (!document.getId().equals(currentUserId)) {
-                            User user = document.toObject(User.class);
-                            user.setDbFileId(document.getId());
-                            results.add(user);
-                        }
-                    }
+        ArrayList<User> holder = new ArrayList<>();
+        DbUtils.queryObjects(DbUtils.COLL_USERS,
+                qry -> qry
+                        .whereNotEqualTo("userId", currentUserId)
+                        .orderBy("username")
+                        .startAt(query.toLowerCase()) // Convert to lowercase for case-insensitive search
+                        .endAt(query.toLowerCase() + "\uf8ff")
+                        .limit(3),
+                User.class, holder, new DbOpResultHandler<>(
+                        queryDocumentSnapshots -> {
+                            Log.d("Search", "Query returned " + holder.size() + " results");
 
-                    if (!results.isEmpty()) {
-                        Log.d("Search", "Showing " + results.size() + " results");
-                        searchResultsCard.setVisibility(View.VISIBLE);
-                        searchResultAdapter.updateResults(results);
-                    } else {
-                        Log.d("Search", "No results to show");
-                        searchResultsCard.setVisibility(View.GONE);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Search", "Error performing search", e);
-                    searchResultsCard.setVisibility(View.GONE);
-                });
+                            if (!holder.isEmpty()) {
+                                Log.d("Search", "Showing " + holder.size() + " results");
+                                searchResultsCard.setVisibility(View.VISIBLE);
+                                searchResultAdapter.updateResults(holder);
+                            } else {
+                                Log.d("Search", "No results to show");
+                                searchResultsCard.setVisibility(View.GONE);
+                            }
+                        },
+                        e -> {
+                            Log.e("Search", "Error performing search", e);
+                            searchResultsCard.setVisibility(View.GONE);
+                        }));
     }
 
     private void searchExactUsername(String username) {
-        String currentUserId = auth.getCurrentUser().getUid();
+        String currentUserId = UserManager.getUserId();
 
-        db.collection("users")
-                .whereEqualTo("username", username)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                        if (!document.getId().equals(currentUserId)) {
-                            User user = document.toObject(User.class);
-                            user.setDbFileId(document.getId());
-                            navigateToSearchedProfile(user);
-                        }
-                    }
-                });
+        ArrayList<User> holder = new ArrayList<>();
+        DbUtils.queryObjects(DbUtils.COLL_USERS,
+                qry -> qry
+                        .whereNotEqualTo("userId", currentUserId)
+                        .whereEqualTo("username", username)
+                        .limit(1),
+                User.class, holder, new DbOpResultHandler<>(
+                        result -> {
+                            if (!holder.isEmpty()) {
+                                navigateToSearchedProfile(holder.get(0));
+                            }
+                        },
+                        null));
     }
 
     private void onSearchResultClick(User user) {
@@ -574,7 +554,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private void navigateToSearchedProfile(User user) {
         Bundle args = new Bundle();
         args.putString("searchedUserID", user.getDbFileId());
-        args.putString("currentUserID", auth.getCurrentUser().getUid());
+        args.putString("currentUserID", UserManager.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_profile_to_searched_profile, args);
 

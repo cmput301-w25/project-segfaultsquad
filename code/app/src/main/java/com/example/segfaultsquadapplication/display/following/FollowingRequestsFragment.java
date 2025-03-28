@@ -39,7 +39,7 @@ public class FollowingRequestsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_follow_requests, container, false);
 
         requestsRecyclerView = view.findViewById(R.id.requests_recycler_view);
-        requestsAdapter = new FollowRequestsAdapter(followRequests, FollowingManager::handleFollowRequest);
+        requestsAdapter = new FollowRequestsAdapter(followRequests, (user, isAccept) -> FollowingManager.handleFollowRequest(user.getDbFileId(), isAccept));
         requestsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         requestsRecyclerView.setAdapter(requestsAdapter);
 
