@@ -12,12 +12,12 @@ import com.google.firebase.firestore.Transaction;
 import java.util.Collection;
 import java.util.function.Consumer;
 
+// TODO: merge into UserManager?
 public class FollowingManager {
-    private static final String LOG_TITLE = "FollowingManager";
-
     public static void checkIfCurrentUserFollowing(User followed, Consumer<Boolean> callback) {
         checkIfFollowing(DbUtils.getUserId(), followed.getDbFileId(), callback);
     }
+
     public static void checkIfFollowing(String followerId, String followedId, Consumer<Boolean> callback) {
         DbUtils.queryObjects(DbUtils.COLL_FOLLOWERS,
                 // Specification
@@ -43,7 +43,7 @@ public class FollowingManager {
                 Following.class, holder, new DbOpResultHandler<>(
                         success -> callback.accept(true),
                         error -> {
-                            Log.e(LOG_TITLE, "Error retrieving followed users: ", error);
+                            error.printStackTrace(System.err);
                             callback.accept(false);
                         })
                 );
@@ -57,7 +57,7 @@ public class FollowingManager {
                 Following.class, holder, new DbOpResultHandler<>(
                         success -> callback.accept(true),
                         error -> {
-                            Log.e(LOG_TITLE, "Error retrieving following users: ", error);
+                            error.printStackTrace(System.err);
                             callback.accept(false);
                         })
                 );
@@ -69,8 +69,9 @@ public class FollowingManager {
             // Add to followers and following lists
             DocumentReference docRefCurr = DbUtils.getDocRef(DbUtils.COLL_USERS, currentUserId);
             DocumentReference docRefUser = DbUtils.getDocRef(DbUtils.COLL_USERS, user.getDbFileId());
-            Transaction.Function<Void> logic;
-            logic = transaction -> {
+            Transaction.Function<Void> logic = transaction -> {
+                transaction.update(docRefCurr, "followRequests",
+                        FieldValue.arrayRemove(user.getDbFileId()));
                 transaction.update(docRefCurr, "followers",
                         FieldValue.arrayUnion(user.getDbFileId()));
                 transaction.update(docRefUser, "following",
@@ -78,8 +79,8 @@ public class FollowingManager {
                 return null;
             };
             DbUtils.operateTransaction(logic, new DbOpResultHandler<>(
-                    Void -> Log.d(LOG_TITLE, "Successfully allowed follow request"),
-                    e -> Log.e(LOG_TITLE, "Error allowing follow request", e)
+                    Void -> System.out.println("Successfully allowed follow request"),
+                    e -> e.printStackTrace(System.err)
             ));
         } else {
             // Remove the follow request
@@ -87,8 +88,8 @@ public class FollowingManager {
                     docRef -> docRef.update("followRequests",
                             FieldValue.arrayRemove(user.getDbFileId())),
                     new DbOpResultHandler<>(
-                            Void -> Log.d(LOG_TITLE, "Successfully declined follow request"),
-                            e -> Log.e(LOG_TITLE, "Error declining follow request", e)
+                            Void -> System.out.println("Successfully declined follow request"),
+                            e -> e.printStackTrace(System.err)
                     ));
         }
     }

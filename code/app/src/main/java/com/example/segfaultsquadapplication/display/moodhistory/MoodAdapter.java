@@ -15,25 +15,24 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.util.Log;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,10 +43,16 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     private OnMoodClickListener listener;
     private String currentUserId;
     private User currentUser; // To hold user data
+    private Map<String, User> userCache; // Cache to store users we've already fetched
 
     // interfaces
     public interface OnMoodClickListener {
         void onMoodClick(MoodEvent mood);
+    }
+
+    // Interface for receiving user data from Firestore
+    public interface UserCallback {
+        void onUserLoaded(User user);
     }
 
     // methods
@@ -62,16 +67,19 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         this.moodList = new ArrayList<>();
         this.listener = listener;
         this.currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
+        this.userCache = new HashMap<>();
         fetchCurrentUser(); // Fetch user details
     }
 
     // Method to fetch current user details from Firestore
     private void fetchCurrentUser() {
         AtomicReference<User> holder = new AtomicReference<>();
-        DbUtils.getObjectByDocId(DbUtils.COLL_USERS, currentUserId, User.class, holder,
-                new DbOpResultHandler<>(
-                        result -> currentUser = holder.get(),
-                        e -> Log.e("MoodAdapter", "Error fetching user data", e)));
+        UserManager.loadUserData(currentUserId, holder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        currentUser = holder.get();
+                    }
+                });
     }
 
     // parent class methods
@@ -86,7 +94,12 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     @Override
     public void onBindViewHolder(@NonNull MoodViewHolder holder, int position) {
         MoodEvent mood = moodList.get(position);
-        holder.bind(mood);
+
+        // Get the user who created this mood
+        getMoodUser(mood, user -> {
+            // We now have the user, update the view with this information
+            holder.bind(mood, user);
+        });
     }
 
     @Override
@@ -106,6 +119,22 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     }
 
     /**
+     * helper method to get the user of the moodevent arg
+     * 
+     * @param m        the passed mood event object whose user we want to get
+     * @param callback callback to receive the user when loaded
+     */
+    public void getMoodUser(MoodEvent m, UserCallback callback) {
+        // get the userId field of this mood event
+        String moodUserId = m.getUserId();
+
+        // Use User Manager to get the user
+        AtomicReference<User> holder = new AtomicReference<>();
+        UserManager.loadUserData(moodUserId, holder,
+                isSuccess -> callback.onUserLoaded(isSuccess ? holder.get() : null));
+    }
+
+    /**
      * nested class for View holding Moods
      */
     class MoodViewHolder extends RecyclerView.ViewHolder {
@@ -116,6 +145,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         private TextView textReason;
         private TextView textTimestamp;
         private TextView textSocialSituation;
+        private TextView textMoodVisibility;
         private ImageView profilePicture;
         private TextView username;
 
@@ -133,6 +163,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             textReason = itemView.findViewById(R.id.textReason);
             textTimestamp = itemView.findViewById(R.id.textTimestamp);
             textSocialSituation = itemView.findViewById(R.id.textSocialSituation);
+            textMoodVisibility = itemView.findViewById(R.id.textMoodVisibility);
             profilePicture = itemView.findViewById(R.id.profile_picture);
             username = itemView.findViewById(R.id.username);
 
@@ -148,9 +179,11 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
          * method to create the UI of the mood event
          *
          * @param mood
-         *             mood information object (MoodEvent)
+         *                 mood information object (MoodEvent)
+         * @param moodUser
+         *                 user who created the mood
          */
-        public void bind(MoodEvent mood) {
+        public void bind(MoodEvent mood, User moodUser) {
             // Set mood emoji
             moodEmoji.setText(mood.getMoodType().getEmoticon());
             // set reason text ("IMAGE if image reason)")
@@ -171,29 +204,57 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
                 textSocialSituation.setVisibility(View.GONE);
             }
 
+            if (mood.isPublic()) {
+                textMoodVisibility.setText("Public");
+                textMoodVisibility.setVisibility(View.VISIBLE);
+            } else {
+                textMoodVisibility.setText("Private");
+                textMoodVisibility.setVisibility(View.VISIBLE);
+            }
+
+            // Set username
+            username.setText(moodUser.getUsername());
             // Set profile picture
-            if (currentUser != null) {
-                List<Integer> profilePicData = currentUser.getProfilePicUrl();
-                if (profilePicData != null && !profilePicData.isEmpty()) {
-                    // Convert List<Integer> back to byte array
-                    byte[] imageBytes = new byte[profilePicData.size()];
-                    for (int i = 0; i < profilePicData.size(); i++) {
-                        imageBytes[i] = profilePicData.get(i).byteValue();
-                    }
+            if (moodUser != null) {
+                List<Integer> profilePicData = moodUser.getProfilePicUrl();
+                // debugging
+                Log.d("MoodAdapter", "profilePicData: " + profilePicData);
+                if (profilePicData != null) {
+                    // debugging
+                    Log.d("MoodAdapter", "profilePicData.isEmpty(): " + profilePicData.isEmpty());
 
-                    // Decode byte array to Bitmap
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    if (bitmap != null) {
-                        profilePicture.setImageBitmap(bitmap);
+                    // if its empty (should even be possible...)
+                    if (profilePicData.isEmpty()) {
+                        // set to the default pfp
+                        profilePicture.setImageResource(R.drawable.profile_icon); // Default image
                     } else {
-                        profilePicture.setImageResource(R.drawable.ic_person); // Default image
-                    }
-                } else {
-                    profilePicture.setImageResource(R.drawable.ic_person); // Default image
-                }
+                        // construct the image from data
 
-                // Set username
-                username.setText(currentUser.getUsername());
+                        // Convert List<Integer> back to byte array
+                        byte[] imageBytes = new byte[profilePicData.size()];
+                        for (int i = 0; i < profilePicData.size(); i++) {
+                            imageBytes[i] = profilePicData.get(i).byteValue();
+                        }
+
+                        // Decode byte array to Bitmap
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                        if (bitmap != null) {
+                            profilePicture.setImageBitmap(bitmap);
+                        } else {
+                            profilePicture.setImageResource(R.drawable.profile_icon); // Default image
+                        }
+                    }
+
+                } else {
+                    // debugging
+                    Log.d("MoodAdapter", "profilePicData was null: " + profilePicData);
+                    profilePicture.setImageResource(R.drawable.profile_icon); // Default image
+                }
+            } else {
+                Log.d("MoodAdapter", "Fialed to get user info for moodevent: " + mood.getDbFileId());
+                // If user data couldn't be loaded, use default image and "Unknown" username
+                profilePicture.setImageResource(R.drawable.profile_icon);
+                username.setText("Unknown");
             }
 
             // Set mood colors

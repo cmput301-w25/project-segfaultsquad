@@ -43,6 +43,7 @@ public class MoodDetailsFragment extends Fragment {
     private TextView reasonTextView;
     private ImageView reasonImageView;
     private TextView socialSituationTextView;
+    private TextView visibilityTextView;
     private TextView locationTextView;
     private Button editButton;
     private Button deleteButton;
@@ -97,6 +98,7 @@ public class MoodDetailsFragment extends Fragment {
         reasonTextView = view.findViewById(R.id.reasonTextView);
         reasonImageView = view.findViewById(R.id.reasonImageView);
         socialSituationTextView = view.findViewById(R.id.socialSituationTextView);
+        visibilityTextView = view.findViewById(R.id.mood_visibility);
         locationTextView = view.findViewById(R.id.locationTextView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
@@ -209,6 +211,12 @@ public class MoodDetailsFragment extends Fragment {
             socialSituationTextView.setVisibility(View.VISIBLE);
         } else {
             socialSituationTextView.setVisibility(View.GONE);
+        }
+
+        if (mood.isPublic()) { //this works and idk why
+            visibilityTextView.setText("Public");
+        } else {
+            visibilityTextView.setText("Private");
         }
 
         // Set location

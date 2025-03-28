@@ -1,22 +1,15 @@
 package com.example.segfaultsquadapplication.impl.moodevent;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.lights.LightsManager;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
@@ -38,7 +31,6 @@ import java.util.function.UnaryOperator;
  * Only the logic to handle mood events and respond to exceptions are needed.
  */
 public class MoodEventManager {
-    private static final String LOG_TITLE = "MoodEventManager";
     private static final int REASON_LIMIT = 200;
     public enum MoodEventFilter {
         ALL(UnaryOperator.identity()),
@@ -112,7 +104,7 @@ public class MoodEventManager {
                 },
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not add mood event", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -235,7 +227,7 @@ public class MoodEventManager {
                 new DbOpResultHandler<>(
                         success -> onComplete.accept(true),
                         error -> {
-                            Log.e(LOG_TITLE, "Error retrieving my mood events: ", error);
+                            error.printStackTrace(System.err);
                             onComplete.accept(false);
                         }
                 )
@@ -254,7 +246,7 @@ public class MoodEventManager {
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Error getting mood event by ID: ", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -272,7 +264,7 @@ public class MoodEventManager {
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not update mood event by ID", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -291,7 +283,7 @@ public class MoodEventManager {
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not delete mood event by id", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );

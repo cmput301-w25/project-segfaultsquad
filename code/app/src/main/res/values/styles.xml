@@ -17,4 +17,11 @@
         <item name="android:elevation">4dp</item>
         <item name="chipCornerRadius">16dp</item>
     </style>
+
+    <!-- for circle containing pfp -->
+    <style name="CircleShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources> 

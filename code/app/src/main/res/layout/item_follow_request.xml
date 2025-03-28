@@ -9,6 +9,8 @@
         android:id="@+id/username"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="15dp"
         android:layout_weight="1"
         android:text="Username"
         android:textSize="18sp" />
@@ -17,11 +19,13 @@
         android:id="@+id/acceptButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Accept" />
+        android:text="Accept"
+        android:layout_marginEnd="15dp"/>
 
     <Button
         android:id="@+id/denyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Deny" />
+        android:text="Deny"
+        android:layout_marginEnd="15dp"/>
 </LinearLayout>

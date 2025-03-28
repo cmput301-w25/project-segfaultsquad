@@ -6,7 +6,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 /**
- * Organizes the logic used to handle database operation results.
+ * Organizes the logic used to handle task operation results.
  */
 public class DbOpResultHandler<TResult> {
     private final OnSuccessListener<TResult> successListener;
@@ -14,7 +14,8 @@ public class DbOpResultHandler<TResult> {
 
     /**
      * Creates an instance of result handler. </br>
-     * To find out more detail about how success / failure would be triggered, see documentation for DbUtils.
+     * To find out more detail about how success / failure would be triggered, see documentation for usages.
+     * I.e. DbUtils.
      *
      * @param successListener The success callback, put null if want to be omitted
      * @param failListener    The failure callback, put null if want to be omitted
