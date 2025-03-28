@@ -43,6 +43,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     private OnMoodClickListener listener;
     private String currentUserId;
     private User currentUser; // To hold user data
+    private Map<String, User> userCache; // Cache to store users we've already fetched
 
     // interfaces
     public interface OnMoodClickListener {
@@ -66,6 +67,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         this.moodList = new ArrayList<>();
         this.listener = listener;
         this.currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
+        this.userCache = new HashMap<>();
         fetchCurrentUser(); // Fetch user details
     }
 
