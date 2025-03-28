@@ -1,5 +1,4 @@
 package com.example.segfaultsquadapplication;
-
 import android.os.Handler;
 import android.os.Looper;
 
@@ -18,7 +17,6 @@ import java.util.concurrent.Executors;
 public class Map_api {
     public interface GeocodingListener {
         void onLocationFound(double latitude, double longitude);
-
         void onError(String error);
     }
 
@@ -60,10 +58,8 @@ public class Map_api {
             }
         });
     }
-
     public interface ReverseGeocodingListener {
         void onAddressFound(String address);
-
         void onError(String error);
     }
 
@@ -73,8 +69,7 @@ public class Map_api {
 
         executor.execute(() -> {
             try {
-                String urlString = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + latitude + "&lon="
-                        + longitude;
+                String urlString = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + latitude + "&lon=" + longitude;
                 URL url = new URL(urlString);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");

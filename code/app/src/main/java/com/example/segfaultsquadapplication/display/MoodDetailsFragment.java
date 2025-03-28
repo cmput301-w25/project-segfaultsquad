@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import com.example.segfaultsquadapplication.Map_api;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
@@ -221,9 +222,22 @@ public class MoodDetailsFragment extends Fragment {
         // Set location
         if (mood.getLocation() != null) {
             GeoPoint locationPoint = mood.getLocation();
-            String locationText = "Lat: " + locationPoint.getLatitude() + ", Long: " + locationPoint.getLongitude();
-            locationTextView.setText(locationText);
-            locationTextView.setVisibility(View.VISIBLE);
+
+            Map_api.getAddress(locationPoint.getLatitude(), locationPoint.getLongitude(), new Map_api.ReverseGeocodingListener() {
+                @Override
+                public void onAddressFound(String address) {
+                    // Update the UI inside this callback
+                    locationTextView.setText(address);
+                    locationTextView.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Handle error (optional: show error text or hide the view)
+                    locationTextView.setText("Address not found");
+                    locationTextView.setVisibility(View.VISIBLE);
+                }
+            });
         } else {
             locationTextView.setVisibility(View.GONE);
         }

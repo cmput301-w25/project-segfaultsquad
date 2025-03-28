@@ -82,6 +82,9 @@
         <action
             android:id="@+id/action_to_following"
             app:destination="@id/navigation_following" />
+        <action
+            android:id="@+id/action_map_to_moodDetails"
+            app:destination="@id/navigation_mood_details" />
     </fragment>
 
     <!-- Follow Requests -->
