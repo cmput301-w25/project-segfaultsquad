@@ -120,7 +120,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
 
     /**
      * helper method to get the user of the moodevent arg
-     *
+     * 
      * @param m        the passed mood event object whose user we want to get
      * @param callback callback to receive the user when loaded
      */
