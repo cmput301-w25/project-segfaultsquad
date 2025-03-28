@@ -318,14 +318,25 @@ public class EditMoodFragment extends Fragment {
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             situation = (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem();
         }
+        // Validate input before update
+        try {
+            MoodEventManager.validateMoodEvent(selectedMoodType, reason);
+        } catch (RuntimeException e) {
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Update event
         MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason, 
                 togglePublicPrivate.isChecked(), situation, selectedImageUri, isSuccess -> {
-                    if (isSuccess) {
-                        Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).navigateUp();
-                    } else {
-                        Toast.makeText(getContext(), "Error saving the modification", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) {
+                        if (isSuccess) {
+                            Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), "Error saving the modification", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
+        // Navigate up immediately
+        Navigation.findNavController(requireView()).navigateUp();
     }
 }

@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 
 /**
  * This file contains authentication and functionality for loading an user's data from DB.
+ * For following-related functions, see FollowingManager.
  */
 public class UserManager {
     private static FirebaseAuth mAuth = null;

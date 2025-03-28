@@ -155,6 +155,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
                 Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
     /**
