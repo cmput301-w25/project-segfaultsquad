@@ -15,11 +15,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.card.MaterialCardView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,13 +28,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.util.Log;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,16 +74,12 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     // Method to fetch current user details from Firestore
     private void fetchCurrentUser() {
         AtomicReference<User> holder = new AtomicReference<>();
-        DbUtils.getObjectByDocId(DbUtils.COLL_USERS, currentUserId, User.class, holder,
-                new DbOpResultHandler<>(
-                        result -> {
-                            currentUser = holder.get();
-                            // Add current user to cache
-                            if (currentUser != null) {
-                                userCache.put(currentUserId, currentUser);
-                            }
-                        },
-                        e -> Log.e("MoodAdapter", "Error fetching user data", e)));
+        UserManager.loadUserData(currentUserId, holder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        currentUser = holder.get();
+                    }
+                });
     }
 
     // parent class methods
@@ -135,32 +128,10 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         // get the userId field of this mood event
         String moodUserId = m.getUserId();
 
-        // First check if we already have this user in cache
-        if (userCache.containsKey(moodUserId)) {
-            callback.onUserLoaded(userCache.get(moodUserId));
-            return;
-        }
-
-        // Use DbUtils to get the user
+        // Use User Manager to get the user
         AtomicReference<User> holder = new AtomicReference<>();
-        DbUtils.getObjectByDocId(DbUtils.COLL_USERS, moodUserId, User.class, holder,
-                new DbOpResultHandler<>(
-                        result -> {
-                            User user = holder.get();
-                            if (user != null) {
-                                // Store in cache for future use
-                                userCache.put(moodUserId, user);
-                                Log.d("MoodAdapter", "Loaded user: " + user.getUsername() + " for mood");
-                                callback.onUserLoaded(user);
-                            } else {
-                                Log.e("MoodAdapter", "User object is null for ID: " + moodUserId);
-                                callback.onUserLoaded(null);
-                            }
-                        },
-                        e -> {
-                            Log.e("MoodAdapter", "Error fetching user data for ID: " + moodUserId, e);
-                            callback.onUserLoaded(null);
-                        }));
+        UserManager.loadUserData(moodUserId, holder,
+                isSuccess -> callback.onUserLoaded(isSuccess ? holder.get() : null));
     }
 
     /**

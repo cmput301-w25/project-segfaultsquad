@@ -204,11 +204,13 @@ public class AddMoodFragment extends Fragment {
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
                 reasonInput.getText().toString().trim(), isPublicMood, situation,
                 selectedImageUri, isSuccess -> {
-                    if (isSuccess) {
-                        Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).navigateUp();
-                    } else {
-                        Toast.makeText(getContext(), "Could not save mood event...", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) {
+                        if (isSuccess) {
+                            Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
+                            Navigation.findNavController(requireView()).navigateUp();
+                        } else {
+                            Toast.makeText(getContext(), "Could not save mood event...", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
