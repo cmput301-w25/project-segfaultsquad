@@ -21,11 +21,12 @@
 
             <TextView
                 android:id="@+id/headingText"
-                android:layout_width="300dp"
-                android:layout_height="55dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Following"
-                android:textColor="#000000"
-                android:textSize="40sp" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:fontFamily="@font/kanit"/>
 
             <ImageButton
                 android:id="@+id/search_users"
@@ -60,9 +61,11 @@
         android:id="@+id/filterMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
         android:layout_marginTop="64dp"
+        android:layout_marginEnd="8dp"
         android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true">
 
@@ -102,4 +105,4 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout> 
+</androidx.constraintlayout.widget.ConstraintLayout>

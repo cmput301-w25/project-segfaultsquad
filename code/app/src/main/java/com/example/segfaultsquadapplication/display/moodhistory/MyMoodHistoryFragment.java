@@ -22,14 +22,8 @@ import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
-import com.example.segfaultsquadapplication.impl.user.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import androidx.navigation.Navigation;
 import android.util.Log;

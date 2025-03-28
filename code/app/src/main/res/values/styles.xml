@@ -24,4 +24,10 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- res/values/styles.xml -->
+    <style name="CustomFontStyle" parent="TextAppearance.AppCompat.Display2">
+        <item name="android:fontFamily">@font/kanit</item>
+    </style>
+
+
 </resources> 

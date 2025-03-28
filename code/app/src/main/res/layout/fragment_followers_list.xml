@@ -27,7 +27,8 @@
             android:paddingBottom="16dp"
             android:text="Followers"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/kanit"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

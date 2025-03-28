@@ -215,8 +215,33 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         public void bind(MoodEvent mood, User moodUser) {
             // Set mood emoji
             moodEmoji.setText(mood.getMoodType().getEmoticon());
-            // set reason text ("IMAGE if image reason)")
+
+            // Get the mood primary color
+            int moodColor = mood.getMoodType().getPrimaryColor(itemView.getContext());
+
+            // Set mood type text and make its color match the mood color
             textMoodType.setText(mood.getMoodType().name());
+            textMoodType.setTextColor(moodColor);
+
+            // Set card stroke color to match the mood color
+            moodCard.setStrokeColor(moodColor);
+
+            // If you still want to set the background color
+            int backgroundColor = mood.getMoodType().getSecondaryColor(itemView.getContext());
+            moodCard.setCardBackgroundColor(backgroundColor);
+
+            // Get the inner card view and set its background tint
+            View innerCardView = itemView.findViewById(R.id.innerCardLayout);
+            if (innerCardView != null) {
+                // For API 21 and above
+                innerCardView.setBackgroundTintList(android.content.res.ColorStateList.valueOf(moodColor));
+
+                // Alternatively, if you need more control or compatibility:
+                // GradientDrawable drawable = (GradientDrawable) innerCardView.getBackground();
+                // drawable.setStroke(2, moodColor); // 2dp stroke width
+            }
+
+            // Set reason text
             if (mood.getReasonText().isEmpty() && mood.getImageData() != null) {
                 textReason.setText("IMAGE");
             } else {
@@ -285,10 +310,6 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
                 profilePicture.setImageResource(R.drawable.profile_icon);
                 username.setText("Unknown");
             }
-
-            // Set mood colors
-            int moodColor = mood.getMoodType().getPrimaryColor(itemView.getContext());
-            int backgroundColor = mood.getMoodType().getSecondaryColor(itemView.getContext());
 
             moodCard.setStrokeColor(moodColor);
             moodCard.setCardBackgroundColor(backgroundColor);

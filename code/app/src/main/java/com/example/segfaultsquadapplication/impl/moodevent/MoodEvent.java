@@ -38,14 +38,14 @@ public class MoodEvent implements IDbData {
 
     // Enum for mood types
     public enum MoodType {
-        ANGER(R.color.mood_anger, R.color.mood_anger_light, "😡"),
-        CONFUSION(R.color.mood_confusion, R.color.mood_confusion_light, "😵‍💫"),
-        DISGUST(R.color.mood_disgust, R.color.mood_disgust_light, "🤢"),
-        FEAR(R.color.mood_fear, R.color.mood_fear_light, "😨"),
-        HAPPINESS(R.color.mood_happiness, R.color.mood_happiness_light, "😀"),
-        SADNESS(R.color.mood_sadness, R.color.mood_sadness_light, "😭"),
-        SHAME(R.color.mood_shame, R.color.mood_shame_light, "😳"),
-        SURPRISE(R.color.mood_surprise, R.color.mood_surprise_light, "🤯");
+        ANGER(R.color.mood_anger, R.color.chip_unselected_background, "😡"),
+        CONFUSION(R.color.mood_confusion, R.color.chip_unselected_background, "😵‍💫"),
+        DISGUST(R.color.mood_disgust, R.color.chip_unselected_background, "🤢"),
+        FEAR(R.color.mood_fear, R.color.chip_unselected_background, "😨"),
+        HAPPINESS(R.color.mood_happiness_light, R.color.chip_unselected_background, "😀"),
+        SADNESS(R.color.mood_sadness, R.color.chip_unselected_background, "😭"),
+        SHAME(R.color.mood_shame, R.color.chip_unselected_background, "😳"),
+        SURPRISE(R.color.mood_surprise, R.color.chip_unselected_background, "🤯");
 
         final int colorId, colorSecondaryId;
         final String emoticon;

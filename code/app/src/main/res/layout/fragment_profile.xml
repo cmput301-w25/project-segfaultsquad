@@ -24,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Profile"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:fontFamily="@font/kanit" />
 
             <!-- Search icon to toggle searchbar visibility-->
             <ImageButton

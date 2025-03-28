@@ -29,7 +29,9 @@ android:orientation="vertical">
             android:text="Mood Analytics"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/kanit"/>
+
     </LinearLayout>
 
     <!-- Emoji Rain Animation -->

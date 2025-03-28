@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -14,7 +15,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/TopHeaderBackground"
+            android:background="@color/app_background"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="8dp">
@@ -25,7 +26,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Mood History"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                android:fontFamily="@font/kanit"
+                android:textColor="@color/text_colour"/>
 
             <ImageButton
                 android:id="@+id/filterButton"
@@ -33,7 +36,8 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@drawable/filter_icon" />
+                android:src="@drawable/filter_icon"
+                app:tint="@color/text_colour" />
 
         </LinearLayout>
 
@@ -45,7 +49,8 @@
             android:layout_weight="1"
             android:padding="16dp"
             android:clipToPadding="false"
-            android:scrollbars="vertical"/>
+            android:scrollbars="vertical"
+            android:background="@color/app_background"/>
 
     </LinearLayout>
 
@@ -105,6 +110,8 @@
         android:layout_gravity="bottom|end"
         android:layout_marginBottom="80dp"
         android:layout_marginEnd="16dp"
+        app:backgroundTint="@color/text_colour"
+        app:tint="@color/app_background"
         app:fabSize="normal"
         app:srcCompat="@android:drawable/ic_menu_view" />
 
@@ -115,6 +122,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
+        app:backgroundTint="@color/text_colour"
+        app:tint="@color/app_background"
         app:fabSize="normal"
         app:srcCompat="@android:drawable/ic_menu_add" />
 

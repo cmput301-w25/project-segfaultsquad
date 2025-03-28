@@ -27,7 +27,8 @@
             android:text="Following"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:paddingBottom="16dp" />
+            android:paddingBottom="16dp"
+            android:fontFamily="@font/kanit"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
