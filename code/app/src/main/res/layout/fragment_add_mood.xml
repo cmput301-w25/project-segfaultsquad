@@ -186,6 +186,7 @@
                 android:layout_height="wrap_content"
                 android:text="Public Mood"
                 android:layout_marginTop="16dp"/>
+
         </LinearLayout>
     </ScrollView>
 

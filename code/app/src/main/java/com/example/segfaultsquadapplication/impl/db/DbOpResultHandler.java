@@ -8,7 +8,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 /**
  * Organizes the logic used to handle task operation results.
  */
-public class TaskResultHandler<TResult> {
+public class DbOpResultHandler<TResult> {
     private final OnSuccessListener<TResult> successListener;
     private final OnFailureListener failListener;
 
@@ -20,7 +20,7 @@ public class TaskResultHandler<TResult> {
      * @param successListener The success callback, put null if want to be omitted
      * @param failListener    The failure callback, put null if want to be omitted
      */
-    public TaskResultHandler(@Nullable OnSuccessListener<TResult> successListener,
+    public DbOpResultHandler(@Nullable OnSuccessListener<TResult> successListener,
                              @Nullable OnFailureListener failListener) {
         this.successListener = successListener;
         this.failListener = failListener;

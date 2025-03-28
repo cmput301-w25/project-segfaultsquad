@@ -17,9 +17,9 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.navigation.NavController;
@@ -28,6 +28,9 @@ import androidx.navigation.Navigation;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginFragment extends Fragment {
 
@@ -43,7 +46,7 @@ public class LoginFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.login_fragment, container, false);
 
@@ -124,6 +127,35 @@ public class LoginFragment extends Fragment {
         // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation component
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         navController.navigate(R.id.navigation_my_mood_history);
-    }
 
+        //after navigation check for follow requests
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String currentUserId = null;
+
+        if (currentUser != null) {
+            currentUserId = currentUser.getUid();
+        }
+
+        if (currentUserId != null) {
+            db.collection("users").document(currentUserId) //get user doc
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            User currentUserData = documentSnapshot.toObject(User.class);
+
+                            // Check if follow requests exist
+                            if (currentUserData != null && currentUserData.getFollowRequests() != null &&
+                                    !currentUserData.getFollowRequests().isEmpty()) {
+                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " new follow requests", Toast.LENGTH_LONG).show();
+
+                            }
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("Firestore", "Error fetching user data", e);
+                        Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
+                    });
+        }
+    }
 }

@@ -2,7 +2,7 @@ package com.example.segfaultsquadapplication.impl.following;
 
 import android.util.Log;
 
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.firestore.DocumentReference;
@@ -24,7 +24,7 @@ public class FollowingManager {
                 query -> query
                         .whereEqualTo("followerId", followerId)
                         .whereEqualTo("followedId", followedId),
-                Following.class, null, new TaskResultHandler<>(
+                Following.class, null, new DbOpResultHandler<>(
                         // Success
                         result -> callback.accept( result.isEmpty() ),
                         // Failure
@@ -40,7 +40,7 @@ public class FollowingManager {
                 // Specification
                 query -> query
                         .whereEqualTo("followerId", followerId),
-                Following.class, holder, new TaskResultHandler<>(
+                Following.class, holder, new DbOpResultHandler<>(
                         success -> callback.accept(true),
                         error -> {
                             error.printStackTrace(System.err);
@@ -54,7 +54,7 @@ public class FollowingManager {
                 // Specification
                 query -> query
                         .whereEqualTo("followedId", followedId),
-                Following.class, holder, new TaskResultHandler<>(
+                Following.class, holder, new DbOpResultHandler<>(
                         success -> callback.accept(true),
                         error -> {
                             error.printStackTrace(System.err);
@@ -78,7 +78,7 @@ public class FollowingManager {
                         FieldValue.arrayUnion(user.getDbFileId()));
                 return null;
             };
-            DbUtils.operateTransaction(logic, new TaskResultHandler<>(
+            DbUtils.operateTransaction(logic, new DbOpResultHandler<>(
                     Void -> System.out.println("Successfully allowed follow request"),
                     e -> e.printStackTrace(System.err)
             ));
@@ -87,7 +87,7 @@ public class FollowingManager {
             DbUtils.operateDocumentById(DbUtils.COLL_USERS, currentUserId,
                     docRef -> docRef.update("followRequests",
                             FieldValue.arrayRemove(user.getDbFileId())),
-                    new TaskResultHandler<>(
+                    new DbOpResultHandler<>(
                             Void -> System.out.println("Successfully declined follow request"),
                             e -> e.printStackTrace(System.err)
                     ));

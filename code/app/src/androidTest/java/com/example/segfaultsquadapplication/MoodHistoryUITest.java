@@ -1,9 +1,7 @@
 package com.example.segfaultsquadapplication;
 
-import androidx.test.espresso.Espresso;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.assertion.ViewAssertions;
-import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.GrantPermissionRule;
@@ -21,13 +19,10 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static java.util.regex.Pattern.matches;
 
-import android.graphics.Movie;
 import android.util.Log;
 
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -43,7 +38,7 @@ import java.util.Objects;
  */
 
 @RunWith(AndroidJUnit4.class)
-public class AddMoodFragmentUITest {
+public class MoodHistoryUITest {
 
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule =
@@ -61,11 +56,8 @@ public class AddMoodFragmentUITest {
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
 
-    @Before //grow database, runs before each test
+    @Before
     public void seedDatabase() throws InterruptedException {
-        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
-        Thread.sleep(500);
-
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference moodsRef = db.collection("moods");
 
@@ -75,10 +67,30 @@ public class AddMoodFragmentUITest {
                 new MoodEvent("2w3eom2a87hnY89diAve7X3BR2n2", MoodEvent.MoodType.SHAME, "Oh maaa Gawd", null, null, true)
         };
         for (MoodEvent mood : moods) moodsRef.document().set(mood);
+
+        TestLoginUtil.handleSplashAndLogin(activityRule, "user1@gmail.com", "password");
+        Thread.sleep(1000);
     }
 
     @Test
-    public void testAddMoodUI() throws InterruptedException {
+    public void IfMoodOnScreen() throws InterruptedException {
+        onView(withText("ANGER")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("DISGUST")).check(ViewAssertions.matches(isDisplayed()));
+        onView(withText("SHAME")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    @Test
+    public void IfTestCanBeDeleted() {
+        onView(withText("DISGUST")).perform(click());
+        onView(withText("Delete")).perform(click());
+
+        onView(withText("Delete")).perform(click()); //click delete again
+
+        onView(withText("DISGUST")).check(ViewAssertions.matches(isDisplayed()));
+    }
+
+    @Test
+    public void AddMoodUI() throws InterruptedException {
         onView(withId(R.id.fabAddMood)).perform(click());
         onView(withText("Confusion")).perform(click());
         onView(withId(R.id.editTextReason)).perform(ViewActions.typeText("Feeling Down"));

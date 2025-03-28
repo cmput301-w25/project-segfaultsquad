@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.LargeTest;
 
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.user.User;
@@ -52,7 +52,7 @@ public class DbUtilTest {
         for (MoodEvent evt : INIT_EVENTS) {
             MockDb.await( (finishCallback) ->
                     () -> DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evt,
-                            new TaskResultHandler<>(
+                            new DbOpResultHandler<>(
                                     ignored -> finishCallback.run(),
                                     err -> {
                                         Assert.assertNull(err);
@@ -68,7 +68,7 @@ public class DbUtilTest {
         User user1 = new User("uid1", "user1", "uid1@gmail.com");
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.addObjectToCollection(DbUtils.COLL_USERS, user1,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> finishCallback.run(),
                                 err -> {
                                     Assert.assertNull(err);
@@ -95,7 +95,7 @@ public class DbUtilTest {
                                 .whereEqualTo("userId", "uid1")
                                 .orderBy("timestamp", Query.Direction.DESCENDING),
                         MoodEvent.class, holder1,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> finishCallback.run(),
                                 ignored -> {
                                     Assert.assertNull("Failed to get query result on UID 1", true);
@@ -117,7 +117,7 @@ public class DbUtilTest {
                         query -> query
                                 .whereEqualTo("userId", "that's right, the target uid of the query do not exist"),
                         MoodEvent.class, holder2,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> finishCallback.run(),
                                 ignored -> finishCallback.run()
                         )));
@@ -165,7 +165,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.getObjectByDocId(DbUtils.COLL_MOOD_EVENTS,
                         "2", MoodEvent.class, holder1,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> finishCallback.run(),
                                 e -> {
                                     Assert.assertNull("Failed to retrieve an existing document", e);
@@ -181,7 +181,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.getObjectByDocId(DbUtils.COLL_MOOD_EVENTS,
                         "-114514", MoodEvent.class, holder2,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> {
                                     Assert.assertNull("Success on retrieving non-existing document", true);
                                     finishCallback.run();
@@ -204,7 +204,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "2",
                         docRef -> docRef.set(moodEvt2),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Failed to set an existing document to a new value", e);
@@ -215,7 +215,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "-12345",
                         docRef -> docRef.set(moodEvt2),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Setting a non-existing document to a new value creates the document in place", false);
@@ -227,7 +227,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "2",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     MoodEvent evt = result.toObject(MoodEvent.class);
                                     assertEquals(evt.getMoodType(), MoodEvent.MoodType.ANGER);
@@ -243,7 +243,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "-100",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     assertFalse("Should not succeed in getting an non-existing document", result.exists());
                                     finishCallback.run();
@@ -255,7 +255,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "3",
                         DocumentReference::delete,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Error deleting existing document", e);
@@ -265,7 +265,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "3",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     assertFalse("Should not succeed in getting the deleted document", result.exists());
                                     finishCallback.run();
@@ -276,7 +276,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, "-999999",
                         DocumentReference::delete,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Deleting an non-existing document should not raise error", true);
@@ -296,7 +296,7 @@ public class DbUtilTest {
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "1",
                         docRef -> docRef.update("followers",
                                 FieldValue.arrayUnion("user2", "user3")),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Failed to update an existing document with a new value", e);
@@ -307,7 +307,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "1",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     User evt = result.toObject(User.class);
                                     assertEquals(evt.getFollowers(), List.of("user2", "user3"));
@@ -323,7 +323,7 @@ public class DbUtilTest {
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "1",
                         docRef -> docRef.update("followers",
                                 FieldValue.arrayRemove("user3")),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Failed to update an existing document with a new value", e);
@@ -334,7 +334,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "1",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     User evt = result.toObject(User.class);
                                     assertEquals(evt.getFollowers(), List.of("user2"));
@@ -351,7 +351,7 @@ public class DbUtilTest {
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "-112233",
                         docRef -> docRef.update("followers",
                                 FieldValue.arrayRemove("some element")),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> {
                                     assertNull("The update on a non-existing document was successful", true);
                                     finishCallback.run();
@@ -380,7 +380,7 @@ public class DbUtilTest {
         };
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateTransaction(logic,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> {
                                     assertNull("Failed to process transaction", e);
@@ -391,7 +391,7 @@ public class DbUtilTest {
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, "1",
                         DocumentReference::get,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 (result) -> {
                                     User evt = result.toObject(User.class);
                                     assertEquals(evt.getFollowers(), List.of("user2", "user4"));

@@ -2,7 +2,7 @@ package com.example.segfaultsquadapplication.impl.user;
 
 import androidx.annotation.Nullable;
 
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -104,7 +104,7 @@ public class UserManager {
      * @param callback The handler for the result
      */
     private static void checkUserDocument(FirebaseUser firebaseUser, BiConsumer<Boolean, String> callback) {
-        TaskResultHandler<DocumentSnapshot> opHandler = new TaskResultHandler<>(
+        DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
                 // Success
                 documentSnapshot -> {
                     System.out.println("SUCCESS, EXIST? " + documentSnapshot.exists());
@@ -136,7 +136,7 @@ public class UserManager {
         User newUser = new User(uid, getUsername(firebaseUser),
                 SAVE_USER_GMAIL ? firebaseUser.getEmail() : null);
 
-        TaskResultHandler<Void> opHandler = new TaskResultHandler<>(
+        DbOpResultHandler<Void> opHandler = new DbOpResultHandler<>(
                 // Success
                 aVoid -> callback.accept(true, null),
                 // Failure
@@ -176,7 +176,7 @@ public class UserManager {
      */
     public static void loadUserData(String userId, AtomicReference<User> holder, Consumer<Boolean> callback) {
         DbUtils.getObjectByDocId(DbUtils.COLL_USERS, userId, User.class, holder,
-                new TaskResultHandler<>(
+                new DbOpResultHandler<>(
                         result -> callback.accept(true),
                         e -> {
                             e.printStackTrace(System.err);

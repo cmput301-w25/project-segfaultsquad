@@ -8,11 +8,14 @@
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,40 +34,106 @@ public class FollowingListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private FollowingAdapter followingAdapter;
-    private List<User> followingList; // Assume User is a model class for user data
+    private List<User> followingList;
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_following_list, container, false);
+
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
+
+        // Initialize views and adapter
         recyclerView = view.findViewById(R.id.recycler_view_following);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        // Initialize the following list and adapter
         followingList = new ArrayList<>();
         followingAdapter = new FollowingAdapter(followingList, this::onFollowingAction);
         recyclerView.setAdapter(followingAdapter);
 
-        // Load following data (this should be replaced with actual data retrieval
-        // logic)
+        // Load following data
         loadFollowingData();
 
         // Set up back button
         view.findViewById(R.id.buttonBack).setOnClickListener(v -> {
-            requireActivity().onBackPressed(); // Navigate back to ProfileFragment
+            requireActivity().onBackPressed();
         });
 
         return view;
     }
 
     private void loadFollowingData() {
-        // Mock data for demonstration
-        followingList.add(new User("User3", "username_1", "user_email"));
-        followingList.add(new User("User4", "username_2", "user_email"));
-        followingAdapter.notifyDataSetChanged();
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Query the following collection for users that the current user follows
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> followedUserIds = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        followedUserIds.add(document.getString("followedId"));
+                    }
+
+                    // Now fetch the user details for each followed user
+                    for (String userId : followedUserIds) {
+                        db.collection("users")
+                                .document(userId)
+                                .get()
+                                .addOnSuccessListener(userDoc -> {
+                                    if (userDoc.exists()) {
+                                        User user = userDoc.toObject(User.class);
+                                        // Set the user ID explicitly
+                                        user.setDbFileId(userDoc.getId());
+                                        followingList.add(user);
+                                        followingAdapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("FollowingList", "Error fetching user details", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowingList", "Error fetching following data", e);
+                });
     }
 
     private void onFollowingAction(User user) {
-        // Handle unfollow action here
+        // Show confirmation dialog before unfollowing
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Unfollow User")
+                .setMessage("Are you sure you want to unfollow " + user.getUsername() + "?")
+                .setPositiveButton("Yes", (dialog, which) -> unfollowUser(user))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void unfollowUser(User userToUnfollow) {
+        Log.d("FollowingListFragment", "-0");
+        String currentUserId = auth.getCurrentUser().getUid();
+        String userToUnfollowId = userToUnfollow.getDbFileId();
+
+        // Delete the following relationship from Firestore
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .whereEqualTo("followedId", userToUnfollowId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    // remove the user from the list
+                                    followingList.remove(userToUnfollow);
+                                    followingAdapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(),
+                                            "Unfollowed " + userToUnfollow.getUsername(),
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                });
     }
 }

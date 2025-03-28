@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.LargeTest;
 
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
@@ -49,7 +49,7 @@ public class MoodEventManagerTest {
         for (MoodEvent evt : INIT_EVENTS) {
             MockDb.await( (finishCallback) ->
                     () -> DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evt,
-                            new TaskResultHandler<>(
+                            new DbOpResultHandler<>(
                                     ignored -> finishCallback.run(),
                                     Assert::assertNull
                             )));
@@ -62,7 +62,7 @@ public class MoodEventManagerTest {
         User user1 = new User("uid1", "user1", "uid1@gmail.com");
         MockDb.await( (finishCallback) ->
                 () -> DbUtils.addObjectToCollection(DbUtils.COLL_USERS, user1,
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 ignored -> finishCallback.run(),
                                 Assert::assertNull
                         )));

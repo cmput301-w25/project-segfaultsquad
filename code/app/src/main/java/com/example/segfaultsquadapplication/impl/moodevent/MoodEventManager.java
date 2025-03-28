@@ -7,7 +7,7 @@ import android.provider.MediaStore;
 
 import androidx.annotation.Nullable;
 
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
 import com.google.firebase.firestore.DocumentReference;
@@ -97,7 +97,7 @@ public class MoodEventManager {
         if (situation != null) {
             moodEvent.setSocialSituation(situation);
         }
-        TaskResultHandler<DocumentReference> handler = new TaskResultHandler<>(
+        DbOpResultHandler<DocumentReference> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> {
                     callback.accept(true);
@@ -224,7 +224,7 @@ public class MoodEventManager {
 
         DbUtils.queryObjects(DbUtils.COLL_MOOD_EVENTS,
                 operator, MoodEvent.class, holder,
-                new TaskResultHandler<>(
+                new DbOpResultHandler<>(
                         success -> onComplete.accept(true),
                         error -> {
                             error.printStackTrace(System.err);
@@ -241,7 +241,7 @@ public class MoodEventManager {
      * @param callback Called when finished, whether the retrieval is a success(true) or failure(false).
      */
     public static void getMoodEventById(String moodId, AtomicReference<MoodEvent> holder, Consumer<Boolean> callback) {
-        TaskResultHandler<DocumentSnapshot> handler = new TaskResultHandler<>(
+        DbOpResultHandler<DocumentSnapshot> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
@@ -259,7 +259,7 @@ public class MoodEventManager {
      * @param callback The callback when the file is saved(true) or can not be saved(false).
      */
     private static void updateMoodEventById(MoodEvent moodEvent, Consumer<Boolean> callback) {
-        TaskResultHandler<Void> handler = new TaskResultHandler<>(
+        DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
@@ -278,7 +278,7 @@ public class MoodEventManager {
      * @param callback The callback when the file is deleted(true) or can not be deleted(false).
      */
     public static void deleteMoodEventById(String id, Consumer<Boolean> callback) {
-        TaskResultHandler<Void> handler = new TaskResultHandler<>(
+        DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure

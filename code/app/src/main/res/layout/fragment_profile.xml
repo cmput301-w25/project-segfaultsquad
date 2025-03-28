@@ -3,8 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/holo_red_light" >
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,6 +25,19 @@
                 android:layout_weight="1"
                 android:text="Profile"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
+
+            <!-- Search icon to toggle searchbar visibility-->
+            <ImageButton
+                android:id="@+id/headerSearchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_search" />
 
             <!-- Heart to goto follow requests -->
             <ImageButton
@@ -54,20 +66,54 @@
                 android:src="@drawable/ic_more_vert" />
         </LinearLayout>
 
+        <!-- Search Section -->
+        <LinearLayout
+            android:id="@+id/searchSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_section_background"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/search_edit_text_background"
+                android:hint="Search users..."
+                android:padding="8dp" />
+
+            <ImageButton
+                android:id="@+id/searchButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:maxWidth="48dp"
+                android:maxHeight="48dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_search" />
+        </LinearLayout>
+
         <!-- Profile Picture -->
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp">
 
-            <com.example.segfaultsquadapplication.display.profile.CircularImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile_picture"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:src="@drawable/ic_person"
-                android:contentDescription="@string/profile_picture"
-                android:background="@drawable/circle_background"
-                android:padding="8dp" />
+                android:scaleType="centerCrop"
+                app:strokeWidth="2dp"
+                app:shapeAppearanceOverlay="@style/CircleShape" />
 
             <ImageButton
                 android:id="@+id/editProfilePictureButton"
@@ -91,7 +137,7 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="John Doe"
+            android:text=" "
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_gravity="center"
@@ -117,7 +163,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingEnd="8dp"
-                    android:text="248"
+                    android:text=" "
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
@@ -139,7 +185,7 @@
                     android:id="@+id/following_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="186"
+                    android:text=" "
                     android:textSize="32sp"
                     android:textStyle="bold"
                     android:paddingEnd="8dp" />
@@ -153,26 +199,45 @@
         </LinearLayout>
 
         <!-- Recent Activity Section -->
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recent Activity"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            
+            <!-- subheading -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="My Mood History"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp" />
 
-        <!-- Grid for Mood Events -->
+            <ImageButton
+                android:id="@+id/filterButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/filter_icon" />
+        </LinearLayout>
+
+        <!-- RecyclerView for mood list -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_mood_grid"
+            android:id="@+id/moodRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingTop="8dp"
+            android:padding="16dp"
             android:clipToPadding="false"
-            android:background="@android:color/holo_blue_light" />
+            android:scrollbars="vertical"/>
 
     </LinearLayout>
-
 
     <!-- Profile Dropdown -->
     <androidx.cardview.widget.CardView
@@ -205,6 +270,76 @@
                 android:paddingStart="8dp"
                 android:text="Logout" />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Dropdown cards -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/filterMenu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="400dp"
+        android:visibility="gone"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/filter1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Last Week" />
+
+            <TextView
+                android:id="@+id/filter2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Mood" />
+
+            <TextView
+                android:id="@+id/filter3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="By Reason" />
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear All Filters" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Search Results Dropdown -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/searchResultsCard"
+        android:layout_width="336dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="128dp"
+        android:visibility="visible"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchResultsRecyclerView"
+            android:layout_width="336dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:clipToPadding="false"
+            android:maxHeight="200dp"
+            android:padding="8dp" />
+
     </androidx.cardview.widget.CardView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

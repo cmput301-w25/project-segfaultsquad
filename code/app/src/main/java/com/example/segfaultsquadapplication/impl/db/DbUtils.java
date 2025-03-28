@@ -71,7 +71,7 @@ public class DbUtils {
     public static <T extends IDbData> void queryObjects(String collection, Function<Query, Query> specifications,
                                                         Class<T> tClass,
                                                         @Nullable Collection<T> holder,
-                                                        TaskResultHandler<QuerySnapshot> handler) {
+                                                        DbOpResultHandler<QuerySnapshot> handler) {
         requireDb();
         specifications.apply( db.collection(collection) )
                 .get()
@@ -134,8 +134,8 @@ public class DbUtils {
      */
     public static <T extends IDbData> void getObjectByDocId(String collection, String docId,
                                             Class<T> tClass, AtomicReference<T> holder,
-                                            TaskResultHandler<DocumentSnapshot> handler) {
-        TaskResultHandler<DocumentSnapshot> opHandler = new TaskResultHandler<>(
+                                            DbOpResultHandler<DocumentSnapshot> handler) {
+        DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
                 // Success
                 documentSnapshot -> {
                     Exception exception;
@@ -175,7 +175,7 @@ public class DbUtils {
      */
     public static <T> void operateDocumentById(String collection, String docId,
                                                 Function<DocumentReference, Task<T>> operation,
-                                                TaskResultHandler<T> handler) {
+                                                DbOpResultHandler<T> handler) {
         requireDb();
         try {
             operation.apply(getDocRef(collection, docId))
@@ -198,7 +198,7 @@ public class DbUtils {
      * @param transaction The transaction logic.
      * @param handler The handler defining success / failure behavior.
      */
-    public static <T> void operateTransaction(Transaction.Function<T> transaction, TaskResultHandler<T> handler) {
+    public static <T> void operateTransaction(Transaction.Function<T> transaction, DbOpResultHandler<T> handler) {
         requireDb();
         db.runTransaction(transaction)
                 .addOnCompleteListener(task -> {
@@ -219,7 +219,7 @@ public class DbUtils {
      * @param handler Handler to encapsulate success/failure callback.
      */
     public static <T extends IDbData> void addObjectToCollection(String collection, T data,
-                                                                 TaskResultHandler<DocumentReference> handler) {
+                                                                 DbOpResultHandler<DocumentReference> handler) {
         requireDb();
         db.collection(collection)
                 .add(data)

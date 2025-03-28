@@ -1,4 +1,5 @@
 package com.example.segfaultsquadapplication;
+
 import android.os.Handler;
 import android.os.Looper;
 
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 public class Map_api {
     public interface GeocodingListener {
         void onLocationFound(double latitude, double longitude);
+
         void onError(String error);
     }
 
@@ -52,6 +54,47 @@ public class Map_api {
                     handler.post(() -> listener.onLocationFound(lat, lon));
                 } else {
                     handler.post(() -> listener.onError("Location not found"));
+                }
+            } catch (Exception e) {
+                handler.post(() -> listener.onError("Failed to fetch data: " + e.getMessage()));
+            }
+        });
+    }
+
+    public interface ReverseGeocodingListener {
+        void onAddressFound(String address);
+
+        void onError(String error);
+    }
+
+    public static void getAddress(double latitude, double longitude, ReverseGeocodingListener listener) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        executor.execute(() -> {
+            try {
+                String urlString = "https://nominatim.openstreetmap.org/reverse?format=json&lat=" + latitude + "&lon="
+                        + longitude;
+                URL url = new URL(urlString);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+                InputStream inputStream = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder result = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                reader.close();
+
+                JSONObject jsonObject = new JSONObject(result.toString());
+                if (jsonObject.has("display_name")) {
+                    String address = jsonObject.getString("display_name");
+                    handler.post(() -> listener.onAddressFound(address));
+                } else {
+                    handler.post(() -> listener.onError("Address not found"));
                 }
             } catch (Exception e) {
                 handler.post(() -> listener.onError("Failed to fetch data: " + e.getMessage()));

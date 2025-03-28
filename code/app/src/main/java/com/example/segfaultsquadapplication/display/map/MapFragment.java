@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.Manifest;
+import android.os.Handler;
 
 import com.example.segfaultsquadapplication.Map_api;
 import com.example.segfaultsquadapplication.R;
@@ -31,6 +32,9 @@ import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent.MoodType;
+import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,7 +49,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import android.util.Log;
 import com.google.android.material.chip.ChipGroup;
@@ -54,24 +58,38 @@ import androidx.cardview.widget.CardView;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.Calendar;
+import java.util.stream.Collectors;
+
 
 import android.graphics.Color;
 import android.widget.Toast;
+import androidx.navigation.Navigation;
 
 import org.osmdroid.views.MapView;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.views.overlay.Marker;
-import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
+import org.osmdroid.util.BoundingBox;
+
+import android.graphics.Canvas;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.widget.TextView;
+import android.app.AlertDialog;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+
 //import org.osmdroid.util.GeoPoint;
 
 public class MapFragment extends Fragment {
@@ -83,6 +101,9 @@ public class MapFragment extends Fragment {
     private List<MoodEvent> userMoods;
     private Map<String, MoodEvent> followedMoods; // Key: userId, Value: most recent mood
     private List<MoodEvent> localMoods;
+    private FirebaseAuth auth;
+    private FirebaseFirestore db;
+
 
     // Tabs
     private static final int TAB_MY_MOODS = 0;
@@ -100,6 +121,11 @@ public class MapFragment extends Fragment {
     private ImageButton filterButton;
     private CardView filterMenu;
     private boolean isFilterMenuVisible = false;
+    private static List<MoodEvent> allMoods = new ArrayList<>();
+    private List<MoodEvent> filteredFollowedMoods = new ArrayList<>();
+    private Map<String, Integer> locationOffsets = new HashMap<>();
+    // Current selected tab
+    private int currentTab = TAB_MY_MOODS;
 
     // permissions handling
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
@@ -117,22 +143,10 @@ public class MapFragment extends Fragment {
         userMoods = new ArrayList<>();
         followedMoods = new HashMap<>();
         localMoods = new ArrayList<>();
-        // Load data
-        loadMoodData();
+        // Initialize Firebase
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
     }
-
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // Initialize MapView or any other components that require view interaction
-        mapView = view.findViewById(R.id.mapView);
-        mapView.setTileSource(TileSourceFactory.MAPNIK); // Example of setting map tiles
-        mapView.setMultiTouchControls(true);
-
-        // Check and request location permissions if necessary
-        enableMyLocation();
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -145,12 +159,15 @@ public class MapFragment extends Fragment {
         mapChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chip_my_moods) {
                 // Handle My Mood History selection
+                currentTab = TAB_MY_MOODS;
                 updateMapMarkers(TAB_MY_MOODS);
             } else if (checkedId == R.id.chip_followed_moods) {
                 // Handle Followed Moods selection
+                currentTab = TAB_FOLLOWED;
                 updateMapMarkers(TAB_FOLLOWED);
             } else if (checkedId == R.id.chip_local_moods) {
                 // Handle Local Moods selection
+                currentTab = TAB_LOCAL;
                 updateMapMarkers(TAB_LOCAL);
             }
         });
@@ -164,17 +181,22 @@ public class MapFragment extends Fragment {
 
         // Setup filter option click listeners
         view.findViewById(R.id.filter1).setOnClickListener(v -> {
-            applyFilter("Last Week");
+            applyFilter("All Followers");
             toggleFilterMenu();
         });
 
         view.findViewById(R.id.filter2).setOnClickListener(v -> {
-            applyFilter("By Mood");
+            applyFilter("My Moods(default)");
             toggleFilterMenu();
         });
 
         view.findViewById(R.id.filter3).setOnClickListener(v -> {
-            applyFilter("By Reason");
+            applyFilter("Followers in 5km");
+            toggleFilterMenu();
+        });
+        // Add clear filters option
+        view.findViewById(R.id.clearFilters).setOnClickListener(v -> {
+            //clearAllFilters();
             toggleFilterMenu();
         });
 
@@ -189,28 +211,12 @@ public class MapFragment extends Fragment {
 
         // Set default location and zoom level
         mapView.getController().setZoom(15.0);
+        mapView.setMinZoomLevel(3.0);
+        mapView.setMaxZoomLevel(20.0);
+        BoundingBox boundingBox = new BoundingBox(85.0, 180.0, -85.0, -180.0); // North, East, South, West
+        mapView.setScrollableAreaLimitDouble(boundingBox);
         enableMyLocation();
 
-
-/*
-        // Example Firestore GeoPoint (latitude, longitude)
-        com.google.firebase.firestore.GeoPoint firestoreGeoPoint = new com.google.firebase.firestore.GeoPoint(37.7749, -122.4194); // Example: San Francisco
-
-        // Convert Firestore GeoPoint to OSMDroid GeoPoint
-        org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(
-                firestoreGeoPoint.getLatitude(),
-                firestoreGeoPoint.getLongitude()
-        );
-
-        // Set map center to converted GeoPoint
-        mapView.getController().setCenter(osmGeoPoint);
-
-
-        // Enable location overlay
-        MyLocationNewOverlay locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()), mapView);
-        locationOverlay.enableMyLocation();
-        mapView.getOverlays().add(locationOverlay);
-*/
         // Add compass overlay
         CompassOverlay compassOverlay = new CompassOverlay(requireContext(), new InternalCompassOrientationProvider(requireContext()), mapView);
         compassOverlay.enableCompass();
@@ -222,7 +228,6 @@ public class MapFragment extends Fragment {
                 // Print latitude and longitude to Logcat
                 Log.d("Coordinates", latitude + ", " + longitude);
 
-                // Now you can use these coordinates anywhere
                 addRedMarker(mapView, latitude, longitude);
             }
 
@@ -238,104 +243,313 @@ public class MapFragment extends Fragment {
         return view;
     }
 
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
+        // Initialize MapView or any other components that require view interaction
+        mapView = view.findViewById(R.id.mapView);
+        mapView.setTileSource(TileSourceFactory.MAPNIK); // Example of setting map tiles
+        mapView.setMultiTouchControls(true);
 
-    private void loadMoodData() {
-        String currentUserId = DbUtils.getUserId();
+        // Check and request location permissions if necessary
+        enableMyLocation();
 
-        // Load user's moods
-        ArrayList<MoodEvent> events = new ArrayList<>();
-        MoodEventManager.getAllMoodEvents(currentUserId, MoodEventManager.MoodEventFilter.ALL, events,
-                isSuccess -> {
-                    if (isSuccess) {
-                        userMoods.clear();
-                        userMoods.addAll(events);
-                        if (mapChipGroup.getCheckedChipId() == R.id.chip_my_moods) {
-                            updateMapMarkers(TAB_MY_MOODS);
-                        }
-                    } else {
-                        Toast.makeText(getContext(), "Fail loading my own mood event data", Toast.LENGTH_LONG).show();
-                    }
-                });
-
-        // Load followed users' moods
-        loadFollowedUsersMoods();
-
-        // Load local moods (if location available)
-        if (currentLocation != null) {
-            loadLocalMoods();
-        }
+        loadMoodData();
     }
 
-    private void loadFollowedUsersMoods() {
-        // First get list of followed users
-        String currentUserId = DbUtils.getUserId();
-        ArrayList<Following> followedUsers = new ArrayList<>();
-        FollowingManager.getAllFollowed(currentUserId, followedUsers, getFldSucc -> {
-            if (getFldSucc) {
-                // Then get their most recent moods
-                for (Following flw : followedUsers) {
-                    ArrayList<MoodEvent> evts = new ArrayList<>();
-                    String uid = flw.getFollowedId();
-                    MoodEventManager.getAllMoodEvents(uid,
-                            MoodEventManager.MoodEventFilter.MOST_RECENT_1, evts,
-                            isSuccess -> {
-                                if (evts.size() > 0) {
-                                    followedMoods.put(uid, evts.get(0));
-                                    if (mapChipGroup.getCheckedChipId() == R.id.chip_followed_moods) {
-                                        updateMapMarkers(TAB_FOLLOWED);
-                                    }
-                                }
-                            });
+
+    /**
+     * helper method to get this user's moods, sorted in reverse chronological order
+     */
+    private void loadMoodData() {
+        // debugging
+        Log.d("MoodHistory", "Loading moods for user: " + DbUtils.getUserId());
+        // Clear previous moods and markers
+        clearMoodMarkers(); // Ensures old moods and markers are removed
+        // Clear allMoods to avoid adding old data
+        allMoods.clear();  // Clear the list of all moods
+        // get the moods
+        ArrayList<MoodEvent> temp = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp, isSuccess -> {
+            if (isSuccess) {
+                allMoods.clear(); // Clear previous moods
+                // debugging
+                Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
+
+                for (MoodEvent mood : temp) {
+                    allMoods.add(mood); // add to arraylist
+                    Log.d("MoodHistory",
+                            "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
+                    // Add each mood as a marker on the map
+                    if (mood.getLocation() != null) {
+                        addMoodMarkerToMap(mood);
+                    }
                 }
-            }
-            // Could not load list of followed users
-            else {
-                Toast.makeText(getContext(), "Fail loading the list of followed users", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void loadLocalMoods() {
-        if (currentLocation == null || mapChipGroup == null)
-            return;
+    private void loadFollowingData() {
+        String currentUserId = auth.getCurrentUser().getUid();
 
-        // Create a GeoPoint for the current location
-        GeoPoint center = new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude());
+        // Debugging log
+        Log.d("FollowingList", "Loading followed users for: " + currentUserId);
 
-        // Get all moods and filter by distance
-        ArrayList<MoodEvent> holder = new ArrayList<>();
-        MoodEventManager.getAllMoodEvents(null,
-                MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
-                    if (isSuccess) {
-                        // Clear local moods
-                        localMoods.clear();
-                        // Add moods nearby to local moods
-                        holder.forEach( mood -> {
-                            if (mood.getLocation() != null &&
-                                    isWithinRadius(mood.getLocation(), center, LOCAL_RADIUS_KM)) {
-                                localMoods.add(mood);
+        // Clear previous moods and markers
+        clearMoodMarkers(); // Ensures old moods and markers are removed
+
+        // Clear allMoods to avoid adding old data
+        allMoods.clear();  // Clear the list of all moods
+
+        // Query the "following" collection to get the list of users the current user follows
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> followedUserIds = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        followedUserIds.add(document.getString("followedId"));
+                    }
+
+                    Log.d("FollowingList", "Number of followed users: " + followedUserIds.size());
+
+                    // Fetch mood data for each followed user
+                    for (String userId : followedUserIds) {
+                        // Skip adding the current user's own moods
+                        if (userId.equals(currentUserId)) {
+                            continue; // Skip the current user's moods
+                        }
+
+                        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, new ArrayList<>(), isSuccess -> {
+                            if (isSuccess) {
+                                Log.d("FollowingList", "Loaded moods for user: " + userId);
+
+                                // Collect moods into allMoods list
+                                ArrayList<MoodEvent> tempMoods = new ArrayList<>();
+                                tempMoods.addAll(allMoods);  // Copy current moods into tempMoods
+
+                                // Now add moods for this user into the allMoods
+                                MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, tempMoods, isLoaded -> {
+                                    if (isLoaded) {
+                                        Log.d("FollowingList", "Loaded " + tempMoods.size() + " moods for user: " + userId);
+
+                                        // Add each mood as a marker on the map
+                                        for (MoodEvent mood : tempMoods) {
+                                            if (mood.getLocation() != null) {
+                                                addMoodMarkerToMap(mood); // Add marker to map
+                                            }
+                                        }
+                                    } else {
+                                        Log.e("FollowingList", "Error loading moods for user: " + userId);
+                                    }
+                                });
+                            } else {
+                                Log.e("FollowingList", "Error loading moods for user: " + userId);
                             }
                         });
-                        // Update markers if appropriate
-                        if (mapChipGroup.getCheckedChipId() == R.id.chip_local_moods) {
-                            updateMapMarkers(TAB_LOCAL);
-                        }
-                    } else {
-                        Toast.makeText(getContext(), "Fail loading the list of local moods", Toast.LENGTH_LONG).show();
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowingList", "Error fetching following data", e);
                 });
+    }
+
+    private void MoodsWithinRadius(float radius) {
+        // Ensure that currentLocation is available
+        if (currentLocation == null) {
+            Log.e("Location", "Current location is not available");
+            return; // Exit if location is not available
+        }
+
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Debugging log
+        Log.d("FollowingList", "Loading followed users for: " + currentUserId);
+
+        // Clear previous moods and markers
+        clearMoodMarkers(); // Ensures old moods and markers are removed
+
+        // Clear allMoods to avoid adding old data
+        allMoods.clear();  // Clear the list of all moods
+
+        // Query the "following" collection to get the list of users the current user follows
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> followedUserIds = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        followedUserIds.add(document.getString("followedId"));
+                    }
+
+                    Log.d("FollowingList", "Number of followed users: " + followedUserIds.size());
+
+                    // Fetch mood data for each followed user
+                    for (String userId : followedUserIds) {
+                        // Skip adding the current user's own moods
+                        if (userId.equals(currentUserId)) {
+                            continue; // Skip the current user's moods
+                        }
+
+                        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, new ArrayList<>(), isSuccess -> {
+                            if (isSuccess) {
+                                Log.d("FollowingList", "Loaded moods for user: " + userId);
+
+                                ArrayList<MoodEvent> tempMoods = new ArrayList<>();
+                                tempMoods.addAll(allMoods); // Copy current moods into tempMoods
+
+                                // Fetch moods for this user and add to the list
+                                MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, tempMoods, isLoaded -> {
+                                    if (isLoaded) {
+                                        Log.d("FollowingList", "Loaded " + tempMoods.size() + " moods for user: " + userId);
+
+                                        // Filter moods to be within the specified radius
+                                        ArrayList<MoodEvent> nearbyMoods = new ArrayList<>();
+                                        for (MoodEvent mood : tempMoods) {
+                                            if (mood.getLocation() != null) {
+                                                Location moodLocation = new Location("");
+                                                moodLocation.setLatitude(mood.getLocation().getLatitude());
+                                                moodLocation.setLongitude(mood.getLocation().getLongitude());
+
+                                                // Calculate distance from current user's location
+                                                float distance = currentLocation.distanceTo(moodLocation); // Distance in meters
+
+                                                // Only consider moods within the specified radius
+                                                if (distance <= radius) {
+                                                    nearbyMoods.add(mood);
+                                                }
+                                            }
+                                        }
+
+                                        // Sort moods by most recent timestamp
+                                        if (!nearbyMoods.isEmpty()) {
+                                            Collections.sort(nearbyMoods, (mood1, mood2) -> mood2.getTimestamp().compareTo(mood1.getTimestamp()));
+
+                                            // Add each filtered mood marker to the map
+                                            for (MoodEvent mood : nearbyMoods) {
+                                                addMoodMarkerToMap(mood); // Add marker to map
+                                            }
+                                        }
+
+                                    } else {
+                                        Log.e("FollowingList", "Error loading moods for user: " + userId);
+                                    }
+                                });
+                            } else {
+                                Log.e("FollowingList", "Error loading moods for user: " + userId);
+                            }
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowingList", "Error fetching following data", e);
+                });
+    }
+
+
+
+    private void addMoodMarkerToMap(MoodEvent mood) {
+        if (mood.getLocation() == null) {
+            Log.e("MoodLocation", "Mood has no location: " + mood.getMoodType());
+            return;
+        }
+
+        Log.d("MoodLocation", "Mood: " + mood.getMoodType() +
+                ", Lat: " + mood.getLocation().getLatitude() +
+                ", Lng: " + mood.getLocation().getLongitude());
+        //org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(mood.getLocation().getLatitude(), mood.getLocation().getLongitude());
+        double lat = mood.getLocation().getLatitude();
+        double lon = mood.getLocation().getLongitude();
+
+        // Create a unique key for the location (latitude and longitude)
+        String locationKey = lat + "," + lon;
+
+        // Get the number of markers already added at this location
+        int markerCount = locationOffsets.getOrDefault(locationKey, 0);
+
+        // Set a fixed offset value for each marker
+        double offsetIncrement = 0.00035; // Adjust for how much to offset each subsequent marker
+        double newLon = lon + markerCount * offsetIncrement;
+
+        // Increment the count for the next marker at this location
+        locationOffsets.put(locationKey, markerCount + 1);
+
+        // Create the GeoPoint with the fixed offset
+        org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(lat, newLon);
+
+        Marker marker = new Marker(mapView);
+        marker.setPosition(osmGeoPoint);
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+
+        // Use emoji as marker icon
+        marker.setIcon(createEmojiDrawable(mood.getMoodType().getEmoticon()));
+
+        // Set a title (mood type) when clicking the marker
+        marker.setTitle("user1:" + mood.getMoodType());
+
+        // Add marker to the map
+        mapView.getOverlays().add(marker);
+        mapView.invalidate(); // Refresh the map
+
+        final boolean[] isInfoWindowShown = {false};
+
+        marker.setOnMarkerClickListener((clickedMarker, mapView1) -> {
+            if (!isInfoWindowShown[0]) {
+                clickedMarker.showInfoWindow(); // Show the info window
+                isInfoWindowShown[0] = true;   // Mark it as shown
+            }
+
+            // Use a Handler to clear the title after 3 seconds
+            Handler handler = new Handler();
+            handler.removeCallbacksAndMessages(null); // Clear any previous delayed messages
+
+            // Clear the title after 3 seconds and close the info window
+            handler.postDelayed(() -> {
+                clickedMarker.closeInfoWindow(); // Close the info window after clearing the title
+                isInfoWindowShown[0] = false;  // Mark it as not shown
+            }, 3000);  // 3 seconds delay
+
+            // Return true to indicate that the click event has been handled
+            return true;
+        });
+
+        // Center the map on the mood location
+        //updateMapLocation(mood.getLocation().getLatitude(), mood.getLocation().getLongitude());
+    }
+
+
+    // Create emoji-based marker
+    private Drawable createEmojiDrawable(String emoji) {
+        // Create a TextView to display the emoji
+        TextView textView = new TextView(getContext());
+        textView.setText(emoji);
+        textView.setTextSize(24);  // Adjust the emoji size (you can make it smaller or larger)
+        textView.setTextColor(Color.BLACK);  // You can customize this color
+
+        // Create a larger Bitmap to accommodate the emoji properly
+        int markerWidth = 100; // Increase the width (adjust as necessary)
+        int markerHeight = 100; // Increase the height (adjust as necessary)
+        Bitmap bitmap = Bitmap.createBitmap(markerWidth, markerHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        // Set the TextView's layout and draw the emoji on the canvas
+        textView.layout(0, 0, markerWidth, markerHeight);
+        textView.draw(canvas);
+
+        // Return the Drawable
+        return new BitmapDrawable(getResources(), bitmap);
     }
 
     /**
      * method to determine if local moods are within range of display
      *
-     * @param point1
-     *                 user location
-     * @param point2
-     *                 mood location
-     * @param radiusKm
-     *                 radius limit for definition of local
+     * @param point1   user location
+     * @param point2   mood location
+     * @param radiusKm radius limit for definition of local
      * @return
      */
     private boolean isWithinRadius(GeoPoint point1, GeoPoint point2, float radiusKm) {
@@ -350,8 +564,7 @@ public class MapFragment extends Fragment {
     /**
      * method to update the mood markers on the map based on filter applied
      *
-     * @param tabPosition
-     *                    the filter being applied index
+     * @param tabPosition the filter being applied index
      */
 
     private void updateMapMarkers(int tabPosition) {
@@ -473,6 +686,7 @@ public class MapFragment extends Fragment {
         map.getOverlays().add(marker);
         map.invalidate(); // Refresh the map
     }
+
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
@@ -504,23 +718,31 @@ public class MapFragment extends Fragment {
     }
 
     /**
-     * method to apply filter (INCORRECT)
+     * method to apply filter
      *
-     * @param filterType
-     *                   filter being applied
+     * @param filterType filter being applied
      */
     private void applyFilter(String filterType) {
-        // TODO: Implement filter logic
         switch (filterType) {
-            case "Last Week":
-                // Filter moods from last week
+            case "All Followers":
+                loadFollowingData();
                 break;
-            case "By Mood":
-                // Show mood type selector
+            case "My Moods(default)":
+                loadMoodData();
                 break;
-            case "By Reason":
-                // Show reason selector
+            case "Followers in 5km":
+                updateCurrentLocation();
+                MoodsWithinRadius(5000);
                 break;
         }
     }
+    private void clearMoodMarkers() {
+        mapView.getOverlays().clear(); // Remove all markers from the map
+        mapView.invalidate(); // Refresh the map view
+        allMoods.clear(); // Clear the list of mood events
+    }
 }
+
+    /**
+     * Filter moods from the last week
+     */

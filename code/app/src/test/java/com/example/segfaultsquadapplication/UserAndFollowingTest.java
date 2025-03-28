@@ -9,8 +9,7 @@ import static org.junit.Assert.assertTrue;
 import androidx.test.filters.LargeTest;
 
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.db.TaskResultHandler;
-import com.example.segfaultsquadapplication.impl.following.FollowingManager;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseUser;
@@ -99,7 +98,7 @@ public class UserAndFollowingTest {
                 () -> DbUtils.operateDocumentById(DbUtils.COLL_USERS, UserManager.getUserId(),
                         docRef -> docRef.update("followers",
                                 FieldValue.arrayUnion("user1")),
-                        new TaskResultHandler<>(
+                        new DbOpResultHandler<>(
                                 Void -> finishCallback.run(),
                                 e -> assertNull("Failed to add follower to user", e)
                         )));
