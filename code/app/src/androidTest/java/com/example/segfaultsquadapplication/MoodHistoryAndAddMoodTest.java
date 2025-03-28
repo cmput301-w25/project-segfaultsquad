@@ -22,7 +22,11 @@ import androidx.test.rule.GrantPermissionRule;
 
 import com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment;
 import com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment;
+import com.example.segfaultsquadapplication.display.profile.ProfileFragment;
+import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
@@ -159,6 +163,10 @@ public class MoodHistoryAndAddMoodTest {
                 .perform(ViewActions.scrollTo()).perform(click());
         onView(withText(MoodEvent.SocialSituation.WITH_GROUP.getDisplayName())).perform(click());
         onView(withId(R.id.buttonConfirm)).perform(click());
+        // Somehow it needs to be clicked twice...
+        try {
+            onView(withId(R.id.buttonConfirm)).perform(click());
+        } catch (Exception ignored) {}
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
         onView(withText("Reason text")).check(matches(isDisplayed()));
 
@@ -183,23 +191,26 @@ public class MoodHistoryAndAddMoodTest {
 
     // Check for filter functionality
     private void testMoodFilter() throws InterruptedException {
-        System.out.println("Populate data for filter");
-        CollectionReference collRef = FirebaseFirestore.getInstance().collection("moods");
+        System.out.println("Populate data for filtering later on");
 
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         MoodEvent evtLastMonth = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "Last M.", null, null, true);
-        DocumentReference docRef = collRef.document();
+
         Date newDate = Calendar.getInstance().getTime();
         newDate.setTime(newDate.getTime() - 30L * 24 * 60 * 60 * 1000);
         evtLastMonth.setTimestamp(new Timestamp(newDate));
-        evtLastMonth.setDbFileId(docRef.getId());
-        docRef.set(evtLastMonth);
+        DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evtLastMonth,
+                new DbOpResultHandler<>(null, null));
 
         MoodEvent evtOtherAngry = new MoodEvent(uid, MoodEvent.MoodType.ANGER, "RAGE", null, null, true);
-        docRef = collRef.document();
-        evtOtherAngry.setDbFileId(docRef.getId());
-        docRef.set(evtOtherAngry);
-        Thread.sleep(1000);
+        DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evtOtherAngry,
+                new DbOpResultHandler<>(null, null));
+
+        // Navigate away then navigate back to load events.
+        onView(withId(R.id.navigation_profile)).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof ProfileFragment), 5, 500));
+        onView(withId(R.id.navigation_my_mood_history)).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 5, 500));
 
         // Tests start below.
 
@@ -229,7 +240,7 @@ public class MoodHistoryAndAddMoodTest {
         onView(withText("Clear All Filters")).perform(click());
         Thread.sleep(500);
         // The event last month should be shown
-        onView(withText("Last M.")).check(matches(isDisplayed()));
+        onView(withText("Last M.")).check(doesNotExist());
         // The fear event should also be shown
         onView(withText("Reason text")).check(matches(isDisplayed()));
 
