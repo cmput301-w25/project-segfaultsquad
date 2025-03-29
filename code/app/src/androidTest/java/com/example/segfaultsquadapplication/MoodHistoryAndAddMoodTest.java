@@ -219,7 +219,7 @@ public class MoodHistoryAndAddMoodTest {
         onView(withText("Last Week")).perform(click());
         Thread.sleep(500);
         // The recent mood should be shown
-        onView(withText("Reason text")).check(matches(isDisplayed()));
+        onView(withText("Reason text")).perform(scrollTo()).check(matches(isDisplayed()));
         // Should not display the event last month!
         onView(withText("Last M.")).check(doesNotExist());
 
@@ -229,9 +229,9 @@ public class MoodHistoryAndAddMoodTest {
         onView(withText( MoodEvent.MoodType.ANGER.name() )).perform(click());
         Thread.sleep(500);
         // The recent fury mood should be shown
-        onView(withText("Fury!")).check(matches(isDisplayed()));
+        onView(withText("Fury!")).perform(scrollTo()).check(matches(isDisplayed()));
         // Should now reveal the angry event last month!
-        onView(withText("Last M.")).check(matches(isDisplayed()));
+        onView(withText("Last M.")).perform(scrollTo()).check(matches(isDisplayed()));
         // The fear event should be hidden
         onView(withText("Reason text")).check(doesNotExist());
 
@@ -240,9 +240,9 @@ public class MoodHistoryAndAddMoodTest {
         onView(withText("Clear All Filters")).perform(click());
         Thread.sleep(500);
         // The event last month should be shown
-        onView(withText("Last M.")).check(doesNotExist());
+        onView(withText("Last M.")).perform(scrollTo()).check(matches(isDisplayed()));
         // The fear event should also be shown
-        onView(withText("Reason text")).check(matches(isDisplayed()));
+        onView(withText("Reason text")).perform(scrollTo()).check(matches(isDisplayed()));
 
         System.out.println("Test - filter by reason");
         onView(withId(R.id.filterButton)).perform(click());
@@ -254,6 +254,6 @@ public class MoodHistoryAndAddMoodTest {
         // The RAGE event without RA should be hidden
         onView(withText("Fury!")).check(doesNotExist());
         // The RAGE event with RA should be shown
-        onView(withText("RAGE")).check(matches(isDisplayed()));
+        onView(withText("RAGE")).perform(scrollTo()).check(matches(isDisplayed()));
     }
 }
