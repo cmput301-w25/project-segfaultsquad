@@ -225,7 +225,7 @@ public class DbUtils {
                 .add(data)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        data.setDbFileId(task.getResult().getPath());
+                        data.setDbFileId(task.getResult().getId());
                         handler.onSuccess(task.getResult());
                     }
                     else {

@@ -75,11 +75,7 @@ public class MoodEventManager {
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
-        AtomicReference<GeoPoint> holder = new AtomicReference<>();
-        LocationManager.getGeoPoint(holder, isSuccess -> {
-            addMoodEvent(moodType, reason, imgBytes,
-                    isSuccess ? holder.get() : null, situation, isPublic, callback);
-        });
+        addMoodEvent(moodType, reason, imgBytes, situation, isPublic, callback);
     }
 
     /**
@@ -87,17 +83,15 @@ public class MoodEventManager {
      * @param moodType Mood type
      * @param reason String reason
      * @param imgBytes Parsed image bytes
-     * @param geoPoint Geopoint info (optional)
      * @param situation Social situation; defaults to MoodEvent's default situation if is null
      * @param isPublic Whether the event is publicly visible
      * @param callback Success/failure callback
      */
     private static void addMoodEvent(MoodEvent.MoodType moodType,
                                     String reason, @Nullable List<Integer> imgBytes,
-                                     @Nullable GeoPoint geoPoint,
                                     @Nullable MoodEvent.SocialSituation situation, boolean isPublic,
                                     Consumer<Boolean> callback) {
-        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, geoPoint, isPublic);
+        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, null, isPublic);
         if (situation != null) {
             moodEvent.setSocialSituation(situation);
         }
@@ -105,6 +99,14 @@ public class MoodEventManager {
                 // Success
                 Void -> {
                     callback.accept(true);
+                    // Lazy-init geoPoint for reactive-ness of the application
+                    AtomicReference<GeoPoint> holder = new AtomicReference<>();
+                    System.out.println(System.currentTimeMillis());
+                    LocationManager.getGeoPoint(holder, isSuccess -> {
+                        System.out.println("TIME INNER: " + System.currentTimeMillis());
+                        DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, moodEvent.getDbFileId(),
+                                docRef -> docRef.update("location", holder.get()), new DbOpResultHandler<>(null, null));
+                    });
                 },
                 // Failure
                 e -> {
