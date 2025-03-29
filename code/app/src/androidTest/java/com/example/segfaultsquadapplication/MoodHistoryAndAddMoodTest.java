@@ -168,7 +168,7 @@ public class MoodHistoryAndAddMoodTest {
             onView(withId(R.id.buttonConfirm)).perform(click());
         } catch (Exception ignored) {}
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
-        onView(withText("Reason text")).check(matches(isDisplayed()));
+        onView(withText("Reason text")).perform(scrollTo()).check(matches(isDisplayed()));
 
         System.out.println("Test Regular - optional fields omitted");
         onView(withId(R.id.fabAddMood)).perform(click());
@@ -177,7 +177,7 @@ public class MoodHistoryAndAddMoodTest {
         onView(withId(R.id.editTextReason)).perform(typeText("Fury!"));
         onView(withId(R.id.buttonConfirm)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
-        onView(withText("Fury!")).check(matches(isDisplayed()));
+        onView(withText("Fury!")).perform(scrollTo()).check(matches(isDisplayed()));
 
         System.out.println("Test Regular - cancelled");
         onView(withId(R.id.fabAddMood)).perform(click());
