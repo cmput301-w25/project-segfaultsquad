@@ -90,9 +90,9 @@ public class FollowersListFragment extends Fragment {
                 isSuccess -> {
                     if (! isSuccess) return;
                     List<String> followerUserIds = userHolder.get().getFollowers();
+                    followersList.clear();
                     // Debug log each follower ID
                     followerUserIds.forEach( flw -> Log.d("FollowersListFragment", "Found follower with ID: " + flw) );
-
                     // Now fetch the user details for each follower
                     for (String followerUserId : followerUserIds) {
                         AtomicReference<User> userDetailHolder = new AtomicReference<>();
