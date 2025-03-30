@@ -53,11 +53,11 @@ import java.util.Objects;
 
 
 /**
- * This test tests for features related to following. </br>
- * Based on the nature of this test, info availability across accounts & logout are automatically tested. </br>
- * That is, follow request, follow back, remove follower, see followed users' events. </br>
+ * This test tests for features related to following. <br>
+ * * Based on the nature of this test, info availability across accounts and logout are automatically tested. <br>
+ * That is, follow request, follow back, remove follower, see followed users' events. <br>
  * These tests are integrated into one to prevent wasting time to excessive login / splash simulation
- * and simulate a user's real-world usage of the App. </br>
+ * and simulate a user's real-world usage of the App. <br>
  * Reference: https://stackoverflow.com/questions/28476507/using-espresso-to-click-view-inside-recyclerview-item
  */
 @RunWith(AndroidJUnit4.class)
@@ -107,8 +107,8 @@ public class UserFollowingTest {
     public GrantPermissionRule locPermRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
 
     /**
-     * The Android UI test would simulate a realtime user's behavior, </br>
-     * thus all smaller tests are put together to mitigate displaying splash screen too many times </br>
+     * The Android UI test would simulate a realtime user's behavior, <br>
+     * thus all smaller tests are put together to mitigate displaying splash screen too many times <br>
      * Also, many test cases would involve with different users and their internal ID,
      * making it impossible to be independently setup before individual tests.
      * @throws InterruptedException If the test thread's waiting behavior is somehow interrupted

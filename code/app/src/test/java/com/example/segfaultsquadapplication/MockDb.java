@@ -36,10 +36,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
- * This class will help setup mock database before unit tests. </br>
- * Initialize an instance of this class before doing tests to wire things appropriately. </br>
- * WARNING: This DB impl is simple and mimics the actual firebase for mock unit tests only. </br>
- * Objects are stored as-is in the internal environment; DO NOT modify instances after adding them. </br>
+ * This class will help setup mock database before unit tests. <br>
+ * Initialize an instance of this class before doing tests to wire things appropriately. <br>
+ * WARNING: This DB impl is simple and mimics the actual firebase for mock unit tests only. <br>
+ * Objects are stored as-is in the internal environment; DO NOT modify instances after adding them. <br>
  * <a href="https://www.baeldung.com/mockito-behavior">Reference</a>
  */
 public class MockDb {
@@ -129,7 +129,7 @@ public class MockDb {
     }
 
     /**
-     * Helper method that helps wait for a DB operation in unit test to finish, then continue with next logics. </br>
+     * Helper method that helps wait for a DB operation in unit test to finish, then continue with next logics. <br>
      * method will behave as a proxy to inject shouldProceed logic as additional logic in the desired callback.
      * @param method The proxy for extra behavior to mark for continue
      */
@@ -219,7 +219,7 @@ public class MockDb {
     }
 
     /**
-     * Helper function for wireNewDocOp - creates a mock document reference. </br>
+     * Helper function for wireNewDocOp - creates a mock document reference. <br>
      * NOTE: The document content is saved in wireNewDocOp - this only creates the reference.
      * @param mockColl The collection to mock
      * @param docId Document id
@@ -329,7 +329,7 @@ public class MockDb {
     }
 
     /**
-     * Forms a query object from the collection. </br>
+     * Forms a query object from the collection. <br>
      * Further operations modify the query content IN-PLACE
      * As the results are held internally via hashmap.
      * @param mockColl The mock collection.

@@ -20,11 +20,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
- * Do not directly call query methods in here within fragments - use the related data manager instead. </br>
- * The utility class for database connection & operations. </br>
+ * Do not directly call query methods in here within fragments - use the related data manager instead. <br>
+ * The utility class for database connection and operations. <br>
  * DbOpResultHandler is utilized to organize the "success" / "failure" callback.
  * Here, whether to call "success" or "failure" is determined by both the operation result
- * and additional logic (e.g. additional castings / success checks), if necessary. </br>
+ * and additional logic (e.g. additional castings / success checks), if necessary. <br>
  */
 public class DbUtils {
     private static FirebaseFirestore db = null;
@@ -58,10 +58,10 @@ public class DbUtils {
      */
 
     /**
-     * Query objects from a collection satisfying specifications (condition, order, limit etc.). </br>
+     * Query objects from a collection satisfying specifications (condition, order, limit etc.). <br>
      * If the query succeeds, all documents will be added to the holder if it is not null;
-     * If holder is null, success will be invoked without parsing documents. </br>
-     * If the query fails, holder will not be modified. </br>
+     * If holder is null, success will be invoked without parsing documents. <br>
+     * If the query fails, holder will not be modified. <br>
      * @param collection The collection to query from
      * @param specifications Transformations (filter, order, limit etc.) applied to the query
      * @param tClass The class type to convert into
@@ -117,6 +117,7 @@ public class DbUtils {
      * For other usages, consider using other helper functions.
      * @param coll The collection
      * @param docPath The document path
+     * @return A reference to the document.
      */
     public static DocumentReference getDocRef(String coll, String docPath) {
         requireDb();
@@ -124,7 +125,7 @@ public class DbUtils {
     }
 
     /**
-     * Retrieves an object implementing IDbData according to the document identifier. </br>
+     * Retrieves an object implementing IDbData according to the document identifier. <br>
      * When handler's success function is called, the holder will contain the retrieved object.
      * @param collection The collection name.
      * @param docId The document id.
@@ -166,8 +167,8 @@ public class DbUtils {
     }
 
     /**
-     * Operates the document content by its collection and document ID. </br>
-     * The operation could be get, update or delete. </br>
+     * Operates the document content by its collection and document ID. <br>
+     * The operation could be get, update or delete. <br>
      * However, note that when getting a document, getObjectByDocId is usually easier to work with.
      * @param collection The collection of the document.
      * @param docId The document ID.

@@ -30,8 +30,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
- * Encapsulates MoodEvent's related interactions with database. </br>
- * The display section of code should be completely decoupled with document snapshots. </br>
+ * Encapsulates MoodEvent's related interactions with database. <br>
+ * The display section of code should be completely decoupled with document snapshots. <br>
  * Only the logic to handle mood events and respond to exceptions are needed.
  */
 public class MoodEventManager {
@@ -227,7 +227,7 @@ public class MoodEventManager {
 
     /**
      * Gets all mood events satisfying the filter.
-     * If user id is provided, the records are restricted to the specified user. </br>
+     * If user id is provided, the records are restricted to the specified user. <br>
      * On success, all mood events will be saved in the holder; otherwise, holder will not be changed.
      * @param userId User id, optional
      * @param filter Filter for the mood event

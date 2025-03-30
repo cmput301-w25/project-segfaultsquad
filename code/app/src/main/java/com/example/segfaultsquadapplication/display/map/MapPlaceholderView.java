@@ -23,7 +23,7 @@ public class MapPlaceholderView extends View {
     private List<MoodMarker> markers;
 
     /**
-     * 
+     * marks the mood
      */
     public static class MoodMarker {
         float x, y;
