@@ -35,6 +35,7 @@ import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.hamcrest.Matcher;
@@ -69,6 +70,12 @@ public class UserFollowingTest {
         String androidLocalhost = "10.0.2.2";
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
+        // Login users to generate user data
+        for (int i = 1; i <= 3; i ++) {
+            UserManager.login("user" + i + "@gmail.com", "password",
+                    (isSuccess, failReason) -> {assertTrue(isSuccess);});
+            FirebaseAuth.getInstance().signOut();
+        }
     }
 
     @Before
