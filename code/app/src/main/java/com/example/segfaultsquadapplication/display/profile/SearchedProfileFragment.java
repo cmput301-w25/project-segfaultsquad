@@ -3,7 +3,6 @@ package com.example.segfaultsquadapplication.display.profile;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;

@@ -7,34 +7,32 @@
 
 package com.example.segfaultsquadapplication.display.moodhistory;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.card.MaterialCardView;
+
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import com.google.firebase.auth.FirebaseAuth;
-
-import android.util.Log;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
-
-import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
@@ -66,9 +64,9 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     public MoodAdapter(OnMoodClickListener listener) {
         this.moodList = new ArrayList<>();
         this.listener = listener;
-        this.currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Get current user ID
+        this.currentUserId = UserManager.getUserId(); // Get current user ID
         this.userCache = new HashMap<>();
-        fetchCurrentUser(); // Fetch user details
+        if (currentUserId != null) fetchCurrentUser(); // Fetch user details
     }
 
     // Method to fetch current user details from Firestore

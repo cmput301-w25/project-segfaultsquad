@@ -1,39 +1,41 @@
 package com.example.segfaultsquadapplication.display.moodhistory;
 
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-import androidx.fragment.app.Fragment;
-
-import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
-import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
-import com.google.firebase.auth.FirebaseAuth;
-import com.github.mikephil.charting.charts.PieChart;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import android.widget.ImageButton;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import android.widget.FrameLayout;
-import android.animation.ObjectAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private List<MoodEvent> moodEvents = new ArrayList<>();
@@ -135,7 +137,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
      * bool to load in only current user's (true) or all (false) mood events
      */
     private void loadMoodDistribution(boolean personalOnly) {
-        String userId = personalOnly ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        String userId = personalOnly ? UserManager.getUserId() : null;
         ArrayList<MoodEvent> holder = new ArrayList<>();
 
         MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
@@ -157,7 +159,7 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
      * bool to load in only current user's (true) or all (false) mood events
      */
     private void loadRecentMoods(boolean personalOnly) {
-        String userId = personalOnly ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+        String userId = personalOnly ? UserManager.getUserId() : null;
         ArrayList<MoodEvent> holder = new ArrayList<>();
 
         MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {

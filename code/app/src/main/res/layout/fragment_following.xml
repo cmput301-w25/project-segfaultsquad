@@ -21,7 +21,7 @@
 
             <TextView
                 android:id="@+id/headingText"
-                android:layout_width="313dp"
+                android:layout_width="332dp"
                 android:layout_height="55dp"
                 android:text="Following"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2"

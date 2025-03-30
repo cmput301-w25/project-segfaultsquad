@@ -12,21 +12,21 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
-import androidx.fragment.app.Fragment;
 
-import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.user.UserManager;
-import com.example.segfaultsquadapplication.impl.user.User;
-import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.widget.CheckBox;
-import android.widget.TextView;
+import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.concurrent.atomic.AtomicReference;
