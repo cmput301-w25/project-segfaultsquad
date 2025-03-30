@@ -1,4 +1,4 @@
-package com.example.segfaultsquadapplication.display;
+package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,10 +23,12 @@ import com.example.segfaultsquadapplication.Map_api;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.firestore.GeoPoint;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -53,6 +55,7 @@ public class MoodDetailsFragment extends Fragment {
 
     // Data
     private String moodId = null;
+    private String userId = null;
     private MoodEvent currentMood;
 
     /**
@@ -71,9 +74,15 @@ public class MoodDetailsFragment extends Fragment {
         // Get the mood ID from arguments
         if (getArguments() != null) {
             moodId = getArguments().getString("moodId");
+            userId = getArguments().getString("userId");
         }
         if (moodId == null) {
             Toast.makeText(getContext(), "Error: No mood ID provided", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(container).navigateUp();
+            return view;
+        }
+        if (userId == null) {
+            Toast.makeText(getContext(), "Error: No user ID provided", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(container).navigateUp();
             return view;
         }
@@ -105,6 +114,13 @@ public class MoodDetailsFragment extends Fragment {
         locationTextView = view.findViewById(R.id.locationTextView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
+        // Edit/delete only available for own mood events.
+        if (! userId.equals(UserManager.getUserId()) ) {
+            editButton.setActivated(false);
+            editButton.setVisibility(View.GONE);
+            deleteButton.setActivated(false);
+            deleteButton.setVisibility(View.GONE);
+        }
     }
 
     /**

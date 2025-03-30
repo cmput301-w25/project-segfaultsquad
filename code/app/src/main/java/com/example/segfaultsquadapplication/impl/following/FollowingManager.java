@@ -7,18 +7,26 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Transaction;
 
+import java.util.function.Consumer;
+
 /**
  * Following-specific helper functions.
  */
 public class FollowingManager {
-    public static void sendFollowRequest(String otherUserId) {
+    public static void sendFollowRequest(String otherUserId, Consumer<Boolean> callback) {
         String currentUserId = DbUtils.getUserId();
         DbUtils.operateDocumentById(DbUtils.COLL_USERS, otherUserId,
                 docRef -> docRef.update("followRequests",
                         FieldValue.arrayUnion(currentUserId)),
                 new DbOpResultHandler<>(
-                        Void -> System.out.println("Successfully added follow request"),
-                        e -> e.printStackTrace(System.err)
+                        Void -> {
+                            System.out.println("Successfully added follow request");
+                            callback.accept(true);
+                        },
+                        e -> {
+                            e.printStackTrace(System.err);
+                            callback.accept(false);
+                        }
                 ));
     }
 

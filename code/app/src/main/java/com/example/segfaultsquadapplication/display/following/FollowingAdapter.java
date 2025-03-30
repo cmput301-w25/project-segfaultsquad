@@ -69,12 +69,9 @@ public class FollowingAdapter extends RecyclerView.Adapter<FollowingAdapter.View
             holder.profilePicture.setImageResource(R.drawable.ic_person);
         }
 
-        holder.followingButton.setText("Following");
         holder.followingButton.setOnClickListener(v -> {
             // Toggle follow/unfollow action
             listener.onFollowingAction(user);
-            // Optionally, change the button text to "Unfollowed" after clicking
-            holder.followingButton.setText("Unfollowed");
         });
     }
 

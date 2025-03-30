@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityRecord;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,7 +23,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,23 +33,18 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FollowingListFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private FollowingAdapter followingAdapter;
     private List<User> followingList;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_following_list, container, false);
-
-        // Initialize Firebase
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Initialize views and adapter
         recyclerView = view.findViewById(R.id.recycler_view_following);
@@ -67,39 +65,24 @@ public class FollowingListFragment extends Fragment {
     }
 
     private void loadFollowingData() {
-        String currentUserId = auth.getCurrentUser().getUid();
+        String currentUserId = UserManager.getUserId();
 
-        // Query the following collection for users that the current user follows
-        db.collection("following")
-                .whereEqualTo("followerId", currentUserId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    List<String> followedUserIds = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : querySnapshot) {
-                        followedUserIds.add(document.getString("followedId"));
+        AtomicReference<User> userHolder = new AtomicReference<>();
+        UserManager.loadUserData(currentUserId, userHolder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        // Now fetch the user details for each followed user
+                        for (String followedUserId : userHolder.get().getFollowing()) {
+                            AtomicReference<User> flwUserHolder = new AtomicReference<>();
+                            UserManager.loadUserData(followedUserId, flwUserHolder,
+                                    isFlwSuccess -> {
+                                        if (isFlwSuccess) {
+                                            followingList.add(flwUserHolder.get());
+                                            followingAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                        }
                     }
-
-                    // Now fetch the user details for each followed user
-                    for (String userId : followedUserIds) {
-                        db.collection("users")
-                                .document(userId)
-                                .get()
-                                .addOnSuccessListener(userDoc -> {
-                                    if (userDoc.exists()) {
-                                        User user = userDoc.toObject(User.class);
-                                        // Set the user ID explicitly
-                                        user.setDbFileId(userDoc.getId());
-                                        followingList.add(user);
-                                        followingAdapter.notifyDataSetChanged();
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("FollowingList", "Error fetching user details", e);
-                                });
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("FollowingList", "Error fetching following data", e);
                 });
     }
 
@@ -115,33 +98,10 @@ public class FollowingListFragment extends Fragment {
 
     private void unfollowUser(User userToUnfollow) {
         Log.d("FollowingListFragment", "-0");
-        String currentUserId = auth.getCurrentUser().getUid();
+        String currentUserId = UserManager.getUserId();
         String userToUnfollowId = userToUnfollow.getDbFileId();
 
         // Delete the following relationship from Firestore
-        db.collection("following")
-                .whereEqualTo("followerId", currentUserId)
-                .whereEqualTo("followedId", userToUnfollowId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (QueryDocumentSnapshot document : querySnapshot) {
-                        document.getReference().delete()
-                                .addOnSuccessListener(aVoid -> {
-                                    // remove the user from the list
-                                    followingList.remove(userToUnfollow);
-                                    followingAdapter.notifyDataSetChanged();
-                                    Toast.makeText(getContext(),
-                                            "Unfollowed " + userToUnfollow.getUsername(),
-                                            Toast.LENGTH_SHORT).show();
-                                });
-                    }
-                });
-
-        // remove from user follower following
-        db.collection("users").document(currentUserId)
-                .update("following", FieldValue.arrayRemove(userToUnfollowId));
-
-        db.collection("users").document(userToUnfollowId)
-                .update("followers", FieldValue.arrayRemove(currentUserId));
+        FollowingManager.makeUnfollow(currentUserId, userToUnfollowId);
     }
 }

@@ -168,6 +168,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
+        args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_myMoodHistory_to_moodDetails, args);
     }

@@ -71,7 +71,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private RecyclerView moodRecyclerView;
     private MoodAdapter moodAdapter;
 
-    private List<MoodEvent> moodEvents = new ArrayList<>();
+    private static List<MoodEvent> moodEvents = new ArrayList<>();
     private User currentUser; // To hold user data
 
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -122,7 +122,8 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         // Set up RecyclerView for mood list
         setupRecyclerView();
 
-        // Load mood events
+        // Display, load & update display for mood events
+        moodAdapter.updateMoods(moodEvents);
         loadMoodEvents();
 
         // Set click listeners
@@ -292,8 +293,11 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         String userId = UserManager.getUserId(); // Get user ID
 
         // Use MoodEventManager to get all mood events for the current user
-        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, moodEvents, isSuccess -> {
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
             if (isSuccess) {
+                moodEvents.clear();
+                moodEvents.addAll(holder);
                 Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
                 moodAdapter.updateMoods(moodEvents); // Update the adapter with the fetched mood events
             } else {
@@ -312,6 +316,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
+        args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_to_moodDetails, args);
     }

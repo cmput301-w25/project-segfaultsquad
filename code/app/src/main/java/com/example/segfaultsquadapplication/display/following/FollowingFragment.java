@@ -9,12 +9,15 @@
 
 package com.example.segfaultsquadapplication.display.following;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.AnimatorRes;
@@ -34,7 +37,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -46,6 +51,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     private boolean isFilterMenuVisible = false;
     private RecyclerView followingRecyclerView;
     private MoodAdapter moodAdapter;
+    // Make it non-static, init as empty; load moods as needed.
     private List<MoodEvent> allMoods = new ArrayList<>();
 
     @Override
@@ -60,8 +66,11 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         // Setup RecyclerView
         setupRecyclerView();
 
-        // Load moods of followed users
+        // Display moods of followed users
         loadMoods();
+
+        // Setup filter options
+        setupFilterOptions(view);
 
         // Setup filter button
         filterButton.setOnClickListener(v -> toggleFilterMenu());
@@ -106,6 +115,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         Log.d("FollowingFragment", "loadFollowedUsersMoods()");
 
         // Fetch the moods of followed users
+        allMoods.clear();
         for (String userId : followingList) {
             ArrayList<MoodEvent> eventsHolder = new ArrayList<>(3);
             MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.PUBLIC_MOST_RECENT_3,
@@ -127,6 +137,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
+        args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.navigation_mood_details, args);
     }
@@ -134,5 +145,102 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     private void toggleFilterMenu() {
         isFilterMenuVisible = !isFilterMenuVisible;
         filterMenu.setVisibility(isFilterMenuVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void setupFilterOptions(View view) {
+        view.findViewById(R.id.filter1).setOnClickListener(v -> {
+            filterLastWeek();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter2).setOnClickListener(v -> {
+            showMoodFilterDialog();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.filter3).setOnClickListener(v -> {
+            showReasonFilterDialog();
+            toggleFilterMenu();
+        });
+
+        view.findViewById(R.id.clearFilters).setOnClickListener(v -> {
+            clearAllFilters();
+            toggleFilterMenu();
+        });
+    }
+
+    private void filterLastWeek() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        Date lastWeekDate = calendar.getTime();
+
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : allMoods) {
+            if (mood.getTimestamp().toDate().after(lastWeekDate)) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void showMoodFilterDialog() {
+        String[] moods = { "ANGER", "CONFUSION", "DISGUST", "FEAR", "HAPPINESS", "SADNESS", "SHAME", "SURPRISE" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Select Mood")
+                .setItems(moods, (dialog, which) -> {
+                    String selectedMood = moods[which];
+                    filterByMood(selectedMood);
+                });
+        builder.show();
+    }
+
+    private void filterByMood(String moodType) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : allMoods) {
+            if (mood.getMoodType().name().equals(moodType)) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void showReasonFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Enter Reason Keyword");
+
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText input = new EditText(getContext());
+        input.setHint("Type search word here...");
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.setMargins(40, 0, 40, 0);
+        input.setLayoutParams(params);
+        layout.addView(input);
+
+        builder.setView(layout);
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            String keyword = input.getText().toString();
+            filterByReason(keyword);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void filterByReason(String keyword) {
+        List<MoodEvent> filteredMoods = new ArrayList<>();
+        for (MoodEvent mood : allMoods) {
+            if (mood.getReasonText() != null &&
+                    mood.getReasonText().toLowerCase().contains(keyword.toLowerCase())) {
+                filteredMoods.add(mood);
+            }
+        }
+        moodAdapter.updateMoods(filteredMoods);
+    }
+
+    private void clearAllFilters() {
+        moodAdapter.updateMoods(allMoods);
     }
 }
