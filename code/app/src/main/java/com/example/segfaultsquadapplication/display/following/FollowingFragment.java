@@ -40,6 +40,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import androidx.navigation.Navigation;
 
+
+/**
+ * Classname: FollowingFragment
+ * Purpose: Allow user to see a feed of their followed user's moods (most recent)
+ * Current Issues: Its blank
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ */
 public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
     private CardView filterMenu;
@@ -69,12 +78,18 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         return view;
     }
 
+    /**
+     * method to setup the list recycler view holder
+     */
     private void setupRecyclerView() {
         moodAdapter = new MoodAdapter(this);
         followingRecyclerView.setAdapter(moodAdapter);
         followingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
+    /**
+     * loads all of the user's moods from firebase
+     */
     private void loadMoods() {
         // debugging
         Log.d("FollowingFragment", "entered loadMoods()");
@@ -101,6 +116,11 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
                 });
     }
 
+    /**
+     * loads all of the user's followed moods from firebase
+     * @param followingList
+     * the list of the followed users
+     */
     private void loadFollowedUsersMoods(List<String> followingList) {
         // debugging
         Log.d("FollowingFragment", "loadFollowedUsersMoods()");
@@ -123,6 +143,11 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         }
     }
 
+    /**
+     * listener to goto mood detals
+     * @param mood
+     * the mood event clicked on
+     */
     @Override
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
@@ -131,6 +156,9 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
                 .navigate(R.id.navigation_mood_details, args);
     }
 
+    /**
+     * helper method to toggle visibility of filter menu
+     */
     private void toggleFilterMenu() {
         isFilterMenuVisible = !isFilterMenuVisible;
         filterMenu.setVisibility(isFilterMenuVisible ? View.VISIBLE : View.GONE);

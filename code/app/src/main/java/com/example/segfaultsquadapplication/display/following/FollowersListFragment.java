@@ -3,6 +3,12 @@
  * Version Info: Initial
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment displays a list of followers for the current user. It initializes
+ * the RecyclerView and loads the followers' data from Firestore. The user can
+ * remove followers or follow back users from this fragment.
+ *
+ * Outstanding Issues: None
  */
 package com.example.segfaultsquadapplication.display.following;
 
@@ -29,8 +35,21 @@ import com.google.firebase.firestore.FieldValue;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classname: FollowersListFragment
+ * Version Info: Initial
+ * Date: March 7, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment displays a list of followers for the current user. It
+ * initializes
+ * the RecyclerView and loads the followers' data from Firestore. The user can
+ * remove followers or follow back users from this fragment.
+ *
+ * Outstanding Issues: None
+ */
 public class FollowersListFragment extends Fragment {
-
+    // attributes
     private RecyclerView recyclerView;
     private FollowersAdapter followersAdapter;
     private List<User> followersList;
@@ -39,7 +58,7 @@ public class FollowersListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_followers_list, container, false);
 
         // Initialize Firebase
@@ -61,7 +80,7 @@ public class FollowersListFragment extends Fragment {
             public void onFollowBack(User user, FollowersAdapter.ViewHolder holder) {
                 Log.d("FollowersListFragment", "Follow back clicked for: " + user.getUsername());
 
-                sendFollowRequest(user, holder); //when button pressed
+                sendFollowRequest(user, holder); // when button pressed
             }
         });
         recyclerView.setAdapter(followersAdapter);
@@ -77,6 +96,9 @@ public class FollowersListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the followers data from Firestore.
+     */
     private void loadFollowersData() {
         String currentUserId = auth.getCurrentUser().getUid();
 
@@ -127,6 +149,12 @@ public class FollowersListFragment extends Fragment {
                 });
     }
 
+    /**
+     * Shows a dialog to confirm the removal of a follower.
+     *
+     * @param follower
+     *                 The follower to be removed.
+     */
     private void showRemoveFollowerDialog(User follower) {
         new AlertDialog.Builder(requireContext())
                 .setTitle("Remove Follower")
@@ -136,6 +164,12 @@ public class FollowersListFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Removes a follower from the current user's followers list.
+     *
+     * @param follower
+     *                 The follower to be removed.
+     */
     private void removeFollower(User follower) {
         String currentUserId = auth.getCurrentUser().getUid();
 
@@ -166,12 +200,13 @@ public class FollowersListFragment extends Fragment {
     }
 
     /**
-     * method to send follow request if not already following
+     * Sends a follow request to the specified user.
      *
-     * @param userToFollow the other user
-     *                 user id for the user to follow
-     * @param holder view holder for adapter
-     *                 check variables in adapter to change adatpter followback button
+     * @param userToFollow
+     *                     the other user user id for the user to follow
+     * @param holder
+     *                     view holder for adapter check variables in adapter to
+     *                     change adatpter followback button
      */
     private void sendFollowRequest(User userToFollow, FollowersAdapter.ViewHolder holder) {
         String currentUserId = auth.getCurrentUser().getUid();

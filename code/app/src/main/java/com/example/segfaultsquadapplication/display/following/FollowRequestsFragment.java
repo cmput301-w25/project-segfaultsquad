@@ -1,3 +1,14 @@
+/**
+ * Classname: FollowRequestsFragment
+ * Version Info: Initial
+ * Date: March 7, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment displays a list of follow requests received by the current user. It allows
+ * the user to accept or deny follow requests. The data is loaded from Firestore.
+ *
+ * Outstanding Issues: None
+ */
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
@@ -30,6 +41,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Classname: FollowRequestsFragment
+ * Version Info: Initial
+ * Date: March 7, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment displays a list of follow requests received by the current
+ * user. It allows
+ * the user to accept or deny follow requests. The data is loaded from
+ * Firestore.
+ *
+ * Outstanding Issues: None
+ */
 public class FollowRequestsFragment extends Fragment {
     private RecyclerView requestsRecyclerView;
     private FollowRequestsAdapter requestsAdapter;
@@ -59,6 +83,12 @@ public class FollowRequestsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * just method for testing
+     * 
+     * @return
+     *         list of users who sent requsts
+     */
     private List<User> getDummyRequests() {
         List<User> dummyUsers = new ArrayList<>();
 
@@ -71,20 +101,24 @@ public class FollowRequestsFragment extends Fragment {
         return dummyUsers;
     }
 
+    /**
+     * Loads the follow requests for the current user from Firestore.
+     */
     private void loadFollowRequests() {
         String currentUserId = auth.getCurrentUser().getUid();
         Log.d("MoodAdapter", "Loading Requests");
 
-//        //-- dummy follow requests for testing --//
-//        List<User> dummyRequests = getDummyRequests();
-//        if (!dummyRequests.isEmpty()) {
-//            followRequests.clear();
-//            followRequests.addAll(dummyRequests);
-//            requestsAdapter.updateRequests(followRequests);
-//        } else {
-//            Toast.makeText(getContext(), "No follow requests", Toast.LENGTH_SHORT).show();
-//        }
-//        //-- dummy follow requests for testing --//
+        // //-- dummy follow requests for testing --//
+        // List<User> dummyRequests = getDummyRequests();
+        // if (!dummyRequests.isEmpty()) {
+        // followRequests.clear();
+        // followRequests.addAll(dummyRequests);
+        // requestsAdapter.updateRequests(followRequests);
+        // } else {
+        // Toast.makeText(getContext(), "No follow requests",
+        // Toast.LENGTH_SHORT).show();
+        // }
+        // //-- dummy follow requests for testing --//
 
         db.collection("users").document(currentUserId)
                 .get()
@@ -107,6 +141,11 @@ public class FollowRequestsFragment extends Fragment {
                 });
     }
 
+    /**
+     * Fetches the user details for the specified follow request IDs.
+     *
+     * @param requestIds The list of user IDs for follow requests.
+     */
     private void fetchFollowRequestUsers(List<String> requestIds) {
         followRequests.clear();
 
@@ -117,7 +156,7 @@ public class FollowRequestsFragment extends Fragment {
                         if (documentSnapshot.exists()) {
                             User user = documentSnapshot.toObject(User.class);
                             if (user != null) {
-                                user.setDbFileId(documentSnapshot.getId()); //doc id for easy follow handling
+                                user.setDbFileId(documentSnapshot.getId()); // doc id for easy follow handling
                                 followRequests.add(user);
                                 requestsAdapter.updateRequests(followRequests);
                             }
@@ -129,13 +168,19 @@ public class FollowRequestsFragment extends Fragment {
         }
     }
 
+    /**
+     * Handles the acceptance or denial of a follow request.
+     *
+     * @param user   The user whose follow request is being handled.
+     * @param accept True if the request is accepted, false if denied.
+     */
     private void handleFollowRequest(User user, boolean accept) {
         String currentUserId = auth.getCurrentUser().getUid();
 
         if (accept) {
-            db.collection("users").document(currentUserId) //update current user followers profile
+            db.collection("users").document(currentUserId) // update current user followers profile
                     .update("followers", FieldValue.arrayUnion(user.getDbFileId()));
-            db.collection("users").document(user.getDbFileId()) //update user that followed following profile
+            db.collection("users").document(user.getDbFileId()) // update user that followed following profile
                     .update("following", FieldValue.arrayUnion(currentUserId));
 
             Map<String, Object> newFollow = new HashMap<>();
@@ -144,7 +189,7 @@ public class FollowRequestsFragment extends Fragment {
             newFollow.put("timestamp", FieldValue.serverTimestamp());
 
             db.collection("following")
-                    .add(newFollow)  // Automatically generates a document ID
+                    .add(newFollow) // Automatically generates a document ID
                     .addOnSuccessListener(documentReference -> {
                         Log.d("Firestore", "DocumentSnapshot added with ID: " + documentReference.getId());
                     })
@@ -152,15 +197,15 @@ public class FollowRequestsFragment extends Fragment {
                         Log.w("Firestore", "Error adding document", e);
                     });
 
-            db.collection("users").document(currentUserId) //remove user follow request list
+            db.collection("users").document(currentUserId) // remove user follow request list
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));
 
-            followRequests.remove(user); //update UI for the thing
+            followRequests.remove(user); // update UI for the thing
             requestsAdapter.notifyItemRemoved(followRequests.indexOf(user));
 
             Toast.makeText(getContext(), user.getUsername() + " is now following you", Toast.LENGTH_SHORT).show();
 
-        } else { //if denied
+        } else { // if denied
             db.collection("users").document(currentUserId)
                     .update("followRequests", FieldValue.arrayRemove(user.getDbFileId()));
 

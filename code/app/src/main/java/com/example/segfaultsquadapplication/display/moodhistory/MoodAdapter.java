@@ -37,6 +37,14 @@ import android.os.AsyncTask;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Classname: MoodAdapter
+ * Version Info: Initial
+ * Date: Feb 18, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ * 
+ * Adapter for the mood events list in the MyMoodHistoryFragment
+ */
 public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
     // attributes
     private List<MoodEvent> moodList;
@@ -46,11 +54,16 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
     private Map<String, User> userCache; // Cache to store users we've already fetched
 
     // interfaces
+    /**
+     * interface for MoodAdapter class
+     */
     public interface OnMoodClickListener {
         void onMoodClick(MoodEvent mood);
     }
 
-    // Interface for receiving user data from Firestore
+    /**
+     * Interface for receiving user data from Firestore
+     */
     public interface UserCallback {
         void onUserLoaded(User user);
     }
@@ -71,7 +84,9 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         fetchCurrentUser(); // Fetch user details
     }
 
-    // Method to fetch current user details from Firestore
+    /**
+     * Method to fetch current user details from Firestore
+     */
     private void fetchCurrentUser() {
         AtomicReference<User> holder = new AtomicReference<>();
         UserManager.loadUserData(currentUserId, holder,
@@ -112,6 +127,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
      * method to update the moods in ArrayList
      *
      * @param newMoods
+     *                 the updated list of MoodEvents
      */
     public void updateMoods(List<MoodEvent> newMoods) {
         this.moodList = newMoods;
@@ -188,7 +204,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             moodEmoji.setText(mood.getMoodType().getEmoticon());
             // set reason text ("IMAGE if image reason)")
             textMoodType.setText(mood.getMoodType().name());
-            if (mood.getReasonText().isEmpty()& mood.getImageData() != null) {
+            if (mood.getReasonText().isEmpty() & mood.getImageData() != null) {
                 textReason.setText("IMAGE");
             } else {
                 textReason.setText(mood.getReasonText());
