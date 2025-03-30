@@ -187,7 +187,9 @@
                     android:drawableStart="@android:drawable/ic_menu_mylocation"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-                    android:text="University of Alberta, AB"
+
+
+
                     android:textColor="#333333"
                     android:textSize="16sp" />
 

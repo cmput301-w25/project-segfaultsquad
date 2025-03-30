@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
+
+import androidx.annotation.AnimatorRes;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,7 +26,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.display.moodhistory.MoodAdapter;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -32,6 +36,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import androidx.navigation.Navigation;
 
 public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
@@ -40,16 +46,11 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     private boolean isFilterMenuVisible = false;
     private RecyclerView followingRecyclerView;
     private MoodAdapter moodAdapter;
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private List<MoodEvent> allMoods = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_following, container, false);
-
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
 
         // Initialize views
         filterButton = view.findViewById(R.id.filterButton);
@@ -78,32 +79,25 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         // debugging
         Log.d("FollowingFragment", "entered loadMoods()");
 
-        String currentUserId = auth.getCurrentUser().getUid(); // Get current user ID
+        String currentUserId = UserManager.getUserId();
         // debugging
         Log.d("FollowingFragment", "currentUserId: " + currentUserId);
 
         // Fetch the list of users that the current user follows
-        db.collection("users").document(currentUserId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        User currentUser = documentSnapshot.toObject(User.class);
-                        if (currentUser != null) {
-                            List<String> followingList = currentUser.getFollowing(); // Get the following list
-                            // debugging
-                            Log.d("FollowingFragment", "followingList: " + followingList);
-                            if (followingList != null && !followingList.isEmpty()) {
-                                // Load the most recent moods of followed users
-                                loadFollowedUsersMoods(followingList);
-                            } else {
-                                Toast.makeText(getContext(), "You are not following anyone.", Toast.LENGTH_SHORT)
-                                        .show();
-                            }
-                        }
+        AtomicReference<User> currUserHolder = new AtomicReference<>();
+        UserManager.loadUserData(currentUserId, currUserHolder,
+                isSuccess -> {
+                    if (! isSuccess) return;
+                    List<String> followingList = currUserHolder.get().getFollowing();
+                    // debugging
+                    Log.d("FollowingFragment", "followingList: " + followingList);
+                    if (followingList != null && !followingList.isEmpty()) {
+                        // Load the most recent moods of followed users
+                        loadFollowedUsersMoods(followingList);
+                    } else if (getContext() != null) {
+                        Toast.makeText(getContext(), "You are not following anyone.", Toast.LENGTH_SHORT)
+                                .show();
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error fetching user data", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -113,24 +107,18 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
         // Fetch the moods of followed users
         for (String userId : followingList) {
-            db.collection("moods")
-                    .whereEqualTo("userId", userId)
-                    .whereEqualTo("public", true)
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .limit(3) // Get the 3 most recent moods
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                            MoodEvent mood = doc.toObject(MoodEvent.class);
-                            mood.setDbFileId(doc.getId());
-                            allMoods.add(mood);
+            ArrayList<MoodEvent> eventsHolder = new ArrayList<>(3);
+            MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.PUBLIC_MOST_RECENT_3,
+                    eventsHolder, isSuccess -> {
+                        if (! isSuccess) {
+                            if (getContext() != null)
+                                Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
+                        } else {
+                            allMoods.addAll(eventsHolder);
+                            // Sort the moods in memory
+                            Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
+                            moodAdapter.updateMoods(allMoods);
                         }
-                        // Sort the moods in memory
-                        Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
-                        moodAdapter.updateMoods(allMoods);
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
                     });
         }
     }

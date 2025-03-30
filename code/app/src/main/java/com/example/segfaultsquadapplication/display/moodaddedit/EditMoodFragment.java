@@ -321,7 +321,7 @@ public class EditMoodFragment extends Fragment {
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             situation = (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem();
         }
-        MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason, 
+        MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason,
                 togglePublicPrivate.isChecked(), situation, selectedImageUri, isSuccess -> {
                     if (isAdded()) {
                         if (isSuccess) {

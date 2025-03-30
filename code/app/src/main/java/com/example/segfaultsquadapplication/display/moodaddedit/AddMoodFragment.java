@@ -204,8 +204,17 @@ public class AddMoodFragment extends Fragment {
         if (togglePublicPrivate.isChecked()) { // set optional social situation field if provided
             isPublicMood = true;
         }
+        String reason = reasonInput.getText().toString().trim();
+        // Validate input before update
+        try {
+            MoodEventManager.validateMoodEvent(selectedMoodType, reason);
+        } catch (RuntimeException e) {
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Create event
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
-                reasonInput.getText().toString().trim(), isPublicMood, situation,
+                reason, isPublicMood, situation,
                 selectedImageUri, isSuccess -> {
                     if (isAdded()) { //meaning that fragment not destroyed, need so app doesn't crash upon reconnection
                         if (isSuccess) {
@@ -216,15 +225,13 @@ public class AddMoodFragment extends Fragment {
                         navigateBackSafely();//navigate back if fragment exists
                     }
                 });
-
+        // Navigate up immediately
         if (!isNetworkAvailable()) { //even if no internet connection, navigate back
             Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
-
         Log.d("AddMoodFragment", "completed saveMood()");
     }
-
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
@@ -236,5 +243,4 @@ public class AddMoodFragment extends Fragment {
             Navigation.findNavController(requireView()).navigateUp();
         }
     }
-
 }

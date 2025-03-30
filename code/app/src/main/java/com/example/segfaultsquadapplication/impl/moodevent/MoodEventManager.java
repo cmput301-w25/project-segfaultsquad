@@ -1,24 +1,18 @@
 package com.example.segfaultsquadapplication.impl.moodevent;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.lights.LightsManager;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.Query;
 
@@ -26,7 +20,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,17 +35,16 @@ import java.util.function.UnaryOperator;
  * Only the logic to handle mood events and respond to exceptions are needed.
  */
 public class MoodEventManager {
-    private static final String LOG_TITLE = "MoodEventManager";
     private static final int REASON_LIMIT = 200;
-    public enum MoodEventFilter {
-        ALL(UnaryOperator.identity()),
-        MOST_RECENT_1(query -> query.limit(1) ),
-        MOST_RECENT_3( query -> query.limit(3) );
-
-        private final UnaryOperator<Query> queryFilter;
-        MoodEventFilter(UnaryOperator<Query> queryFilter) {
-            this.queryFilter = queryFilter;
-        }
+    public static class MoodEventFilter {
+        public static final Function<Query, Query> ALL = UnaryOperator.identity();
+        public static final Function<Query, Query> MOST_RECENT_1 = query -> query.limit(1);
+        public static final Function<Query, Query> MOST_RECENT_3 = query -> query.limit(3);
+        public static final Function<Query, Query> PUBLIC_ONLY = query -> query.whereEqualTo("public", true);
+        // Function within compose is executed first
+        public static final Function<Query, Query> PUBLIC_MOST_RECENT_1 = MOST_RECENT_1.compose(PUBLIC_ONLY);
+        // Function within compose is executed first
+        public static final Function<Query, Query> PUBLIC_MOST_RECENT_3 = MOST_RECENT_3.compose(PUBLIC_ONLY);
     }
 
     /*
@@ -79,11 +75,7 @@ public class MoodEventManager {
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
-        AtomicReference<GeoPoint> holder = new AtomicReference<>();
-        LocationManager.getGeoPoint(holder, isSuccess -> {
-            addMoodEvent(moodType, reason, imgBytes,
-                    isSuccess ? holder.get() : null, situation, isPublic, callback);
-        });
+        addMoodEvent(moodType, reason, imgBytes, situation, isPublic, callback);
     }
 
     /**
@@ -91,17 +83,15 @@ public class MoodEventManager {
      * @param moodType Mood type
      * @param reason String reason
      * @param imgBytes Parsed image bytes
-     * @param geoPoint Geopoint info (optional)
      * @param situation Social situation; defaults to MoodEvent's default situation if is null
      * @param isPublic Whether the event is publicly visible
      * @param callback Success/failure callback
      */
     private static void addMoodEvent(MoodEvent.MoodType moodType,
                                     String reason, @Nullable List<Integer> imgBytes,
-                                     @Nullable GeoPoint geoPoint,
                                     @Nullable MoodEvent.SocialSituation situation, boolean isPublic,
                                     Consumer<Boolean> callback) {
-        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, geoPoint, isPublic);
+        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, null, isPublic);
         if (situation != null) {
             moodEvent.setSocialSituation(situation);
         }
@@ -109,10 +99,18 @@ public class MoodEventManager {
                 // Success
                 Void -> {
                     callback.accept(true);
+                    // Lazy-init geoPoint for reactive-ness of the application
+                    AtomicReference<GeoPoint> holder = new AtomicReference<>();
+                    System.out.println(System.currentTimeMillis());
+                    LocationManager.getGeoPoint(holder, isSuccess -> {
+                        System.out.println("TIME INNER: " + System.currentTimeMillis());
+                        DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, moodEvent.getDbFileId(),
+                                docRef -> docRef.update("location", holder.get()), new DbOpResultHandler<>(null, null));
+                    });
                 },
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not add mood event", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -143,25 +141,41 @@ public class MoodEventManager {
 
         List<Integer> imgBytes = encodeImg(ctx, imgUri);
 
-        moodEvent.setMoodType(moodType);
-        moodEvent.setReasonText(reason);
-        moodEvent.setPublic(isPublic);
-        moodEvent.setSocialSituation(situation);
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("moodType", moodType);
+        updates.put("reasonText", reason);
+        // The field is named isPublic but the key in db is "public"; for safety update both.
+        updates.put("isPublic", isPublic);
+        updates.put("public", isPublic);
+        updates.put("SocialSituation", situation);
         if (imgBytes != null) {
-            moodEvent.setImageData(imgBytes);
+            updates.put("imageData", imgBytes);
         }
 
-        updateMoodEventById(moodEvent, callback);
+        updateMoodEventById(moodEvent.getDbFileId(), updates, callback);
     }
 
     /**
-     * Helper function for add/update mood event.
-     * Validates the mood type and reason length.
+     * Adds the comment to the mood event and save the result to database.
+     * @param moodEvent Mood event
+     * @param comment The comment to add
+     * @param callback Success/failure callback
+     * @throws RuntimeException Exception thrown on invalid data / IO exception
+     */
+    public static void addComment(MoodEvent moodEvent, String comment, Consumer<Boolean> callback) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("comments", FieldValue.arrayUnion(comment));
+
+        updateMoodEventById(moodEvent.getDbFileId(), updates, callback);
+    }
+
+    /**
+     * Validates the mood type and reason length for a mood event.
      * @param moodType Mood type; exception thrown if mood type is null
      * @param reason Reason text; exception thrown if too long.
      * @throws RuntimeException Throws exception when the data is invalid.
      */
-    private static void validateMoodEvent(MoodEvent.MoodType moodType, String reason) throws RuntimeException {
+    public static void validateMoodEvent(MoodEvent.MoodType moodType, String reason) throws RuntimeException {
         // Mood type must be defined
         if (moodType == null) {
             throw new RuntimeException("Please select a mood");
@@ -220,22 +234,21 @@ public class MoodEventManager {
      * @param holder The holder for retrieved mood events
      * @param onComplete Callback when operation is completed
      */
-    public static void getAllMoodEvents(@Nullable String userId, MoodEventFilter filter,
+    public static void getAllMoodEvents(@Nullable String userId, Function<Query, Query> filter,
                                         Collection<MoodEvent> holder, Consumer<Boolean> onComplete) {
         // Restrict to the current user & order by time, then apply further filters
         // Recall that the argument in compose is executed first.
-        Function<Query, Query> operator = filter.queryFilter;
         if (userId != null) {
-            operator = operator.compose( (Query query) -> query.whereEqualTo("userId", userId) );
+            filter = filter.compose( (Query query) -> query.whereEqualTo("userId", userId) );
         }
-        operator = operator.compose( (Query query) -> query.orderBy("timestamp", Query.Direction.DESCENDING) );
+        filter = filter.compose( (Query query) -> query.orderBy("timestamp", Query.Direction.DESCENDING) );
 
         DbUtils.queryObjects(DbUtils.COLL_MOOD_EVENTS,
-                operator, MoodEvent.class, holder,
+                filter, MoodEvent.class, holder,
                 new DbOpResultHandler<>(
                         success -> onComplete.accept(true),
                         error -> {
-                            Log.e(LOG_TITLE, "Error retrieving my mood events: ", error);
+                            error.printStackTrace(System.err);
                             onComplete.accept(false);
                         }
                 )
@@ -254,7 +267,7 @@ public class MoodEventManager {
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Error getting mood event by ID: ", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
@@ -263,21 +276,22 @@ public class MoodEventManager {
 
     /**
      * Updates a mood event with its internal document ID in the database.
-     * @param moodEvent The mood event object.
+     * @param fileId The id of the file to update.
+     * @param updates The updates to handle.
      * @param callback The callback when the file is saved(true) or can not be saved(false).
      */
-    private static void updateMoodEventById(MoodEvent moodEvent, Consumer<Boolean> callback) {
+    private static void updateMoodEventById(String fileId, Map<String, Object> updates, Consumer<Boolean> callback) {
         DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
                 // Success
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not update mood event by ID", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
-        DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, moodEvent.getDbFileId(),
-                documentReference -> documentReference.set(moodEvent), handler);
+        DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, fileId,
+                documentReference -> documentReference.update(updates), handler);
     }
 
     /**
@@ -291,7 +305,7 @@ public class MoodEventManager {
                 Void -> callback.accept(true),
                 // Failure
                 e -> {
-                    Log.e(LOG_TITLE, "Can not delete mood event by id", e);
+                    e.printStackTrace(System.err);
                     callback.accept(false);
                 }
         );
