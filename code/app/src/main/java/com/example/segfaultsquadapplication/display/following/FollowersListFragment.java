@@ -156,6 +156,13 @@ public class FollowersListFragment extends Fragment {
                                 });
                     }
                 });
+
+        // remove from user follower following
+        db.collection("users").document(currentUserId)
+                .update("followers", FieldValue.arrayRemove(follower.getDbFileId()));
+
+        db.collection("users").document(follower.getDbFileId())
+                .update("following", FieldValue.arrayRemove(currentUserId));
     }
 
     /**

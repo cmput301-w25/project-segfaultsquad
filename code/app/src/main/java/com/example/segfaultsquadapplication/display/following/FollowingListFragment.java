@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -135,5 +136,12 @@ public class FollowingListFragment extends Fragment {
                                 });
                     }
                 });
+
+        // remove from user follower following
+        db.collection("users").document(currentUserId)
+                .update("following", FieldValue.arrayRemove(userToUnfollowId));
+
+        db.collection("users").document(userToUnfollowId)
+                .update("followers", FieldValue.arrayRemove(currentUserId));
     }
 }
