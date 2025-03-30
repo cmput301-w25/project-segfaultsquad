@@ -74,21 +74,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="All Followers" />
+                android:text="All Followed User Moods" />
 
             <TextView
                 android:id="@+id/filter2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="My Moods(default)" />
+                android:text="My Moods (Default)" />
 
             <TextView
                 android:id="@+id/filter3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Followers in 5km" />
+                android:text="Followed User Moods In 5km" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
