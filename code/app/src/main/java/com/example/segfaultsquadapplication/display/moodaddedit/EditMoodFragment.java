@@ -29,9 +29,9 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -352,9 +352,8 @@ public class EditMoodFragment extends Fragment {
                     }
                 });
 
-        if (!isNetworkAvailable()) { // even if no internet connection, navigate back
-            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.",
-                    Toast.LENGTH_SHORT).show();
+        if (!isNetworkAvailable()) { //even if no internet connection, navigate back
+            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_LONG).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
     }

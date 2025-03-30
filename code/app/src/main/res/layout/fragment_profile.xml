@@ -152,6 +152,7 @@
             android:paddingTop="16dp">
 
             <LinearLayout
+                android:id="@+id/followers_wrapper"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -175,6 +176,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/following_wrapper"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

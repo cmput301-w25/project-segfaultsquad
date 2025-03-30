@@ -1,11 +1,12 @@
-package com.example.segfaultsquadapplication.impl.following;
+package com.example.segfaultsquadapplication.impl.user;
 
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Transaction;
+
+import java.util.function.Consumer;
 
 /**
  * Following-specific helper functions.
@@ -22,8 +23,14 @@ public class FollowingManager {
                 docRef -> docRef.update("followRequests",
                         FieldValue.arrayUnion(currentUserId)),
                 new DbOpResultHandler<>(
-                        Void -> System.out.println("Successfully added follow request"),
-                        e -> e.printStackTrace(System.err)
+                        Void -> {
+                            System.out.println("Successfully added follow request");
+                            callback.accept(true);
+                        },
+                        e -> {
+                            e.printStackTrace(System.err);
+                            callback.accept(false);
+                        }
                 ));
     }
     /**

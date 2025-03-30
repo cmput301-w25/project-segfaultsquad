@@ -7,14 +7,20 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -24,17 +30,9 @@ import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.android.material.card.MaterialCardView;
 
-import java.util.Date;
-
-import android.widget.EditText;
-
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
-
-import android.widget.LinearLayout;
-import android.util.Log;
-import android.text.InputFilter;
-import android.widget.Switch;
 
 /**
  * This fragment allows users to create a new mood event by selecting a mood type, providing a reason, and optionally uploading an image. It handles user input and saves the mood event to Firestore.
@@ -221,9 +219,8 @@ public class AddMoodFragment extends Fragment {
                     }
                 });
         // Navigate up immediately
-        if (!isNetworkAvailable()) { // even if no internet connection, navigate back
-            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.",
-                    Toast.LENGTH_SHORT).show();
+        if (!isNetworkAvailable()) { //even if no internet connection, navigate back
+            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_LONG).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
         Log.d("AddMoodFragment", "completed saveMood()");

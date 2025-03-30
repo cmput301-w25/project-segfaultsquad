@@ -148,7 +148,7 @@
     <!-- Mood Details -->
     <fragment
         android:id="@+id/navigation_mood_details"
-        android:name="com.example.segfaultsquadapplication.display.MoodDetailsFragment"
+        android:name="com.example.segfaultsquadapplication.display.moodhistory.MoodDetailsFragment"
         android:label="Mood Details">
         <argument
             android:name="moodId"

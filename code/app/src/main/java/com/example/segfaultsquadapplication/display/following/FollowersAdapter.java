@@ -14,10 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is an adapter for displaying a list of followers in a RecyclerView. It binds follower data to the UI components and handles user interactions such as removing a follower or following back a user.
@@ -181,30 +181,20 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
          *             user to check (if they are following current user)
          */
         private void checkFollowStatus(User user) {
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String currentUserId = auth.getCurrentUser().getUid();
+            String currentUserId = UserManager.getUserId();
+            AtomicReference<User> holder = new AtomicReference<>();
+            UserManager.loadUserData(user.getDbFileId(), holder,
+                    isSuccess -> {
+                        if (isSuccess) {
+                            boolean isFollowingNow = holder.get().getFollowers() != null &&
+                                    holder.get().getFollowers().contains(currentUserId);
+                            boolean followRequestSentNow = holder.get().getFollowRequests() != null &&
+                                    holder.get().getFollowRequests().contains(currentUserId);
 
-            db.collection("following")
-                    .whereEqualTo("followerId", currentUserId)
-                    .whereEqualTo("followedId", user.getDbFileId())
-                    .limit(1)
-                    .get()
-                    .addOnSuccessListener(querySnapshot -> {
-                        boolean isFollowingNow = !querySnapshot.isEmpty();
-
-                        db.collection("users")
-                                .document(user.getDbFileId())
-                                .get()
-                                .addOnSuccessListener(documentSnapshot -> {
-                                    List<String> followRequests = (List<String>) documentSnapshot.get("followRequests");
-                                    boolean followRequestSentNow = followRequests != null
-                                            && followRequests.contains(currentUserId);
-
-                                    this.isFollowing = isFollowingNow;
-                                    this.followRequestSent = followRequestSentNow;
-                                    setFollowBackButtonState();
-                                });
+                            this.isFollowing = isFollowingNow;
+                            this.followRequestSent = followRequestSentNow;
+                            setFollowBackButtonState();
+                        }
                     });
         }
     }

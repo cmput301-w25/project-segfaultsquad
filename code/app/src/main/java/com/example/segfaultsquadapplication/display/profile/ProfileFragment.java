@@ -6,8 +6,11 @@
  */
 package com.example.segfaultsquadapplication.display.profile;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,12 +21,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -33,33 +40,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.display.moodhistory.MoodAdapter;
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
+import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
-
-import android.widget.ImageButton;
-import androidx.cardview.widget.CardView;
-
-import android.content.Intent;
-import android.net.Uri;
-
-import android.app.AlertDialog;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -72,10 +64,12 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private TextView username;
     private TextView followersCount;
     private TextView followingCount;
+    private View followersSection;
+    private View followingSection;
     private RecyclerView moodRecyclerView;
     private MoodAdapter moodAdapter;
 
-    private List<MoodEvent> moodEvents = new ArrayList<>();
+    private static List<MoodEvent> moodEvents = new ArrayList<>();
     private User currentUser; // To hold user data
 
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -115,6 +109,8 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         username = view.findViewById(R.id.username);
         followersCount = view.findViewById(R.id.followers_count);
         followingCount = view.findViewById(R.id.following_count);
+        followersSection = view.findViewById(R.id.followers_wrapper);
+        followingSection = view.findViewById(R.id.following_wrapper);
         moodRecyclerView = view.findViewById(R.id.moodRecyclerView);
         ImageButton overflowButton = view.findViewById(R.id.overflowButton);
         CardView logoutDropdown = view.findViewById(R.id.logoutDropdown);
@@ -136,12 +132,13 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         // Set up RecyclerView for mood list
         setupRecyclerView();
 
-        // Load mood events
+        // Display, load & update display for mood events
+        moodAdapter.updateMoods(moodEvents);
         loadMoodEvents();
 
         // Set click listeners
-        followersCount.setOnClickListener(v -> navigateToFollowersList());
-        followingCount.setOnClickListener(v -> navigateToFollowingList());
+        followersSection.setOnClickListener(v -> navigateToFollowersList());
+        followingSection.setOnClickListener(v -> navigateToFollowingList());
 
         // Toggle logout dropdown visibility
         overflowButton.setOnClickListener(v -> {
@@ -324,8 +321,11 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         String userId = UserManager.getUserId(); // Get user ID
 
         // Use MoodEventManager to get all mood events for the current user
-        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, moodEvents, isSuccess -> {
+        ArrayList<MoodEvent> holder = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
             if (isSuccess) {
+                moodEvents.clear();
+                moodEvents.addAll(holder);
                 Log.d("ProfileFragment", "Mood events count: " + moodEvents.size());
                 moodAdapter.updateMoods(moodEvents); // Update the adapter with the fetched mood events
             } else {
@@ -344,6 +344,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
+        args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_to_moodDetails, args);
     }
