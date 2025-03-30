@@ -494,7 +494,6 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     }
 
     private void performSearch(String query) {
-        String currentUserId = UserManager.getUserId();
         Log.d("Search", "Performing search with query: " + query);
 
         if (query.isEmpty()) {
@@ -505,7 +504,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         ArrayList<User> holder = new ArrayList<>();
         DbUtils.queryObjects(DbUtils.COLL_USERS,
                 qry -> qry
-                        .whereNotEqualTo("userId", currentUserId)
+                        .whereNotEqualTo("username", currentUser.getUsername())
                         .orderBy("username")
                         .startAt(query.toLowerCase()) // Convert to lowercase for case-insensitive search
                         .endAt(query.toLowerCase() + "\uf8ff")
@@ -530,12 +529,10 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     }
 
     private void searchExactUsername(String username) {
-        String currentUserId = UserManager.getUserId();
-
         ArrayList<User> holder = new ArrayList<>();
         DbUtils.queryObjects(DbUtils.COLL_USERS,
                 qry -> qry
-                        .whereNotEqualTo("userId", currentUserId)
+                        .whereNotEqualTo("username", currentUser.getUsername())
                         .whereEqualTo("username", username)
                         .limit(1),
                 User.class, holder, new DbOpResultHandler<>(
@@ -543,8 +540,16 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                             if (!holder.isEmpty()) {
                                 navigateToSearchedProfile(holder.get(0));
                             }
+                            else if (getContext() != null) {
+                                Toast.makeText(getContext(), "The searched user does not exist", Toast.LENGTH_LONG).show();
+                            }
                         },
-                        null));
+                        e -> {
+                            e.printStackTrace(System.err);
+                            if (getContext() != null) {
+                                Toast.makeText(getContext(), "Could not search user", Toast.LENGTH_SHORT).show();
+                            }
+                        }));
     }
 
     private void onSearchResultClick(User user) {

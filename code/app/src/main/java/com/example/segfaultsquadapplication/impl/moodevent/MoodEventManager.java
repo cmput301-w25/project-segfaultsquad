@@ -144,7 +144,9 @@ public class MoodEventManager {
         Map<String, Object> updates = new HashMap<>();
         updates.put("moodType", moodType);
         updates.put("reasonText", reason);
+        // The field is named isPublic but the key in db is "public"; for safety update both.
         updates.put("isPublic", isPublic);
+        updates.put("public", isPublic);
         updates.put("SocialSituation", situation);
         if (imgBytes != null) {
             updates.put("imageData", imgBytes);

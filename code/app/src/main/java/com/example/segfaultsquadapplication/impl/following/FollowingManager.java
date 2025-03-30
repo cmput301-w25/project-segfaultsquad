@@ -11,10 +11,21 @@ import com.google.firebase.firestore.Transaction;
  * Following-specific helper functions.
  */
 public class FollowingManager {
+    public static void sendFollowRequest(String otherUserId) {
+        String currentUserId = DbUtils.getUserId();
+        DbUtils.operateDocumentById(DbUtils.COLL_USERS, otherUserId,
+                docRef -> docRef.update("followRequests",
+                        FieldValue.arrayUnion(currentUserId)),
+                new DbOpResultHandler<>(
+                        Void -> System.out.println("Successfully added follow request"),
+                        e -> e.printStackTrace(System.err)
+                ));
+    }
+
     public static void handleFollowRequest(String otherUserId, boolean accept) {
         String currentUserId = DbUtils.getUserId();
         if (accept) {
-            makeFollow(currentUserId, otherUserId);
+            makeFollow(otherUserId, currentUserId);
         } else {
             // Remove the follow request
             DbUtils.operateDocumentById(DbUtils.COLL_USERS, currentUserId,

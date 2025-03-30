@@ -71,6 +71,7 @@ public class FollowingListFragment extends Fragment {
                 isSuccess -> {
                     if (! isSuccess) return;
                     List<String> followedUserIds = currUserHolder.get().getFollowing();
+                    followingList.clear();
                     // Now fetch the user details for each followed user
                     for (String followedUserId : followedUserIds) {
                         AtomicReference<User> followedUserHolder = new AtomicReference<>();

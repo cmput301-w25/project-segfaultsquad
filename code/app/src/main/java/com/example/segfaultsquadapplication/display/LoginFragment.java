@@ -9,7 +9,6 @@ package com.example.segfaultsquadapplication.display;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +27,9 @@ import androidx.navigation.Navigation;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoginFragment extends Fragment {
 
@@ -129,8 +128,7 @@ public class LoginFragment extends Fragment {
         navController.navigate(R.id.navigation_my_mood_history);
 
         //after navigation check for follow requests
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = UserManager.getCurrUser();
         String currentUserId = null;
 
         if (currentUser != null) {
@@ -138,23 +136,20 @@ public class LoginFragment extends Fragment {
         }
 
         if (currentUserId != null) {
-            db.collection("users").document(currentUserId) //get user doc
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            User currentUserData = documentSnapshot.toObject(User.class);
-
+            AtomicReference<User> userHolder = new AtomicReference<>();
+            UserManager.loadUserData(currentUserId, userHolder,
+                    isSuccess -> {
+                        if (isSuccess) {
+                            User currentUserData = userHolder.get();
                             // Check if follow requests exist
-                            if (currentUserData != null && currentUserData.getFollowRequests() != null &&
+                            if (currentUserData != null &&
+                                    currentUserData.getFollowRequests() != null &&
                                     !currentUserData.getFollowRequests().isEmpty()) {
-                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " new follow requests", Toast.LENGTH_LONG).show();
-
+                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " follow requests", Toast.LENGTH_LONG).show();
                             }
+                        } else {
+                            Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
                         }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.w("Firestore", "Error fetching user data", e);
-                        Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
                     });
         }
     }
