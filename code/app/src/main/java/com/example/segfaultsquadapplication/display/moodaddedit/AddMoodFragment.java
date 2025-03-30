@@ -34,6 +34,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * This fragment allows users to create a new mood event by selecting a mood type, providing a reason, and optionally uploading an image. It handles user input and saves the mood event to Firestore.
+ * Current Issues: N/A
+ */
 public class AddMoodFragment extends Fragment {
     // attributes
     private static final int PICK_IMAGE_REQUEST = 1;

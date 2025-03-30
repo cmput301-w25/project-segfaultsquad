@@ -31,6 +31,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import androidx.navigation.Navigation;
+
+
+/**
+ * Allow user to see a feed of their followed user's moods (most recent)
+ * Current Issues: None
+ */
 public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
     private CardView filterMenu;

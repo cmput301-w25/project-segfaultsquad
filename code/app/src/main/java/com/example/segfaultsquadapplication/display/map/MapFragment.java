@@ -51,6 +51,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This fragment displays a map where users can view mood events associated with themselves and their followers. It handles location permissions, mood filtering, and mood event loading from Firestore.
+ * Outstanding Issues: None
+ */
 public class MapFragment extends Fragment {
     // Attributes
     private Location currentLocation;
