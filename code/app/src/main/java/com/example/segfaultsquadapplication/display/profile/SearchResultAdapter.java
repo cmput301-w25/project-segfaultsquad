@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.user.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This file is for the searching users among the list of users in a recyclerview
  * handles user clicks into the view

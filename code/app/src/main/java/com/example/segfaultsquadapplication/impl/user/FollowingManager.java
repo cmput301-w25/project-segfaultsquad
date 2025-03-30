@@ -16,8 +16,9 @@ public class FollowingManager {
      * Sends a follow request to another user.
      * The request is added to the other user's "followRequests" field in Firebase.
      * @param otherUserId The user ID of the user to whom follow request is sent.
+     * @param callback consumer boolean for custom callback
      */
-    public static void sendFollowRequest(String otherUserId) {
+    public static void sendFollowRequest(String otherUserId, Consumer<Boolean> callback) {
         String currentUserId = DbUtils.getUserId();
         DbUtils.operateDocumentById(DbUtils.COLL_USERS, otherUserId,
                 docRef -> docRef.update("followRequests",

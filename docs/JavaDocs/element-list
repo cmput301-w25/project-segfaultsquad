@@ -5,6 +5,7 @@ com.example.segfaultsquadapplication.display.map
 com.example.segfaultsquadapplication.display.moodaddedit
 com.example.segfaultsquadapplication.display.moodhistory
 com.example.segfaultsquadapplication.display.profile
+com.example.segfaultsquadapplication.impl.comment
 com.example.segfaultsquadapplication.impl.db
 com.example.segfaultsquadapplication.impl.following
 com.example.segfaultsquadapplication.impl.location
