@@ -1,8 +1,7 @@
-package com.example.segfaultsquadapplication.impl.following;
+package com.example.segfaultsquadapplication.impl.user;
 
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Transaction;

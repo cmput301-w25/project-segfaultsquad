@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.Map_api;
 import com.example.segfaultsquadapplication.R;
@@ -49,8 +50,10 @@ public class MoodDetailsFragment extends Fragment {
     private TextView socialSituationTextView;
     private TextView visibilityTextView;
     private TextView locationTextView;
+    private RecyclerView commentRecyclerView;
     private Button editButton;
     private Button deleteButton;
+    private Button commentButton;
 
     // Data
     private String moodId = null;
@@ -111,8 +114,10 @@ public class MoodDetailsFragment extends Fragment {
         socialSituationTextView = view.findViewById(R.id.socialSituationTextView);
         visibilityTextView = view.findViewById(R.id.mood_visibility);
         locationTextView = view.findViewById(R.id.locationTextView);
+        commentRecyclerView = view.findViewById(R.id.commentRecyclerView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
+        commentButton = view.findViewById(R.id.commentButton);
         // Edit/delete only available for own mood events.
         if (! userId.equals(UserManager.getUserId()) ) {
             editButton.setActivated(false);
@@ -132,16 +137,21 @@ public class MoodDetailsFragment extends Fragment {
         backButton.setOnClickListener(v ->
                 Navigation.findNavController(requireView()).navigateUp());
 
-        // Edit button
-        editButton.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putString("moodId", moodId);
-            Navigation.findNavController(requireView())
-                    .navigate(R.id.action_moodDetails_to_editMood, args);
-        });
+        // No edit / delete for other users' events
+        if (! userId.equals(UserManager.getUserId()) ) {
+            // Edit button
+            editButton.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("moodId", moodId);
+                Navigation.findNavController(requireView())
+                        .navigate(R.id.action_moodDetails_to_editMood, args);
+            });
 
-        // Delete button
-        deleteButton.setOnClickListener(v -> confirmDeleteMood());
+            // Delete button
+            deleteButton.setOnClickListener(v -> confirmDeleteMood());
+        }
+
+        // TODO: add comment button
     }
 
     /**
@@ -151,6 +161,7 @@ public class MoodDetailsFragment extends Fragment {
      * On failure, it shows an error message and navigates back.
      */
     private void loadMoodData() {
+        // The Mood itself
         AtomicReference<MoodEvent> holder = new AtomicReference<>();
         MoodEventManager.getMoodEventById(moodId, holder,
                 result -> {
@@ -158,6 +169,28 @@ public class MoodDetailsFragment extends Fragment {
                         populateUI(holder.get());
                     }
                     else {
+                        if (getContext() == null) return;
+                        Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
+                        Navigation.findNavController(requireView()).navigateUp();
+                    }
+                });
+    }
+
+    /**
+     * Loads the comments data from Firestore using the mood ID.
+     * When successful, it populates the UI with the retrieved data.
+     * On failure, it shows an error message and navigates back.
+     */
+    private void loadComments() {
+        // The Mood itself
+        AtomicReference<MoodEvent> holder = new AtomicReference<>();
+        MoodEventManager.getMoodEventById(moodId, holder,
+                result -> {
+                    if (result) {
+                        populateUI(holder.get());
+                    }
+                    else {
+                        if (getContext() == null) return;
                         Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
                         Navigation.findNavController(requireView()).navigateUp();
                     }
@@ -283,6 +316,7 @@ public class MoodDetailsFragment extends Fragment {
     private void deleteMood() {
         MoodEventManager.deleteMoodEventById(moodId, isSuccess -> {
             if (isAdded()) {
+                if (getContext() == null) return;
                 if (isSuccess) {
                     Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(requireView()).navigateUp();
@@ -293,7 +327,7 @@ public class MoodDetailsFragment extends Fragment {
             }
         });
         if (!isNetworkAvailable()) { //even if no internet connection, navigate back
-            Toast.makeText(getContext(), "No internet connection. Mood will be deleted upon connection.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No internet connection. Mood will be deleted upon connection.", Toast.LENGTH_LONG).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
     }

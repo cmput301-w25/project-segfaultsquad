@@ -335,7 +335,7 @@ public class EditMoodFragment extends Fragment {
                 });
 
         if (!isNetworkAvailable()) { //even if no internet connection, navigate back
-            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_LONG).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
     }
