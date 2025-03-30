@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class LocationManager {
-    private static final String LOG_TITLE = "LocationManager";
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     private static Activity currActivity = null;
@@ -44,12 +43,12 @@ public class LocationManager {
     }
     public static void getLocation(AtomicReference<Location> holder, Consumer<Boolean> callback) {
         if (fusedLocationClient == null) {
-            Log.d(LOG_TITLE, "Fused Location Client not initialized");
+            System.out.println("Fused Location Client not initialized");
             callback.accept(false);
             return;
         }
         if (! checkLocationPermission(currActivity)) {
-            Log.d(LOG_TITLE, "No permission to get location");
+            System.out.println("No permission to get location");
             callback.accept(false);
             return;
         }
@@ -65,17 +64,17 @@ public class LocationManager {
                 // Location retrieved
                 .addOnSuccessListener(location -> {
                     if (location != null) {
-                        Log.d(LOG_TITLE, "Location retrieved");
+                        System.out.println("Location retrieved");
                         holder.set(location);
                         callback.accept(true);
                     } else {
-                        Log.d(LOG_TITLE, "Location is null");
+                        System.out.println("Location is null");
                         callback.accept(false);
                     }
                 })
                 // Location not retrieved
                 .addOnFailureListener(e -> {
-                    Log.d(LOG_TITLE, "Location can not be retrieved");
+                    System.err.println("Location can not be retrieved");
                     callback.accept(false);
                 });
     }
@@ -110,25 +109,4 @@ public class LocationManager {
                 new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
                 LOCATION_PERMISSION_REQUEST_CODE);
     }
-
-//    /**
-//     * helper method to verify results of location permission request
-//     *
-//     * @param requestCode
-//     * @param permissions
-//     * @param grantResults
-//     */
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-//            // permission gramted
-//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                getUserLocationAndSaveMood();
-//            } else {
-//                // TODO: ask if this is what we are actualy supposed to do or not...
-//                // permission denied, save mood without location
-//                createAndSaveMood(null);
-//            }
-//        }
-//    }
 }

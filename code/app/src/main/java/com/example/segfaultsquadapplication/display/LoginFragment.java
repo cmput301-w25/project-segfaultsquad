@@ -9,7 +9,6 @@ package com.example.segfaultsquadapplication.display;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,8 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.appcompat.widget.AppCompatButton;
@@ -28,9 +27,9 @@ import androidx.navigation.Navigation;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoginFragment extends Fragment {
 
@@ -108,16 +107,16 @@ public class LoginFragment extends Fragment {
         // Disable login button while processing
         loginButton.setEnabled(false);
 
-        DbUtils.login(email, password, new DbOpResultHandler<>(
-                // Success
-                result -> navigateToHome(),
-                // Failure
-                e -> {
-                    loginButton.setEnabled(true);
-                    Log.w("login", e);
-                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+        UserManager.login(email, password,
+                (isSuccess, failureReason) -> {
+                    if (isSuccess) {
+                        navigateToHome();
+                    } else {
+                        loginButton.setEnabled(true);
+                        Toast.makeText(getActivity(), failureReason, Toast.LENGTH_LONG).show();
+                    }
                 }
-        ));
+        );
     }
 
     /**
@@ -129,8 +128,7 @@ public class LoginFragment extends Fragment {
         navController.navigate(R.id.navigation_my_mood_history);
 
         //after navigation check for follow requests
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseUser currentUser = UserManager.getCurrUser();
         String currentUserId = null;
 
         if (currentUser != null) {
@@ -138,23 +136,20 @@ public class LoginFragment extends Fragment {
         }
 
         if (currentUserId != null) {
-            db.collection("users").document(currentUserId) //get user doc
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            User currentUserData = documentSnapshot.toObject(User.class);
-
+            AtomicReference<User> userHolder = new AtomicReference<>();
+            UserManager.loadUserData(currentUserId, userHolder,
+                    isSuccess -> {
+                        if (isSuccess) {
+                            User currentUserData = userHolder.get();
                             // Check if follow requests exist
-                            if (currentUserData != null && currentUserData.getFollowRequests() != null &&
+                            if (currentUserData != null &&
+                                    currentUserData.getFollowRequests() != null &&
                                     !currentUserData.getFollowRequests().isEmpty()) {
-                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " new follow requests", Toast.LENGTH_LONG).show();
-
+                                Toast.makeText(getActivity(), "There are " + currentUserData.getFollowRequestCount() + " follow requests", Toast.LENGTH_LONG).show();
                             }
+                        } else {
+                            Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
                         }
-                    })
-                    .addOnFailureListener(e -> {
-                        Log.w("Firestore", "Error fetching user data", e);
-                        Toast.makeText(getActivity(), "Error loading follow requests", Toast.LENGTH_LONG).show();
                     });
         }
     }

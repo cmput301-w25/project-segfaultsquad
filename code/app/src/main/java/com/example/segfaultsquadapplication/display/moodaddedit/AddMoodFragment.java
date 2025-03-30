@@ -204,10 +204,20 @@ public class AddMoodFragment extends Fragment {
         if (togglePublicPrivate.isChecked()) { // set optional social situation field if provided
             isPublicMood = true;
         }
+        String reason = reasonInput.getText().toString().trim();
+        // Validate input before update
+        try {
+            MoodEventManager.validateMoodEvent(selectedMoodType, reason);
+        } catch (RuntimeException e) {
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Create event
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
-                reasonInput.getText().toString().trim(), isPublicMood, situation,
+                reason, isPublicMood, situation,
                 selectedImageUri, isSuccess -> {
                     if (isAdded()) { //meaning that fragment not destroyed, need so app doesn't crash upon reconnection
+                    if (getContext() != null) {
                         if (isSuccess) {
                             Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
                         } else {
@@ -223,6 +233,10 @@ public class AddMoodFragment extends Fragment {
         }
 
         Log.d("AddMoodFragment", "completed saveMood()");
+                    }
+                });
+        // Navigate up immediately
+        Navigation.findNavController(requireView()).navigateUp();
     }
 
     private boolean isNetworkAvailable() {

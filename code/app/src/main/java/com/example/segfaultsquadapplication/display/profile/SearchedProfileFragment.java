@@ -2,7 +2,6 @@ package com.example.segfaultsquadapplication.display.profile;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,19 +18,19 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SearchedProfileFragment extends Fragment {
     private ImageView profilePicture;
     private TextView username;
     private TextView followersCount;
     private TextView followingCount;
-    private FirebaseFirestore db;
     private String searchedUserId;
     private String currentUserId;
     private Button followButton;
@@ -58,9 +57,6 @@ public class SearchedProfileFragment extends Fragment {
         followButton = view.findViewById(R.id.follow_profile_button);
         currentUserFollowingSearched = false;
 
-        // Initialize Firestore
-        db = FirebaseFirestore.getInstance();
-
         // Load user data
         loadUserData();
 
@@ -73,22 +69,21 @@ public class SearchedProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
-        db.collection("users").document(searchedUserId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        User user = documentSnapshot.toObject(User.class);
-                        setUserData(user);
+        AtomicReference<User> userHolder = new AtomicReference<>();
+        UserManager.loadUserData(searchedUserId, userHolder,
+                isSuccess -> {
+                    if (isSuccess) {
+                        setUserData(userHolder.get());
                     }
                 });
     }
 
-    private void setUserData(User user) {
-        username.setText(user.getUsername());
-        loadFollowerAndFollowingCounts();
+    private void setUserData(User searchedUser) {
+        username.setText(searchedUser.getUsername());
+        adaptUI(searchedUser);
 
         // Set profile picture
-        List<Integer> profilePicData = user.getProfilePicUrl();
+        List<Integer> profilePicData = searchedUser.getProfilePicUrl();
         if (profilePicData != null && !profilePicData.isEmpty()) {
             byte[] imageBytes = new byte[profilePicData.size()];
             for (int i = 0; i < profilePicData.size(); i++) {
@@ -106,52 +101,21 @@ public class SearchedProfileFragment extends Fragment {
         }
     }
 
-    private void loadFollowerAndFollowingCounts() {
-        // Load followers count
-        db.collection("following")
-                .whereEqualTo("followedId", searchedUserId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    followersCount.setText(String.valueOf(queryDocumentSnapshots.size()));
-                    checkIfFollowing(); //to check if current follows searched
-                });
-
-        // Load following count
-        db.collection("following")
-                .whereEqualTo("followerId", searchedUserId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    followingCount.setText(String.valueOf(queryDocumentSnapshots.size()));
-                });
-    }
-
-    private void checkIfFollowing() {
-        //checkifFollowing
-        db.collection("following")
-                .whereEqualTo("followerId", currentUserId)//check if current user is following
-                .whereEqualTo("followedId", searchedUserId)
-                .limit(1) // Optimize by limiting results to 1
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (!queryDocumentSnapshots.isEmpty()) {
-                        currentUserFollowingSearched = true;
-                        updateFollowButton();
-                    }
-                });
-
-        db.collection("users")
-                .document(searchedUserId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                        List<String> followRequests = (List<String>) documentSnapshot.get("followRequests");
-                        if (followRequests != null && followRequests.contains(currentUserId)) {
-                            followRequestSent = true;
-                            updateFollowButton();
-                        } else {
-                            Log.d("FollowRequestCheck", "No follow request found.");
-                        }
-                });
-
+    /**
+     * Adapts the UI contents based on the searched user's information.
+     * @param searchedUser The searched user.
+     */
+    private void adaptUI(User searchedUser) {
+        followersCount.setText(String.valueOf(searchedUser.getFollowers().size()));
+        followingCount.setText(String.valueOf(searchedUser.getFollowing().size()));
+        // The following button style based on relationship status
+        if (searchedUser.getFollowers().contains(currentUserId)) {
+            currentUserFollowingSearched = true;
+            updateFollowButton();
+        } else if (searchedUser.getFollowRequests().contains(currentUserId)) {
+            followRequestSent = true;
+            updateFollowButton();
+        }
     }
 
     private void updateFollowButton() {
@@ -159,7 +123,7 @@ public class SearchedProfileFragment extends Fragment {
             followButton.setText("Following");
             followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
         }
-        if (followRequestSent) {
+        else if (followRequestSent) {
             followButton.setText("Requested to Follow");
             followButton.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), com.google.android.material.R.color.button_material_dark));
         }
@@ -167,12 +131,10 @@ public class SearchedProfileFragment extends Fragment {
 
     private void sendFollowRequest() {
         if (!currentUserFollowingSearched & !followRequestSent) {
-            db.collection("users").document(searchedUserId) //update current user followers profile
-                    .update("followRequests", FieldValue.arrayUnion(currentUserId));
+            FollowingManager.sendFollowRequest(searchedUserId);
             Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
             followRequestSent = true;
             updateFollowButton();
         }
     }
-
 }
