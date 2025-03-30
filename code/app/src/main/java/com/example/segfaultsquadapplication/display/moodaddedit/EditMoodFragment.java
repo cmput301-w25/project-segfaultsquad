@@ -1,8 +1,11 @@
 package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -328,6 +331,31 @@ public class EditMoodFragment extends Fragment {
         // Update event
         MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason, 
                 togglePublicPrivate.isChecked(), situation, selectedImageUri, isSuccess -> {
+                    if (isAdded()) {
+                        if (isSuccess) {
+                            Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
+                            Navigation.findNavController(requireView()).navigateUp();
+                        } else {
+                            Toast.makeText(getContext(), "Error saving the modification", Toast.LENGTH_SHORT).show();
+                        }
+                        navigateBackSafely();//navigate back if fragment exists
+                    }
+                });
+
+        if (!isNetworkAvailable()) { //even if no internet connection, navigate back
+            Toast.makeText(getContext(), "No internet connection. Mood will be saved upon connection.", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
+        }
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+    private void navigateBackSafely() {
+        if (isAdded() && getView() != null) {
+            Navigation.findNavController(requireView()).navigateUp();
+        }
                     if (getContext() != null) {
                         if (isSuccess) {
                             Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();

@@ -26,6 +26,7 @@ import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -101,6 +102,30 @@ public class FollowingListFragment extends Fragment {
         String userToUnfollowId = userToUnfollow.getDbFileId();
 
         // Delete the following relationship from Firestore
+        db.collection("following")
+                .whereEqualTo("followerId", currentUserId)
+                .whereEqualTo("followedId", userToUnfollowId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    // remove the user from the list
+                                    followingList.remove(userToUnfollow);
+                                    followingAdapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(),
+                                            "Unfollowed " + userToUnfollow.getUsername(),
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                });
+
+        // remove from user follower following
+        db.collection("users").document(currentUserId)
+                .update("following", FieldValue.arrayRemove(userToUnfollowId));
+
+        db.collection("users").document(userToUnfollowId)
+                .update("followers", FieldValue.arrayRemove(currentUserId));
         FollowingManager.makeUnfollow(currentUserId, userToUnfollowId);
     }
 }

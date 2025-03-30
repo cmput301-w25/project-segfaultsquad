@@ -6,7 +6,6 @@
  */
 package com.example.segfaultsquadapplication.display.following;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,13 +17,10 @@ import androidx.annotation.AnimatorRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
-import com.example.segfaultsquadapplication.impl.following.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,10 +29,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class FollowersListFragment extends Fragment {
 
@@ -61,8 +54,10 @@ public class FollowersListFragment extends Fragment {
             }
 
             @Override
-            public void onFollowBack(User user) {
+            public void onFollowBack(User user, FollowersAdapter.ViewHolder holder) {
                 Log.d("FollowersListFragment", "Follow back clicked for: " + user.getUsername());
+
+                sendFollowRequest(user, holder); //when button pressed
                 FollowingManager.makeFollow(UserManager.getUserId(), user.getDbFileId());
             }
         });
@@ -106,6 +101,9 @@ public class FollowersListFragment extends Fragment {
                                     followersAdapter.notifyDataSetChanged();
                                 });
                     }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FollowersListFragment", "Error fetching followers data", e);
                 });
     }
 
@@ -116,5 +114,55 @@ public class FollowersListFragment extends Fragment {
                 .setPositiveButton("Yes", (dialog, which) -> FollowingManager.removeFollower(follower.getDbFileId()))
                 .setNegativeButton("No", null)
                 .show();
+    }
+
+    private void removeFollower(User follower) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        // Delete the following relationship from Firestore
+        db.collection("following")
+                .whereEqualTo("followerId", follower.getDbFileId())
+                .whereEqualTo("followedId", currentUserId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot document : querySnapshot) {
+                        document.getReference().delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    followersList.remove(follower);
+                                    followersAdapter.notifyDataSetChanged();
+                                    Toast.makeText(getContext(),
+                                            "Removed " + follower.getUsername() + " from followers",
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    }
+                });
+
+        // remove from user follower following
+        db.collection("users").document(currentUserId)
+                .update("followers", FieldValue.arrayRemove(follower.getDbFileId()));
+
+        db.collection("users").document(follower.getDbFileId())
+                .update("following", FieldValue.arrayRemove(currentUserId));
+    }
+
+    /**
+     * method to send follow request if not already following
+     *
+     * @param userToFollow the other user
+     *                 user id for the user to follow
+     * @param holder view holder for adapter
+     *                 check variables in adapter to change adatpter followback button
+     */
+    private void sendFollowRequest(User userToFollow, FollowersAdapter.ViewHolder holder) {
+        String currentUserId = auth.getCurrentUser().getUid();
+
+        db.collection("users").document(userToFollow.getDbFileId())
+                .update("followRequests", FieldValue.arrayUnion(currentUserId))
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("FollowersListFragment", "Follow request sent to " + userToFollow.getUsername());
+                    holder.updateFollowStatus(false, true);
+                    Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> Log.e("FollowersListFragment", "Error sending follow request", e));
     }
 }
