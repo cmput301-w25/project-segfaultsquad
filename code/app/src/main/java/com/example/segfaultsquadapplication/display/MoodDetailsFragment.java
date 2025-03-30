@@ -1,7 +1,10 @@
 package com.example.segfaultsquadapplication.display;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -250,13 +253,31 @@ public class MoodDetailsFragment extends Fragment {
      */
     private void deleteMood() {
         MoodEventManager.deleteMoodEventById(moodId, isSuccess -> {
-            if (isSuccess) {
-                Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(requireView()).navigateUp();
-            }
-            else {
-                Toast.makeText(getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
+            if (isAdded()) {
+                if (isSuccess) {
+                    Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
+                    Navigation.findNavController(requireView()).navigateUp();
+                } else {
+                    Toast.makeText(getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
+                }
+                navigateBackSafely();//navigate back if fragment exists
             }
         });
+        if (!isNetworkAvailable()) { //even if no internet connection, navigate back
+            Toast.makeText(getContext(), "No internet connection. Mood will be deleted upon connection.", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
+        }
     }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+    private void navigateBackSafely() {
+        if (isAdded() && getView() != null) {
+            Navigation.findNavController(requireView()).navigateUp();
+        }
+    }
+
 }
