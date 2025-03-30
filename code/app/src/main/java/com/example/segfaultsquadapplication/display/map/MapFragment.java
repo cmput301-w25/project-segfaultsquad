@@ -234,6 +234,13 @@ public class MapFragment extends Fragment {
 
             List<String> followedUserIds = new ArrayList<>(userHolder.get().getFollowing());
 
+            if (followedUserIds.isEmpty()) {
+                // If there are no followed users, show a reminder
+                Log.d("FollowingList", "No followed users currently.");
+                Toast.makeText(requireContext(), "You have no followed user currently.", Toast.LENGTH_LONG).show();
+                return; // Exit as there are no followed users to load moods for
+            }
+
             Log.d("FollowingList", "Number of followed users: " + followedUserIds.size());
 
             // Fetch mood data for each followed user
@@ -302,6 +309,13 @@ public class MapFragment extends Fragment {
 
             List<String> followedUserIds = new ArrayList<>(userHolder.get().getFollowing());
 
+            if (followedUserIds.isEmpty()) {
+                // If there are no followers, show a reminder
+                Log.d("FollowingList", "No followers currently.");
+                Toast.makeText(requireContext(), "You have no follower currently.", Toast.LENGTH_LONG).show();
+                return; // Exit as there are no followers to load moods for
+            }
+
             Log.d("FollowingList", "Number of followed users: " + followedUserIds.size());
 
             // Fetch mood data for each followed user
@@ -353,6 +367,7 @@ public class MapFragment extends Fragment {
             }
         });
     }
+
 
     private void addMoodMarkerToMap(MoodEvent mood, User user) {
         if (mood.getLocation() == null) {
