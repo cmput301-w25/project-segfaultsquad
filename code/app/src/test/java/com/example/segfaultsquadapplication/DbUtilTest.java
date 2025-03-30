@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Runs tests for DbUtil content.
- *
  * USE SILENT CLASS to prevent lenient errors
  * All of MockDb's features may not be needed for all test cases in all test files. Use silent version.
  */
@@ -83,6 +82,7 @@ public class DbUtilTest {
 
     /**
      * Tests queryObjects's functionality.
+     * @throws InterruptedException if the operation is interrupted.
      */
     @Test
     public void queryDocumentsTest() throws InterruptedException {

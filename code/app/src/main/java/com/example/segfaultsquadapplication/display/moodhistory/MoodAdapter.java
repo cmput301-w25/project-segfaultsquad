@@ -188,7 +188,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             moodEmoji.setText(mood.getMoodType().getEmoticon());
             // set reason text ("IMAGE if image reason)")
             textMoodType.setText(mood.getMoodType().name());
-            if (mood.getReasonText().isEmpty() && mood.getImageData() != null) {
+            if (mood.getReasonText().isEmpty()& mood.getImageData() != null) {
                 textReason.setText("IMAGE");
             } else {
                 textReason.setText(mood.getReasonText());
