@@ -249,7 +249,7 @@ public class MapFragment extends Fragment {
 
                     // Now fetch mood events for this user
                     ArrayList<MoodEvent> evtHolder = new ArrayList<>();
-                    MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL,
+                    MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.PUBLIC_ONLY,
                             evtHolder, isMoodEvtSuccess -> {
                                 if (!isMoodEvtSuccess) {
                                     Log.e("FollowingList", "Error loading moods for user: " + userId);
@@ -324,7 +324,7 @@ public class MapFragment extends Fragment {
 
                     // Now fetch mood events for this user
                     ArrayList<MoodEvent> evtHolder = new ArrayList<>();
-                    MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL,
+                    MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.PUBLIC_ONLY,
                             evtHolder, isMoodEvtSuccess -> {
                                 if (!isMoodEvtSuccess) {
                                     Log.e("FollowingList", "Error loading moods for user: " + userId);
