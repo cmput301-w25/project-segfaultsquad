@@ -15,16 +15,7 @@ import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.google.android.material.card.MaterialCardView;
 
 /**
- * Classname: EditMoodFragmentInflater
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This class provides utility methods for inflating and setting up UI
- * components
- * in the EditMoodFragment. It includes methods for setting up the mood grid and
- * social situation spinner.
- *
+ * This class provides utility methods for inflating and setting up UI components in the EditMoodFragment. It includes methods for setting up the mood grid and social situation spinner.
  * Outstanding Issues: None
  */
 public class EditMoodFragmentInflater {

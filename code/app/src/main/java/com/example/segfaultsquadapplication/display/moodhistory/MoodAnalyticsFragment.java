@@ -36,12 +36,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
 /**
- * Classname: MoodAnalyticsFragment
- * Version Info: Initial
- * Date: Feb 18, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- * 
- * Adapter for the mood events list in the MyMoodHistoryFragment
+ * Mood Analytics fragment (screen). Displays mood analytics for current user and all users in nice graphics
+ *
  */
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     // attributes

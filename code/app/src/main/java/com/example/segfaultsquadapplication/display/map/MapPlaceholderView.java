@@ -22,15 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Classname: MapPlaceholderView
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This custom view serves as a placeholder for the map, allowing for the
- * visualization of mood markers. It draws a grid and mood markers on the
- * canvas.
- *
+ * This custom view serves as a placeholder for the map, allowing for the visualization of mood markers. It draws a grid and mood markers on the canvas.
  * Outstanding Issues: None
  */
 public class MapPlaceholderView extends View {

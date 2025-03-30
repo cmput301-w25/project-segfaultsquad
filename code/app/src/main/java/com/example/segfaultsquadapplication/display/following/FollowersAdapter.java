@@ -20,17 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 /**
- * Classname: FollowersAdapter
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This class is an adapter for displaying a list of followers in a
- * RecyclerView.
- * It binds follower data to the UI components and handles user interactions
- * such as
- * removing a follower or following back a user.
- *
+ * This class is an adapter for displaying a list of followers in a RecyclerView. It binds follower data to the UI components and handles user interactions such as removing a follower or following back a user.
  * Outstanding Issues: None
  */
 public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.ViewHolder> {

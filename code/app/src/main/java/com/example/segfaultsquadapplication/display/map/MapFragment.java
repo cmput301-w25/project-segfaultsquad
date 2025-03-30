@@ -64,16 +64,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.widget.TextView;
 
 /**
- * Classname: MapFragment
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This fragment displays a map where users can view mood events associated with
- * themselves and their followers. It handles location permissions, mood
- * filtering,
- * and mood event loading from Firestore.
- *
+ * This fragment displays a map where users can view mood events associated with themselves and their followers. It handles location permissions, mood filtering, and mood event loading from Firestore.
  * Outstanding Issues: None
  */
 public class MapFragment extends Fragment {

@@ -38,12 +38,8 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Classname: MoodAdapter
- * Version Info: Initial
- * Date: Feb 18, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- * 
  * Adapter for the mood events list in the MyMoodHistoryFragment
+ * Issues: None
  */
 public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder> {
     // attributes

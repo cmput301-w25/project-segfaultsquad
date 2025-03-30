@@ -47,16 +47,9 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Classname: EditMoodFragment
- * Purpose: Allows users to edit an existing mood event.
- * Current Issues: N/A
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ * This fragment allows users to update details of a previously created mood event including the mood type, reason, social situation, and associate image.
  *
- * This fragment allows users to update details of a previously created mood
- * event including the mood type, reason, social situation, and associated
- * image.
+ * Current Issues: N/A
  */
 public class EditMoodFragment extends Fragment {
     // attribute

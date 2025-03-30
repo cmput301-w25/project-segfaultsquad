@@ -37,16 +37,8 @@ import android.text.InputFilter;
 import android.widget.Switch;
 
 /**
- * Classname: AddMoodFragment
- * Purpose: Allow user to add a mood event to their history
+ * This fragment allows users to create a new mood event by selecting a mood type, providing a reason, and optionally uploading an image. It handles user input and saves the mood event to Firestore.
  * Current Issues: N/A
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This fragment allows users to create a new mood event by selecting a mood
- * type, providing a reason, and optionally uploading an image. It handles user
- * input and saves the mood event to Firestore.
  */
 public class AddMoodFragment extends Fragment {
     // attributes

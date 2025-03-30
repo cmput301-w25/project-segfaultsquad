@@ -38,17 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Classname: FollowingListFragment
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This fragment displays a list of users that the current user is following. It
- * initializes
- * the RecyclerView and loads the following data from Firestore. The user can
- * unfollow users
- * from this fragment.
- *
+ * This fragment displays a list of users that the current user is following. It initializes the RecyclerView and loads the following data from Firestore. The user can unfollow users from this fragment.
  * Outstanding Issues: None
  */
 public class FollowingListFragment extends Fragment {

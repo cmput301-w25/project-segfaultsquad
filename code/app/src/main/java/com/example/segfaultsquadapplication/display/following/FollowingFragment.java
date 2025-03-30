@@ -1,12 +1,3 @@
-/**
- * Classname: FollowingFragment
- * Purpose: Allow user to see a feed of their followed user's moods (most recent)
- * Current Issues: Its blank
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
-
 package com.example.segfaultsquadapplication.display.following;
 
 import android.os.Bundle;
@@ -42,12 +33,8 @@ import androidx.navigation.Navigation;
 
 
 /**
- * Classname: FollowingFragment
- * Purpose: Allow user to see a feed of their followed user's moods (most recent)
- * Current Issues: Its blank
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ * Allow user to see a feed of their followed user's moods (most recent)
+ * Current Issues: None
  */
 public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;

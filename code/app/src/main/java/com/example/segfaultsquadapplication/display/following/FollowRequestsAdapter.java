@@ -27,17 +27,7 @@ import com.example.segfaultsquadapplication.impl.user.User;
 import java.util.List;
 
 /**
- * Classname: FollowRequestsAdapter
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This adapter is responsible for displaying a list of follow requests in a
- * RecyclerView.
- * It binds follow request data to the UI components and handles user
- * interactions for
- * accepting or denying follow requests.
- *
+ * This adapter is responsible for displaying a list of follow requests in a RecyclerView. It binds follow request data to the UI components and handles user interactions for accepting or denying follow requests.
  * Outstanding Issues: None
  */
 public class FollowRequestsAdapter extends RecyclerView.Adapter<FollowRequestsAdapter.RequestViewHolder> {

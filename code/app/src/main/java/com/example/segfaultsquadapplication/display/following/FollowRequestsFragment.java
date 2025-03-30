@@ -42,16 +42,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Classname: FollowRequestsFragment
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- *
- * This fragment displays a list of follow requests received by the current
- * user. It allows
- * the user to accept or deny follow requests. The data is loaded from
- * Firestore.
- *
+ * This fragment displays a list of follow requests received by the current user. It allows the user to accept or deny follow requests. The data is loaded from Firestore.
  * Outstanding Issues: None
  */
 public class FollowRequestsFragment extends Fragment {

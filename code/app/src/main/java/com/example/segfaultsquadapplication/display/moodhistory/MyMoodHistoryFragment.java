@@ -36,12 +36,8 @@ import androidx.navigation.NavController;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 /**
- * Classname: MyMoodHistoryFragment
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- * 
  * Mood History fragment (Not really, just loads of startup)
+ * Issues: None
  */
 public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
