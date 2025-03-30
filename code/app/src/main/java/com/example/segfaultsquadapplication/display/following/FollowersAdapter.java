@@ -1,9 +1,3 @@
-/**
- * Classname: FollowersAdapter
- * Version Info: Initial
- * Date: March 7, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
 package com.example.segfaultsquadapplication.display.following;
 
 import android.graphics.Bitmap;
@@ -25,17 +19,43 @@ import com.example.segfaultsquadapplication.impl.user.UserManager;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class is an adapter for displaying a list of followers in a RecyclerView. It binds follower data to the UI components and handles user interactions such as removing a follower or following back a user.
+ * Outstanding Issues: None
+ */
 public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.ViewHolder> {
-
+    // attributes
     private List<User> followersList;
     private OnFollowerClickListener listener;
 
+    /**
+     * Interface for handling follower click events.
+     */
     public interface OnFollowerClickListener {
+        /**
+         * Called when a follower is removed.
+         *
+         * @param user The user to be removed.
+         */
         void onRemoveFollower(User user);
 
+        /**
+         * Called when a follow back action is initiated.
+         *
+         * @param user       The user to follow back.
+         * @param viewHolder The ViewHolder associated with the user.
+         */
         void onFollowBack(User user, ViewHolder viewHolder);
     }
 
+    /**
+     * constructor
+     * 
+     * @param followersList
+     *                      the list of User objects who are folllowing current user
+     * @param listener
+     *                      listener object to update the list
+     */
     public FollowersAdapter(List<User> followersList, OnFollowerClickListener listener) {
         this.followersList = followersList;
         this.listener = listener;
@@ -59,7 +79,11 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
         return followersList.size();
     }
 
+    /**
+     * sub class viewholder for holding follwer items
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        // attributes
         TextView username;
         ImageView profilePicture;
         Button removeButton;
@@ -67,6 +91,11 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
         private boolean isFollowing = false;
         private boolean followRequestSent = false;
 
+        /**
+         * Constructor for the ViewHolder.
+         *
+         * @param itemView The view for the item.
+         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.username);
@@ -75,6 +104,12 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
             followBackButton = itemView.findViewById(R.id.follow_back_button);
         }
 
+        /**
+         * Binds the user data to the UI components.
+         *
+         * @param user     The user to bind.
+         * @param listener The listener for click events.
+         */
         public void bind(User user, OnFollowerClickListener listener) {
             username.setText(user.getUsername());
 
@@ -109,12 +144,23 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
             });
         }
 
+        /**
+         * method to update following status
+         * 
+         * @param isFollowing
+         *                          bool value for if user is following the other
+         * @param followRequestSent
+         *                          bool value for is a following request has been sent
+         */
         public void updateFollowStatus(boolean isFollowing, boolean followRequestSent) {
             this.isFollowing = isFollowing;
             this.followRequestSent = followRequestSent;
             setFollowBackButtonState();
         }
 
+        /**
+         * settor method for the follow back button
+         */
         private void setFollowBackButtonState() {
             if (isFollowing) {
                 followBackButton.setText("Following");
@@ -128,7 +174,12 @@ public class FollowersAdapter extends RecyclerView.Adapter<FollowersAdapter.View
             }
         }
 
-
+        /**
+         * helper method to check if one user is following another
+         * 
+         * @param user
+         *             user to check (if they are following current user)
+         */
         private void checkFollowStatus(User user) {
             String currentUserId = UserManager.getUserId();
             AtomicReference<User> holder = new AtomicReference<>();

@@ -64,7 +64,7 @@ public class UserManager {
     }
 
     /**
-     * Gets the SPECIFIED user's id. Use this instead of the raw getUid for consistency & null handling.
+     * Gets the SPECIFIED user's id. Use this instead of the raw getUid for consistency and null handling.
      * @param user The user to retrieve the ID from.
      * @return The user id for the specified user.
      */

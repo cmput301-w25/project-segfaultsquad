@@ -1,3 +1,14 @@
+/**
+ * Classname: EditMoodFragment
+ * Purpose: Allows users to edit an existing mood event.
+ * Current Issues: N/A
+ * Version Info: Initial
+ * Date: Feb 16, 2025
+ * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment allows users to update details of a previously created mood
+ * event including the mood type, reason, social situation, and associated image.
+ */
 package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
@@ -36,12 +47,12 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Fragment for editing an existing mood event.
- * This fragment allows users to update details of a previously created mood
- * event including
- * the mood type, reason, social situation, and associated image.
+ * This fragment allows users to update details of a previously created mood event including the mood type, reason, social situation, and associate image.
+ *
+ * Current Issues: N/A
  */
 public class EditMoodFragment extends Fragment {
+    // attribute
     private static final String TAG = "EditMoodFragment";
     private static final int PICK_IMAGE_REQUEST = 1;
 
@@ -94,8 +105,7 @@ public class EditMoodFragment extends Fragment {
                 v -> {
                     selectedMoodType = (MoodEvent.MoodType) v.getTag();
                     updateMoodSelection((MaterialCardView) v);
-                }, moodGrid
-        );
+                }, moodGrid);
         EditMoodFragmentInflater.setupSocialSituationSpinner(getContext(), socialSituationSpinner);
         setupImageUpload();
         setupButtons(view);
@@ -109,7 +119,8 @@ public class EditMoodFragment extends Fragment {
     /**
      * Initializes all UI components from the view.
      *
-     * @param view The root view containing all UI components
+     * @param view
+     *             The root view containing all UI components
      */
     private void initializeViews(View view) {
         moodGrid = view.findViewById(R.id.moodGrid);
@@ -143,7 +154,8 @@ public class EditMoodFragment extends Fragment {
     /**
      * Sets up the navigation and action buttons.
      *
-     * @param view The root view containing all buttons
+     * @param view
+     *             The root view containing all buttons
      */
     private void setupButtons(View view) {
         // Navigation back button
@@ -176,7 +188,8 @@ public class EditMoodFragment extends Fragment {
     /**
      * Populates the UI with data from the loaded mood event.
      *
-     * @param mood The MoodEvent object containing all mood data
+     * @param mood
+     *             The MoodEvent object containing all mood data
      */
     private void populateUI(MoodEvent mood) {
         // Set the mood type
@@ -226,7 +239,8 @@ public class EditMoodFragment extends Fragment {
      * Highlights the selected mood in the mood grid.
      * Updates the background and text colors of all mood cards.
      *
-     * @param moodType The MoodType to highlight as selected
+     * @param moodType
+     *                 The MoodType to highlight as selected
      */
     private void highlightSelectedMood(MoodEvent.MoodType moodType) {
         for (int i = 0; i < moodGrid.getChildCount(); i++) {
@@ -259,7 +273,8 @@ public class EditMoodFragment extends Fragment {
     /**
      * Updates the visual selection state when a new mood is selected.
      *
-     * @param selectedCard The MaterialCardView that was selected
+     * @param selectedCard
+     *                     The MaterialCardView that was selected
      */
     private void updateMoodSelection(MaterialCardView selectedCard) {
         MoodEvent.MoodType selectedType = (MoodEvent.MoodType) selectedCard.getTag();
@@ -295,9 +310,12 @@ public class EditMoodFragment extends Fragment {
      * Handles the result of the image picker activity.
      * Updates the image preview when a new image is selected.
      *
-     * @param requestCode The request code passed to startActivityForResult()
-     * @param resultCode  The result code returned by the child activity
-     * @param data        An Intent that carries the result data
+     * @param requestCode
+     *                    The request code passed to startActivityForResult()
+     * @param resultCode
+     *                    The result code returned by the child activity
+     * @param data
+     *                    An Intent that carries the result data
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -330,7 +348,7 @@ public class EditMoodFragment extends Fragment {
                         } else {
                             Toast.makeText(getContext(), "Error saving the modification", Toast.LENGTH_SHORT).show();
                         }
-                        navigateBackSafely();//navigate back if fragment exists
+                        navigateBackSafely();// navigate back if fragment exists
                     }
                 });
 
@@ -339,11 +357,23 @@ public class EditMoodFragment extends Fragment {
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
     }
+
+    /**
+     * for offline functionality
+     * 
+     * @return
+     *         returns bool of if network is avilible
+     */
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
+    /**
+     * navigates to previous fragment
+     */
     private void navigateBackSafely() {
         if (isAdded() && getView() != null) {
             Navigation.findNavController(requireView()).navigateUp();

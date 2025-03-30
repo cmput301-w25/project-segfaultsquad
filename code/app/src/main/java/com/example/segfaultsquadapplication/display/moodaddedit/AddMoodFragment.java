@@ -1,12 +1,3 @@
-/**
- * Classname: AddMoodFragment
- * Purpose: Allow user to add a mood event to thier history
- * Current Issues: N/A
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
-
 package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
@@ -81,7 +72,7 @@ public class AddMoodFragment extends Fragment {
     }
 
     /**
-     * helper method to locate/assign/initialize view components
+     * Helper method to locate/assign/initialize view components.
      *
      * @param view
      *             the view being projected onto
@@ -97,16 +88,15 @@ public class AddMoodFragment extends Fragment {
     }
 
     /**
-     * setup for the used date and time format
+     * Sets up the used date and time format.
      */
     private void setupDateTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
         textDateTime.setText(sdf.format(new Date()));
     }
 
-
     /**
-     * helper method to setup image upload for mood reason (picture)
+     * Helper method to setup image upload for mood reason (picture).
      */
     private void setupImageUpload() {
         // debugging
@@ -164,7 +154,7 @@ public class AddMoodFragment extends Fragment {
     }
 
     /**
-     * visual highlight for the selected mood option
+     * Visual highlight for the selected mood option.
      *
      * @param selectedCard
      *                     the mood type card selected in the "How are you feeling?"
@@ -191,7 +181,7 @@ public class AddMoodFragment extends Fragment {
     }
 
     /**
-     * confirm button for mood event creation
+     * Confirm button for mood event creation.
      */
     private void saveMood() {
         Log.d("AddMoodFragment", "entered saveMood()");
@@ -214,13 +204,14 @@ public class AddMoodFragment extends Fragment {
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
                 reason, isPublicMood, situation,
                 selectedImageUri, isSuccess -> {
-                    if (isAdded()) { //meaning that fragment not destroyed, need so app doesn't crash upon reconnection
+                    if (isAdded()) { // meaning that fragment not destroyed, need so app doesn't crash upon
+                                     // reconnection
                         if (isSuccess) {
                             Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(getContext(), "Could not save mood event...", Toast.LENGTH_SHORT).show();
                         }
-                        navigateBackSafely();//navigate back if fragment exists
+                        navigateBackSafely(); // navigate back if fragment exists
                     }
                 });
         // Navigate up immediately
@@ -230,12 +221,22 @@ public class AddMoodFragment extends Fragment {
         }
         Log.d("AddMoodFragment", "completed saveMood()");
     }
+
+    /**
+     * Checks if the network is available.
+     *
+     * @return True if the network is available, false otherwise.
+     */
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    /**
+     * Safely navigates back to the previous fragment.
+     */
     private void navigateBackSafely() {
         if (isAdded() && getView() != null) {
             Navigation.findNavController(requireView()).navigateUp();

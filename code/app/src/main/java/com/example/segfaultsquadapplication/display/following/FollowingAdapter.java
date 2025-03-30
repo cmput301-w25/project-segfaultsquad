@@ -3,6 +3,12 @@
  * Version Info: Initial
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This class is an adapter for displaying a list of users that the current user is following
+ * in a RecyclerView. It binds following user data to the UI components and handles user
+ * interactions such as unfollowing a user.
+ *
+ * Outstanding Issues: None
  */
 package com.example.segfaultsquadapplication.display.following;
 
@@ -23,12 +29,24 @@ import com.example.segfaultsquadapplication.impl.user.User;
 
 import java.util.List;
 
+/**
+ * This class is an adapter for displaying a list of users that the current user is following in a RecyclerView. It binds following user data to the UI components and handles user interactions such as unfollowing a user.
+ * Outstanding Issues: None
+ */
 public class FollowingAdapter extends RecyclerView.Adapter<FollowingAdapter.ViewHolder> {
 
     private List<User> followingList;
     private OnFollowingActionListener listener;
 
+    /**
+     * Interface for handling following actions.
+     */
     public interface OnFollowingActionListener {
+        /**
+         * Called when a following action is performed.
+         *
+         * @param user The user for whom the action is performed.
+         */
         void onFollowingAction(User user);
     }
 
@@ -80,11 +98,19 @@ public class FollowingAdapter extends RecyclerView.Adapter<FollowingAdapter.View
         return followingList.size();
     }
 
+    /**
+     * holds user details in UI
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView username;
         ImageView profilePicture;
         Button followingButton;
 
+        /**
+         * Constructor for the ViewHolder.
+         *
+         * @param itemView The view for the item.
+         */
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             username = itemView.findViewById(R.id.username);

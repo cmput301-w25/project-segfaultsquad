@@ -13,7 +13,7 @@ public class DbOpResultHandler<TResult> {
     private final OnFailureListener failListener;
 
     /**
-     * Creates an instance of result handler. </br>
+     * Creates an instance of result handler. <br>
      * To find out more detail about how success / failure would be triggered, see documentation for usages.
      * I.e. DbUtils.
      *

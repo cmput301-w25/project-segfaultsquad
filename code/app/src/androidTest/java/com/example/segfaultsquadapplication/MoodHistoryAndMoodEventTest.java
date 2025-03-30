@@ -46,8 +46,8 @@ import java.util.Objects;
 
 
 /**
- * This test tests for the mood history display and filtering; </br>
- * new mood event / modify mood event are also tested here by convenience. </br>
+ * This test tests for the mood history display and filtering; <br>
+ * new mood event / modify mood event are also tested here by convenience. <br>
  * These tests are integrated into one to prevent wasting time to excessive login / splash simulation
  * and simulate a user's real-world usage of the App.
  */
@@ -112,7 +112,7 @@ public class MoodHistoryAndMoodEventTest {
     public GrantPermissionRule locPermRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION);
 
     /**
-     * The Android UI test would simulate a realtime user's behavior, </br>
+     * The Android UI test would simulate a realtime user's behavior, <br>
      * thus all smaller tests are put together to mitigate displaying splash screen too many times
      * @throws InterruptedException If the test thread's waiting behavior is somehow interrupted
      */

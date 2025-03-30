@@ -1,9 +1,3 @@
-/**
- * Classname: MyMoodHistoryFragment
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
 package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.app.AlertDialog;
@@ -35,13 +29,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Mood History fragment (Not really, just loads of startup)
+ * Issues: None
+ */
 public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
     private ImageButton filterButton;
     private CardView filterMenu;
     private boolean isFilterMenuVisible = false;
     private RecyclerView moodRecyclerView;
     private MoodAdapter moodAdapter;
-    // Use static arraylist, so subsequent visits to history page will not start out blank
+    // Use static arraylist, so subsequent visits to history page will not start out
+    // blank
     private static List<MoodEvent> allMoods = new ArrayList<>();
 
     @Override
@@ -87,7 +86,8 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         moodAdapter = new MoodAdapter(this);
         moodRecyclerView.setAdapter(moodAdapter);
         moodRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        // Display with last fetched moods for now, will be updated when new moods are fetched
+        // Display with last fetched moods for now, will be updated when new moods are
+        // fetched
         moodAdapter.updateMoods(allMoods);
     }
 
@@ -130,25 +130,27 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
 
         // get the moods
         ArrayList<MoodEvent> temp = new ArrayList<>();
-        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp, isSuccess -> {
-            if (isSuccess) {
-                allMoods.clear(); // Clear previous moods
-                // debugging
-                Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
+        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp,
+                isSuccess -> {
+                    if (isSuccess) {
+                        allMoods.clear(); // Clear previous moods
+                        // debugging
+                        Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
 
-                for (MoodEvent mood : temp) {
-                    allMoods.add(mood); // add to arraylist
-                    Log.d("MoodHistory",
-                            "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
-                }
+                        for (MoodEvent mood : temp) {
+                            allMoods.add(mood); // add to arraylist
+                            Log.d("MoodHistory",
+                                    "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
+                        }
 
-//                // Sort the moods in memory instead
-//                Collections.sort(allMoods, (a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
-                moodAdapter.updateMoods(allMoods);
-            } else {
-                Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
-            }
-        });
+                        // // Sort the moods in memory instead
+                        // Collections.sort(allMoods, (a, b) ->
+                        // b.getTimestamp().compareTo(a.getTimestamp()));
+                        moodAdapter.updateMoods(allMoods);
+                    } else {
+                        Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
     }
 
@@ -184,7 +186,6 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      *                   Week", "By Mood", or "By Reason"
      */
     private void applyFilter(String filterType) {
-        // TODO: Implement filtering logic
         switch (filterType) {
             case "Last Week":
                 filterLastWeek();

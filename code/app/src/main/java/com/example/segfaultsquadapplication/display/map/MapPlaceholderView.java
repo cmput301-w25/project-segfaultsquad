@@ -3,6 +3,11 @@
  * Version Info: Initial
  * Date: Feb 16, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This custom view serves as a placeholder for the map, allowing for the
+ * visualization of mood markers. It draws a grid and mood markers on the canvas.
+ *
+ * Outstanding Issues: None
  */
 
 package com.example.segfaultsquadapplication.display.map;
@@ -17,6 +22,10 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This custom view serves as a placeholder for the map, allowing for the visualization of mood markers. It draws a grid and mood markers on the canvas.
+ * Outstanding Issues: None
+ */
 public class MapPlaceholderView extends View {
     private Paint backgroundPaint;
     private Paint markerPaint;
@@ -24,7 +33,7 @@ public class MapPlaceholderView extends View {
     private List<MoodMarker> markers;
 
     /**
-     * 
+     * Class representing a mood marker on the map.
      */
     public static class MoodMarker {
         float x, y;
@@ -64,11 +73,22 @@ public class MapPlaceholderView extends View {
         markers = new ArrayList<>();
     }
 
+    /**
+     * Clears all markers from the view.
+     */
     public void clearMarkers() {
         markers.clear();
         invalidate();
     }
 
+    /**
+     * Adds a marker to the view.
+     *
+     * @param x     The x-coordinate of the marker.
+     * @param y     The y-coordinate of the marker.
+     * @param color The color of the marker.
+     * @param label The label for the marker.
+     */
     public void addMarker(float x, float y, int color, String label) {
         markers.add(new MoodMarker(x, y, color, label));
         invalidate();

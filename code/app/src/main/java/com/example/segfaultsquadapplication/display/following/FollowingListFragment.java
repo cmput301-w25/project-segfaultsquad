@@ -3,6 +3,12 @@
  * Version Info: Initial
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
+ *
+ * This fragment displays a list of users that the current user is following. It initializes
+ * the RecyclerView and loads the following data from Firestore. The user can unfollow users
+ * from this fragment.
+ *
+ * Outstanding Issues: None
  */
 
 package com.example.segfaultsquadapplication.display.following;
@@ -28,6 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This fragment displays a list of users that the current user is following. It initializes the RecyclerView and loads the following data from Firestore. The user can unfollow users from this fragment.
+ * Outstanding Issues: None
+ */
 public class FollowingListFragment extends Fragment {
 
     private RecyclerView recyclerView;
@@ -36,7 +46,7 @@ public class FollowingListFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+            Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_following_list, container, false);
 
         // Initialize views and adapter
@@ -57,6 +67,9 @@ public class FollowingListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the following data from Firestore.
+     */
     private void loadFollowingData() {
         String currentUserId = UserManager.getUserId();
 
@@ -79,6 +92,12 @@ public class FollowingListFragment extends Fragment {
                 });
     }
 
+    /**
+     * Handles the action of following or unfollowing a user.
+     *
+     * @param user
+     *             The user to follow or unfollow.
+     */
     private void onFollowingAction(User user) {
         // Show confirmation dialog before unfollowing
         new AlertDialog.Builder(requireContext())
@@ -89,6 +108,11 @@ public class FollowingListFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Unfollows the specified user.
+     *
+     * @param userToUnfollow The user to unfollow.
+     */
     private void unfollowUser(User userToUnfollow) {
         Log.d("FollowingListFragment", "-0");
         String currentUserId = UserManager.getUserId();

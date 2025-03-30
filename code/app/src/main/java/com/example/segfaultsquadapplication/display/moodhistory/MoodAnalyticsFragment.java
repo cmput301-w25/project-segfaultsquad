@@ -37,7 +37,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Mood Analytics fragment (screen). Displays mood analytics for current user and all users in nice graphics
+ *
+ */
 public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
+    // attributes
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
     private HorizontalBarChart recentMoodsChart;
@@ -94,7 +99,8 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     /**
-     * listener setup for the chips to toggle between personal and global mood event data
+     * listener setup for the chips to toggle between personal and global mood event
+     * data
      */
     private void setupChipListeners() {
         myMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -123,7 +129,8 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     /**
-     * method to load in analytics data (just calls sub methods to load in data and create graphs)
+     * method to load in analytics data (just calls sub methods to load in data and
+     * create graphs)
      */
     private void loadAnalyticsData() {
         // Load personal moods by default
@@ -133,8 +140,10 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * method to load in mood events and create pie chart
+     * 
      * @param personalOnly
-     * bool to load in only current user's (true) or all (false) mood events
+     *                     bool to load in only current user's (true) or all (false)
+     *                     mood events
      */
     private void loadMoodDistribution(boolean personalOnly) {
         String userId = personalOnly ? UserManager.getUserId() : null;
@@ -155,8 +164,10 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * method to load in recent mood events for bar chart
+     * 
      * @param personalOnly
-     * bool to load in only current user's (true) or all (false) mood events
+     *                     bool to load in only current user's (true) or all (false)
+     *                     mood events
      */
     private void loadRecentMoods(boolean personalOnly) {
         String userId = personalOnly ? UserManager.getUserId() : null;
@@ -173,8 +184,9 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * method to update the recent moods count bar chart
+     * 
      * @param moodEvents
-     * list of mood events to be displayed
+     *                   list of mood events to be displayed
      */
     private void updateBarChart(List<MoodEvent> moodEvents) {
         ArrayList<BarEntry> entries = new ArrayList<>();

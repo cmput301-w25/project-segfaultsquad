@@ -1,9 +1,3 @@
-/**
- * Classname: AddMoodFragment
- * Version Info: Initial
- * Date: Feb 16, 2025
- * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
- */
 package com.example.segfaultsquadapplication.display.map;
 
 import android.Manifest;
@@ -121,29 +115,38 @@ public class MapFragment extends Fragment {
         });
 
         // Load user settings
-        Configuration.getInstance().load(requireContext(), PreferenceManager.getDefaultSharedPreferences(requireContext()));
+        Configuration.getInstance().load(requireContext(),
+                PreferenceManager.getDefaultSharedPreferences(requireContext()));
 
         // Initialize MapView
         mapView = view.findViewById(R.id.mapView);
         mapView.setTileSource(TileSourceFactory.MAPNIK); // Use OpenStreetMap tiles
         mapView.setMultiTouchControls(true);
 
-
         // Set default location and zoom level
         mapView.getController().setZoom(18.0);
         mapView.setMinZoomLevel(3.0);
         mapView.setMaxZoomLevel(20.0);
-        BoundingBox boundingBox = new BoundingBox(85.0, 180.0, -85.0, -180.0); //map restrictions
+        BoundingBox boundingBox = new BoundingBox(85.0, 180.0, -85.0, -180.0); // map restrictions
         mapView.setScrollableAreaLimitDouble(boundingBox);
         enableMyLocation();
 
         // Add compass overlay
-        CompassOverlay compassOverlay = new CompassOverlay(requireContext(), new InternalCompassOrientationProvider(requireContext()), mapView);
+        CompassOverlay compassOverlay = new CompassOverlay(requireContext(),
+                new InternalCompassOrientationProvider(requireContext()), mapView);
         compassOverlay.enableCompass();
         mapView.getOverlays().add(compassOverlay);
         return view;
     }
 
+    /**
+     * listener of sorts. Executes code dependeant on fragment load-in
+     * 
+     * @param view
+     *                           the view being created
+     * @param savedInstanceState
+     *                           saved instance for caching
+     */
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -157,7 +160,6 @@ public class MapFragment extends Fragment {
 
         loadMoodData();
     }
-
 
     /**
      * helper method to get this user's moods, sorted in reverse chronological order
@@ -182,29 +184,34 @@ public class MapFragment extends Fragment {
 
             // Now fetch the mood events for this user
             ArrayList<MoodEvent> temp = new ArrayList<>();
-            MoodEventManager.getAllMoodEvents(currentUserId, MoodEventManager.MoodEventFilter.ALL, temp, moodLoadSuccess -> {
-                if (!moodLoadSuccess) {
-                    Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+            MoodEventManager.getAllMoodEvents(currentUserId, MoodEventManager.MoodEventFilter.ALL, temp,
+                    moodLoadSuccess -> {
+                        if (!moodLoadSuccess) {
+                            Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
 
-                // Clear previous moods and markers on success
-                clearMoodEvents();
-                Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
+                        // Clear previous moods and markers on success
+                        clearMoodEvents();
+                        Log.d("MoodHistory", "Number of moods retrieved: " + temp.size());
 
-                for (MoodEvent mood : temp) {
-                    allMoods.add(mood); // Add to arraylist
-                    Log.d("MoodHistory", "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
+                        for (MoodEvent mood : temp) {
+                            allMoods.add(mood); // Add to arraylist
+                            Log.d("MoodHistory",
+                                    "Loaded mood: " + mood.getMoodType() + " with ID: " + mood.getDbFileId());
 
-                    // Add each mood as a marker on the map
-                    if (mood.getLocation() != null) {
-                        addMoodMarkerToMap(mood, currentUser);
-                    }
-                }
-            });
+                            // Add each mood as a marker on the map
+                            if (mood.getLocation() != null) {
+                                addMoodMarkerToMap(mood, currentUser);
+                            }
+                        }
+                    });
         });
     }
 
+    /**
+     * helper method to load in following user's data
+     */
     private void loadFollowingData() {
         String currentUserId = UserManager.getUserId();
 
@@ -273,7 +280,12 @@ public class MapFragment extends Fragment {
         });
     }
 
-
+    /**
+     * method to restrict mood event radius on map
+     * 
+     * @param radius
+     *               the premitted radius in km
+     */
     private void MoodsWithinRadius(float radius) {
         // Ensure that currentLocation is available
         if (currentLocation == null) {
@@ -342,7 +354,8 @@ public class MapFragment extends Fragment {
 
                                         // Ignore moods outside of the specified radius, in meters
                                         float distance = currentLocation.distanceTo(moodLocation);
-                                        if (distance > radius) continue;
+                                        if (distance > radius)
+                                            continue;
 
                                         // Record marker & add to map
                                         allMoods.add(mood);
@@ -355,7 +368,14 @@ public class MapFragment extends Fragment {
         });
     }
 
-
+    /**
+     * adds the mood event markers to the map
+     * 
+     * @param mood
+     *             the mood events
+     * @param user
+     *             the user
+     */
     private void addMoodMarkerToMap(MoodEvent mood, User user) {
         if (mood.getLocation() == null) {
             Log.e("MoodLocation", "Mood has no location: " + mood.getMoodType());
@@ -392,18 +412,18 @@ public class MapFragment extends Fragment {
         marker.setIcon(createEmojiDrawable(mood.getMoodType().getEmoticon()));
 
         // Set a title (mood type) when clicking the marker
-        marker.setTitle(user.getUsername()+ ": " + mood.getMoodType());
+        marker.setTitle(user.getUsername() + ": " + mood.getMoodType());
 
         // Add marker to the map
         mapView.getOverlays().add(marker);
         mapView.invalidate(); // Refresh the map
 
-        final boolean[] isInfoWindowShown = {false};
+        final boolean[] isInfoWindowShown = { false };
 
         marker.setOnMarkerClickListener((clickedMarker, mapView1) -> {
             if (!isInfoWindowShown[0]) {
                 clickedMarker.showInfoWindow(); // Show the info window
-                isInfoWindowShown[0] = true;   // Mark it as shown
+                isInfoWindowShown[0] = true; // Mark it as shown
             }
 
             // Use a Handler to clear the title after 3 seconds
@@ -413,8 +433,8 @@ public class MapFragment extends Fragment {
             // Clear the title after 3 seconds and close the info window
             handler.postDelayed(() -> {
                 clickedMarker.closeInfoWindow(); // Close the info window after clearing the title
-                isInfoWindowShown[0] = false;  // Mark it as not shown
-            }, 3000);  // 3 seconds delay
+                isInfoWindowShown[0] = false; // Mark it as not shown
+            }, 3000); // 3 seconds delay
 
             // Return true to indicate that the click event has been handled
             return true;
@@ -433,12 +453,19 @@ public class MapFragment extends Fragment {
         locationOffsets.clear();
     }
 
-    // Create emoji-based marker
+    /**
+     * Create emoji-based marker
+     * 
+     * @param emoji
+     *              the emoji to render
+     * @return
+     *         returns drawable to present on screen
+     */
     private Drawable createEmojiDrawable(String emoji) {
         // Create a TextView to display the emoji
         TextView textView = new TextView(getContext());
         textView.setText(emoji);
-        textView.setTextSize(30);  // Adjust the emoji size
+        textView.setTextSize(30); // Adjust the emoji size
         textView.setTextColor(Color.BLACK);
 
         // Create a larger Bitmap to accommodate the emoji properly
@@ -455,6 +482,9 @@ public class MapFragment extends Fragment {
         return new BitmapDrawable(getResources(), bitmap);
     }
 
+    /**
+     * method to update current location
+     */
     private void updateCurrentLocation() {
         AtomicReference<Location> locHolder = new AtomicReference<>();
         LocationManager.getLocation(locHolder, isSuccess -> {
@@ -476,6 +506,11 @@ public class MapFragment extends Fragment {
 
     /**
      * Updates the map with the given latitude and longitude.
+     * 
+     * @param latitude
+     *                  the latitude (double)
+     * @param longitude
+     *                  the longtitude (double)
      */
     private void updateMapLocation(double latitude, double longitude) {
         org.osmdroid.util.GeoPoint osmGeoPoint = new org.osmdroid.util.GeoPoint(latitude, longitude);
@@ -499,12 +534,15 @@ public class MapFragment extends Fragment {
      * Enables the location overlay on the map.
      */
     private void enableLocationOverlay() {
-        MyLocationNewOverlay locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()), mapView);
+        MyLocationNewOverlay locationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(requireContext()),
+                mapView);
         locationOverlay.enableMyLocation();
         mapView.getOverlays().add(locationOverlay);
     }
 
-
+    /**
+     * helper method to enable user location
+     */
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -514,7 +552,9 @@ public class MapFragment extends Fragment {
         }
     }
 
-
+    /**
+     * helper method to request user location premissions
+     */
     private void requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -527,10 +567,14 @@ public class MapFragment extends Fragment {
         }
     }
 
+    /**
+     * ui popup for permission methods
+     */
     private void showLocationPermissionRationale() {
         new MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Location Permission Required")
-                .setMessage("The app needs location permission to show nearby moods and attach location to your mood events.")
+                .setMessage(
+                        "The app needs location permission to show nearby moods and attach location to your mood events.")
                 .setPositiveButton("Grant Permission", (dialog, which) -> {
                     requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
                 })
@@ -540,7 +584,6 @@ public class MapFragment extends Fragment {
                 })
                 .show();
     }
-
 
     @Override
     public void onResume() {
@@ -559,7 +602,8 @@ public class MapFragment extends Fragment {
     /**
      * method to apply filter
      *
-     * @param filterType filter being applied
+     * @param filterType
+     *                   filter being applied
      */
     private void applyFilter(String filterType) {
         switch (filterType) {
@@ -576,6 +620,10 @@ public class MapFragment extends Fragment {
                 break;
         }
     }
+
+    /**
+     * helper method to clear present marker
+     */
     private void clearMoodMarkers() {
         // Get the current overlays from the map
         List<Overlay> overlays = mapView.getOverlays();
@@ -604,7 +652,3 @@ public class MapFragment extends Fragment {
         allMoods.clear();
     }
 }
-
-    /**
-     * Filter moods from the last week
-     */
