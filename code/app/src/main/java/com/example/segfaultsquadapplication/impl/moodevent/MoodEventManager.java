@@ -73,7 +73,10 @@ public class MoodEventManager {
             return;
         }
 
-        List<Integer> imgBytes = encodeImg(ctx, imgUri);
+        List<Integer> imgBytes = null;
+        try {
+            imgBytes = encodeImg(ctx, imgUri);
+        } catch (Exception ignored ) {}
 
         addMoodEvent(moodType, reason, imgBytes, situation, isPublic, callback);
     }
@@ -139,7 +142,10 @@ public class MoodEventManager {
             return;
         }
 
-        List<Integer> imgBytes = encodeImg(ctx, imgUri);
+        List<Integer> imgBytes = null;
+        try {
+            imgBytes = encodeImg(ctx, imgUri);
+        } catch (Exception ignored) {}
 
         Map<String, Object> updates = new HashMap<>();
         updates.put("moodType", moodType);

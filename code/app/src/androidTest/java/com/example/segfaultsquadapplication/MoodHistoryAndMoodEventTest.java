@@ -20,7 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.GrantPermissionRule;
 
-import com.example.segfaultsquadapplication.display.MoodDetailsFragment;
+import com.example.segfaultsquadapplication.display.moodhistory.MoodDetailsFragment;
 import com.example.segfaultsquadapplication.display.moodaddedit.AddMoodFragment;
 import com.example.segfaultsquadapplication.display.moodaddedit.EditMoodFragment;
 import com.example.segfaultsquadapplication.display.moodhistory.MyMoodHistoryFragment;

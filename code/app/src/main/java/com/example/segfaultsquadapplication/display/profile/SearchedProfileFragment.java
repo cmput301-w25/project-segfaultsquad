@@ -3,7 +3,6 @@ package com.example.segfaultsquadapplication.display.profile;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +17,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.following.FollowingManager;
+import com.example.segfaultsquadapplication.impl.user.FollowingManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
-import com.google.firebase.firestore.FieldValue;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -131,8 +129,15 @@ public class SearchedProfileFragment extends Fragment {
 
     private void sendFollowRequest() {
         if (!currentUserFollowingSearched & !followRequestSent) {
-            FollowingManager.sendFollowRequest(searchedUserId);
-            Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+            FollowingManager.sendFollowRequest(searchedUserId,
+                    isSuccess -> {
+                        if (getContext() != null) {
+                            if (isSuccess)
+                                Toast.makeText(getContext(), "Follow Request Sent", Toast.LENGTH_SHORT).show();
+                            else
+                                Toast.makeText(getContext(), "Could not send follow request", Toast.LENGTH_SHORT).show();
+                        }
+                    });
             followRequestSent = true;
             updateFollowButton();
         }

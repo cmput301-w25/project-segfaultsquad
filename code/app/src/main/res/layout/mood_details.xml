@@ -162,7 +162,7 @@
             </LinearLayout>
 
 
-            <!-- Location Section -->
+            <!-- Location / Visibility Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -187,9 +187,6 @@
                     android:drawableStart="@android:drawable/ic_menu_mylocation"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-
-
-
                     android:textColor="#333333"
                     android:textSize="16sp" />
 
@@ -211,6 +208,54 @@
                     android:text="Private"
                     android:textColor="#333333"
                     android:textSize="16sp" />
+            </LinearLayout>
+
+
+            <!-- Comment list -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="COMMENTS"
+                    android:textColor="#666666"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- RecyclerView for comment list -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/commentRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:padding="16dp"
+                    android:clipToPadding="false"
+                    android:scrollbars="vertical"/>
+
+                <!-- Comment button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <Button
+                        android:id="@+id/commentButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/color_primary"
+                        android:text="Add Comment"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>

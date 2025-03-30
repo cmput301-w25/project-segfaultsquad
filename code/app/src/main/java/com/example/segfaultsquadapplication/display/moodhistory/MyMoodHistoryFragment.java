@@ -1,39 +1,33 @@
 package com.example.segfaultsquadapplication.display.moodhistory;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
-import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
-import com.example.segfaultsquadapplication.impl.user.User;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import androidx.navigation.Navigation;
-import android.util.Log;
-import android.app.AlertDialog;
-import android.widget.EditText;
 import java.util.Calendar;
 import java.util.Date;
-
-import androidx.navigation.NavController;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import java.util.List;
 
 /**
  * Mood History fragment (Not really, just loads of startup)
@@ -170,6 +164,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     public void onMoodClick(MoodEvent mood) {
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
+        args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.action_myMoodHistory_to_moodDetails, args);
     }
