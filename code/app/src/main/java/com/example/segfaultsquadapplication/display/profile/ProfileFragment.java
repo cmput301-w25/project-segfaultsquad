@@ -62,6 +62,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This file is for the user profile details stored in firebase
+ * Uses getters and setters to query user profile information
+ */
 public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
 
     private ImageView profilePicture;
@@ -91,6 +95,16 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
 
     private CardView searchResultsCard;
 
+    /**
+     *
+     * @param inflater The LayoutInflater object that can be used to inflat any views in the fragment
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     * The fragment should not add the view itself,
+     * but this can be used to generate the LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here
+     * @return the view generated
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -208,18 +222,33 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         return view;
     }
 
+    /**
+     * Called to initialize the fragment and enable the options menu.
+     * This method is invoked when the fragment is created.
+     * @param savedInstanceState If the fragment is being re-created from a previous saved state, this is the state.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true); // Enable options menu
     }
 
+    /**
+     * Creates and inflates the options menu for the profile fragment..
+     * @param menu The options menu in which items are placed.
+     * @param inflater The MenuInflater object used to inflate the menu.
+     */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.profile_menu, menu); // Inflate the menu
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    /**
+     * Handles clicks on menu items in the options menu, logs out user if action done
+     * @param item The menu item that was selected.
+     * @return true if the menu item is handled, false otherwise.
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_logout) {
@@ -241,6 +270,9 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                 });
     }
 
+    /**
+     * sets user data if current user is null to from the user class saved variable
+     */
     private void setUserData() {
         if (currentUser != null) {
             username.setText(currentUser.getUsername()); // username

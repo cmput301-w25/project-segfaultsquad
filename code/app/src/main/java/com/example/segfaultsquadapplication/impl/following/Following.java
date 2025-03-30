@@ -2,11 +2,20 @@ package com.example.segfaultsquadapplication.impl.following;
 
 import com.example.segfaultsquadapplication.impl.db.IDbData;
 
+/**
+ * This file is to save the following relationship between users stored in firebase
+ * Uses getters and setters for follow details querying
+ */
 public class Following implements IDbData {
     private String dbFileId; // Unique identifier for the following relationship
     private String followerId; // User ID of the follower
     private String followedId; // User ID of the followed
 
+    /**
+     * Constructs a new Following object with the specified follower and followed user IDs.
+     * @param followerId The user ID of the follower.
+     * @param followedId The user ID of the followed.
+     */
     public Following(String followerId, String followedId) {
         this.followerId = followerId;
         this.followedId = followedId;

@@ -9,16 +9,29 @@ import android.graphics.Shader;
 import android.util.AttributeSet;
 import androidx.appcompat.widget.AppCompatImageView;
 
+/**
+ * This file is for user profile image with drawing and set images
+ * user profile image from firebase cropped into circle
+ */
 public class CircularImageView extends AppCompatImageView {
     private Paint paint;
     private Bitmap bitmap;
     private BitmapShader shader;
 
+    /**
+     * initialize the view
+     * @param context context of the application
+     */
     public CircularImageView(Context context) {
         super(context);
         init();
     }
 
+    /**
+     * constructor to initialize XML attributes
+     * @param context context of the application
+     * @param attrs attribute set with XML parameters
+     */
     public CircularImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
@@ -34,6 +47,11 @@ public class CircularImageView extends AppCompatImageView {
         paint.setAntiAlias(true);
     }
 
+    /**
+     * draws the circular image on the canvas
+     * valid bitmap is set, it is drawn as a circle in the center of the view
+     * @param canvas canvas to draw the circular image on.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         if (bitmap != null) {
@@ -45,6 +63,10 @@ public class CircularImageView extends AppCompatImageView {
         }
     }
 
+    /**
+     * Sets a new bitmap image  refreshes view to display circle image
+     * @param bm The new bitmap to be set.
+     */
     @Override
     public void setImageBitmap(Bitmap bm) {
         bitmap = bm;

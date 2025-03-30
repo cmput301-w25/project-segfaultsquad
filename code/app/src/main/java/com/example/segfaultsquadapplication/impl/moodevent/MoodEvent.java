@@ -21,6 +21,10 @@ import java.util.List;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.PropertyName;
 
+/**
+ * This file is to save the details of a mood event upon retrieval from firebase
+ * Uses getters and setters for mood details querying
+ */
 public class MoodEvent implements IDbData {
     // Required attributes
     private String moodId; // Unique identifier for the mood event
@@ -36,6 +40,9 @@ public class MoodEvent implements IDbData {
     private SocialSituation SocialSituation; // Social situation (optional)
 
     // Enum for mood types
+    /**
+     * Enum mood type attribute to select different emojis
+     */
     public enum MoodType {
         ANGER(R.color.mood_anger, R.color.mood_anger_light, "😡"),
         CONFUSION(R.color.mood_confusion, R.color.mood_confusion_light, "😵‍💫"),
@@ -74,6 +81,9 @@ public class MoodEvent implements IDbData {
     }
 
     // Enum for social situations
+    /**
+     * Enum social situations attribute to select different situations
+     */
     public enum SocialSituation {
         ALONE("Alone"),
         WITH_ONE_PERSON("With One Person"),
@@ -97,6 +107,16 @@ public class MoodEvent implements IDbData {
     }
 
     // Constructor
+
+    /**
+     * The mood event as sent in by user assigned to class variables
+     * @param userId is the userid for current user
+     * @param moodType is the selected mood type
+     * @param reasonText typed in reason limited to 200 chars
+     * @param imageData the image from user
+     * @param location is the location of the user
+     * @param isPublic is the visibility as selected by the user
+     */
     public MoodEvent(String userId, MoodType moodType, String reasonText, List<Integer> imageData, GeoPoint location,
             boolean isPublic) {
         this.userId = userId;
