@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.test.filters.LargeTest;
 
+import com.example.segfaultsquadapplication.impl.comment.Comment;
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
@@ -321,6 +323,19 @@ public class MoodEventManagerTest {
                         }));
 
         System.out.println("  - deletes the correct document for a valid doc ID");
+        // Populate a comment first to test out the comment is removed later
+        Comment validEvent = new Comment("5", "uid1", "user1", "valid");
+        CommentManager.submitComment(validEvent);
+        ArrayList<Comment> cmts = new ArrayList<>();
+        MockDb.await((finishCallback) ->
+                () ->
+                        CommentManager.getCommentsForMood("5", cmts,
+                                isSuccess -> {
+                                    assertTrue(isSuccess);
+                                    assertEquals(1, cmts.size());
+                                    finishCallback.run();
+                                }));
+        // Delete the mood event
         MockDb.await( (finishCallback) ->
                 () -> MoodEventManager.deleteMoodEventById("5",
                         isSuccess -> {
@@ -347,5 +362,15 @@ public class MoodEventManagerTest {
                             finishCallback.run();
                         }));
         assertEquals(0, holderUser2.size());
+        // Find out whether the comment has been deleted as well
+        ArrayList<Comment> cmtsAfterRmv = new ArrayList<>();
+        MockDb.await((finishCallback) ->
+                () ->
+                        CommentManager.getCommentsForMood("5", cmtsAfterRmv,
+                                isSuccess -> {
+                                    assertTrue(isSuccess);
+                                    assertEquals(0, cmtsAfterRmv.size());
+                                    finishCallback.run();
+                                }));
     }
 }
