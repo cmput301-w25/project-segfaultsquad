@@ -234,6 +234,8 @@ public class EventCommentTest {
         onView(withId(R.id.commentInput)).perform(typeText("User2 was also here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
         Thread.sleep(UI_POPULATE_WAIT_TIME);
+        onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Check displayed
         onView(withText("user1")).check(matches(isDisplayed()));
         onView(withText("User1 was here")).check(matches(isDisplayed()));
