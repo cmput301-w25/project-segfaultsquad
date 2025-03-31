@@ -47,8 +47,6 @@ public class MoodAnalyticsFragment extends Fragment {
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
     private HorizontalBarChart recentMoodsChart;
-    private ChipGroup moodDistributionChipGroup;
-    private ChipGroup recentMoodsChipGroup;
     private Chip myMoodsChip, communityMoodsChip;
     private Chip myRecentMoodsChip, communityRecentMoodsChip;
 
@@ -67,8 +65,6 @@ public class MoodAnalyticsFragment extends Fragment {
         // Initialize views
         moodDistributionChart = view.findViewById(R.id.moodDistributionChart);
         recentMoodsChart = view.findViewById(R.id.recentMoodsChart);
-        moodDistributionChipGroup = view.findViewById(R.id.moodDistributionChipGroup);
-        recentMoodsChipGroup = view.findViewById(R.id.recentMoodsChipGroup);
         myMoodsChip = view.findViewById(R.id.myMoodsChip);
         communityMoodsChip = view.findViewById(R.id.communityMoodsChip);
         myRecentMoodsChip = view.findViewById(R.id.myRecentMoodsChip);

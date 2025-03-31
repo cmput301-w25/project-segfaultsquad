@@ -287,35 +287,4 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             moodCard.setCardBackgroundColor(backgroundColor);
         }
     }
-
-    // AsyncTask to load image from URL
-    private static class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
-        private final ImageView imageView;
-
-        public LoadImageTask(ImageView imageView) {
-            this.imageView = imageView;
-        }
-
-        @Override
-        protected Bitmap doInBackground(String... urls) {
-            String url = urls[0];
-            Bitmap bitmap = null;
-            try {
-                InputStream in = new java.net.URL(url).openStream();
-                bitmap = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("LoadImageTask", "Error loading image", e);
-            }
-            return bitmap;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            if (result != null) {
-                imageView.setImageBitmap(result);
-            } else {
-                imageView.setImageResource(R.drawable.ic_person); // Default image
-            }
-        }
-    }
 }
