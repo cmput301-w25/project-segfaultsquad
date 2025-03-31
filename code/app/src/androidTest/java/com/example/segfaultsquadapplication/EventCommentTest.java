@@ -160,20 +160,18 @@ public class EventCommentTest {
     }
 
     /**
-     * Creates mood events for demonstration later
-     * @param prefix Prefix for mood events
+     * Creates a mood event for demonstration later
+     * @param prefix Prefix for mood event
      * @throws InterruptedException If this is somehow interrupted
      */
     private void createMoodEvents(String prefix) throws InterruptedException {
-        System.out.println("Populate events with prefix " + prefix);
-        // Make 4 public and 1 private
-        for (int i = 1; i <= 5; i ++) {
-            MoodEvent evt = new MoodEvent(UserManager.getUserId(), MoodEvent.MoodType.CONFUSION,
-                    prefix + "E" + i, null, null, i <= 4);
-            DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evt,
-                    new DbOpResultHandler<>(null, null));
-            Thread.sleep(100);
-        }
+        System.out.println("Populate event with prefix " + prefix);
+        // Make a public event
+        MoodEvent evt = new MoodEvent(UserManager.getUserId(), MoodEvent.MoodType.HAPPINESS,
+                prefix + "E" + 3, null, null, true);
+        DbUtils.addObjectToCollection(DbUtils.COLL_MOOD_EVENTS, evt,
+                new DbOpResultHandler<>(null, null));
+        Thread.sleep(100);
     }
 
     /**
