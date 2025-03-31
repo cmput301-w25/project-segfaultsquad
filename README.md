@@ -12,19 +12,18 @@
 
 ## Project Description
 
-[Brief description of the project in your own words]
+The project is an Android application aimed at monitoring and sharing mood events. This app is designed to help users understand their emotional states and triggers, providing insights into their mental well-being during academic and daily life challenges.
 
 ## Key Features
 
-- [Feature 1]: Brief description
-- [Feature 2]: Brief description
-- [Feature 3]: Brief description
+1. Mood Tracking: Users can add mood events to their history, specifying the date, time, and emotional state, with options to include a trigger reason and the social situation they are in.
+2. Mood Management: Users have the ability to view, edit, or delete their own mood events, they have full control over their mood history.
+3. Unique 'wow' factor: The app includes analytics features that allow users to visualize mood trends over time, analyze patterns, and gain deeper insights into their emotional well-being through data representation.
 
 ## Setup Instructions
 
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
+1. Download & open the code folder in Android Studio (or the apk)
+2. Run the app via an emulator or device
 
 ## Documentation
 
