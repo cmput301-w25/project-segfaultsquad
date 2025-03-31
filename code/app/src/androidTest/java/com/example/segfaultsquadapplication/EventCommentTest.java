@@ -226,7 +226,7 @@ public class EventCommentTest {
         System.out.println("Check follow user evts");
         onView(withId(R.id.navigation_following)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof FollowingFragment), 5, 500));
-
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Click on event 3's comment
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         onView(withId(R.id.commentsTitle)).check(matches(isDisplayed()));
