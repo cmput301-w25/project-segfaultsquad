@@ -49,7 +49,11 @@ import java.util.Objects;
  * This test tests for the mood history display and filtering; <br>
  * new mood event / modify mood event are also tested here by convenience. <br>
  * These tests are integrated into one to prevent wasting time to excessive login / splash simulation
- * and simulate a user's real-world usage of the App.
+ * and simulate a user's real-world usage of the App. </br>
+ *
+ * NOTE: This is a black-box test; the implementation is not the concern,
+ * We only worry that the functionalities are working.
+ * Thus, this test is deliberately made large to capture the butterfly effect of potential bug.
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -232,10 +236,12 @@ public class MoodHistoryAndMoodEventTest {
         onView(withText(MoodEvent.SocialSituation.IN_CROWD.getDisplayName())).perform(scrollTo()).perform(click());
         onView(withId(R.id.togglePublicPrivate)).perform(scrollTo()).perform(click());
         onView(withId(R.id.buttonConfirm)).perform(click());
-        assertTrue(waitUntil(scenario, (f) -> (f instanceof MoodDetailsFragment), 20, 500));
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
 
         // Enter a very long message
         System.out.println("Test Modify - Reason field has length limit; cancel does not change event.");
+        onView(withText("Reason text")).perform(scrollTo()).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof MoodDetailsFragment), 20, 500));
         onView(withId(R.id.editButton)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof EditMoodFragment), 20, 500));
         StringBuilder tooLong = new StringBuilder();
@@ -251,6 +257,8 @@ public class MoodHistoryAndMoodEventTest {
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MoodDetailsFragment), 20, 500));
 
         // Validate edit result; the cancelled modification should not show up.
+        onView(withText("Reason text")).perform(scrollTo()).perform(click());
+        assertTrue(waitUntil(scenario, (f) -> (f instanceof MoodDetailsFragment), 20, 500));
         onView(withId(R.id.moodEmojiTextView)).check(matches(withText( MoodEvent.MoodType.CONFUSION.getEmoticon() )));
         onView(withId(R.id.reasonTextView)).check(matches(withText("Reason text")));
         onView(withId(R.id.socialSituationTextView)).check(matches(withText( MoodEvent.SocialSituation.IN_CROWD.getDisplayName() )));
@@ -321,9 +329,9 @@ public class MoodHistoryAndMoodEventTest {
                 .perform(typeText("RA"));
         onView(withId(android.R.id.button1)).perform(click());
         Thread.sleep(500);
-        // The RAGE event without RA should be hidden
+        // The event without RA should be hidden
         onView(withText("Fury!")).check(doesNotExist());
-        // The RAGE event with RA should be shown
+        // The event with RA should be shown
         onView(withText("RAGE")).perform(scrollTo()).check(matches(isDisplayed()));
     }
 }

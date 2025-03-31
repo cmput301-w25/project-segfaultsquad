@@ -1,5 +1,6 @@
 package com.example.segfaultsquadapplication;
 
+import static androidx.core.util.Preconditions.checkNotNull;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
@@ -8,6 +9,7 @@ import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withChild;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.segfaultsquadapplication.TestLoginUtil.waitUntil;
@@ -17,8 +19,13 @@ import android.Manifest;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.espresso.UiController;
 import androidx.test.espresso.ViewAction;
+import androidx.test.espresso.ViewAssertion;
+import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -38,6 +45,7 @@ import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
@@ -60,6 +68,10 @@ import java.util.Objects;
  * These tests are integrated into one to prevent wasting time to excessive login / splash simulation
  * and simulate a user's real-world usage of the App. <br>
  * Reference: https://stackoverflow.com/questions/28476507/using-espresso-to-click-view-inside-recyclerview-item
+ *
+ * NOTE: This is a black-box test; the implementation is not the concern,
+ * We only worry that the functionalities are working.
+ * Thus, this test is deliberately made large to capture the butterfly effect of potential bug.
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -70,18 +82,22 @@ public class UserFollowingTest {
         String androidLocalhost = "10.0.2.2";
         int portNumber = 8080;
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
-        // Login users to generate user data
-        for (int i = 1; i <= 3; i ++) {
-            UserManager.login("user" + i + "@gmail.com", "password",
-                    (isSuccess, failReason) -> {assertTrue(isSuccess);});
-            FirebaseAuth.getInstance().signOut();
-        }
     }
 
     @Before
     public void seedDatabase() throws InterruptedException {
         // Just in case if last run crashed half-way!
         tearDown();
+        // Login users to generate user data
+        for (int i = 1; i <= 3; i ++) {
+            TestLoginUtil.handleSplashAndLogin(scenario, "user" + i + "@gmail.com", "password");
+            // Logout
+            onView(withId(R.id.navigation_profile)).perform(click());
+            assertTrue(waitUntil(scenario, (f) -> (f instanceof ProfileFragment), 5, 500));
+            onView(withId(R.id.overflowButton)).perform(click());
+            onView(withText("Logout")).perform(click());
+            assertTrue(waitUntil(scenario, (f) -> (f instanceof LoginFragment), 5, 500));
+        }
     }
 
     @After
@@ -146,6 +162,8 @@ public class UserFollowingTest {
         // Search for user 1
         onView(withId(R.id.headerSearchButton)).perform(click());
         onView(withId(R.id.searchEditText)).perform(typeText("u"));
+        // Give it a few seconds to make suggestions.s
+        Thread.sleep(5000);
         // Make sure the user suggestion is working.
         onView(withText("user1")).check(matches(isDisplayed())).perform((click()));
         assertTrue(waitUntil(scenario, (f) -> (f instanceof SearchedProfileFragment), 5, 500));
@@ -157,8 +175,8 @@ public class UserFollowingTest {
 
         // Can't search for oneself.
         onView(withId(R.id.headerSearchButton)).perform(click());
-        onView(withId(R.id.searchEditText)).perform(typeText("user"));
-        onView(withText("user2")).check(doesNotExist());
+        onView(withId(R.id.searchEditText)).perform(typeText("u"));
+        onView(withId(R.id.searchResultsCard)).check(doesNotContain(withText("user2")));
 
         // Follow user 3; this time we use the goto button
         onView(withId(R.id.searchEditText)).perform(clearText()).perform(typeText("user3"));
@@ -172,7 +190,7 @@ public class UserFollowingTest {
     // Login as user 3; send some follow requests
     private void testUser3FlwRequest() throws InterruptedException {
         // Logout & login
-        onView(withId(R.id.logoutDropdown)).perform(click());
+        onView(withId(R.id.overflowButton)).perform(click());
         onView(withText("Logout")).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof LoginFragment), 5, 500));
         TestLoginUtil.handleSplashAndLogin(scenario, "user3@gmail.com", "password");
@@ -208,7 +226,7 @@ public class UserFollowingTest {
     // Checks following mechanism (acceptance etc.) with user 1
     private void checkUser1FollowingStatus() throws InterruptedException {
         // Logout & login
-        onView(withId(R.id.logoutDropdown)).perform(click());
+        onView(withId(R.id.overflowButton)).perform(click());
         onView(withText("Logout")).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof LoginFragment), 5, 500));
         TestLoginUtil.handleSplashAndLogin(scenario, "user1@gmail.com", "password");
@@ -309,6 +327,26 @@ public class UserFollowingTest {
             public void perform(UiController uiController, View view) {
                 View v = view.getRootView().findViewById(id);
                 v.performClick();
+            }
+        };
+    }
+
+    /**
+     * Code adapted from, with minor tweak: https://stackoverflow.com/questions/31394569/how-to-assert-inside-a-recyclerview-in-espresso
+     */
+    public static ViewAssertion doesNotContain(@NonNull final Matcher<View> itemMatcher) {
+        checkNotNull(itemMatcher);
+        return new ViewAssertion() {
+            @Override
+            public void check(View view, NoMatchingViewException noViewFoundException) {
+                if (! (view instanceof RecyclerView)) throw new NoMatchingViewException.Builder().withCause(new RuntimeException("NOT RECYCLER VIEW")).build();
+                RecyclerView rView = (RecyclerView) view;
+                boolean matches = false;
+                for (int i = 0; i < rView.getAdapter().getItemCount(); i ++) {
+                    RecyclerView.ViewHolder viewHolder = rView.findViewHolderForAdapterPosition(i);
+                    if (itemMatcher.matches(viewHolder.itemView)) matches = true;
+                }
+                if (matches) throw new NoMatchingViewException.Builder().withCause(new RuntimeException("CONTAINS UNWANTED ELEMENT")).build();
             }
         };
     }

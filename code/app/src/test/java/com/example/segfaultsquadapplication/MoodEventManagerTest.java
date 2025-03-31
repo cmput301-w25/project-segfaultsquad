@@ -43,7 +43,7 @@ public class MoodEventManagerTest {
 
     @Before
     public void setup() throws InterruptedException {
-        new MockDb(DbUtils.COLL_MOOD_EVENTS, DbUtils.COLL_USERS);
+        new MockDb(DbUtils.COLL_MOOD_EVENTS, DbUtils.COLL_USERS, DbUtils.COLL_COMMENTS);
 
         System.out.println("\n\n Test setup - adding event objects to collections");
 
