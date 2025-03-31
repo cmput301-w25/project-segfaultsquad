@@ -182,6 +182,7 @@ public class EventCommentTest {
         System.out.println("Populate comment for user1's own events");
         onView(withId(R.id.navigation_my_mood_history)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 5, 500));
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Click on event 3's comment
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         Thread.sleep(UI_POPULATE_WAIT_TIME);
@@ -189,6 +190,7 @@ public class EventCommentTest {
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User1 was here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Check displayed
         onView(withText("user1")).check(matches(isDisplayed()));
         onView(withText("User1 was here")).check(matches(isDisplayed()));
@@ -226,10 +228,12 @@ public class EventCommentTest {
         Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Click on event 3's comment
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         onView(withId(R.id.commentsTitle)).check(matches(isDisplayed()));
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User2 was also here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
         // Check displayed
         onView(withText("user1")).check(matches(isDisplayed()));
         onView(withText("User1 was here")).check(matches(isDisplayed()));
