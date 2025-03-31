@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,6 +24,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
                 android:text="Profile"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
@@ -37,7 +40,8 @@
                 android:maxHeight="48dp"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_search" />
+                android:src="@drawable/ic_search"
+                app:tint="@color/text_colour"/>
 
             <!-- Heart to goto follow requests -->
             <ImageButton
@@ -50,6 +54,7 @@
                 android:maxHeight="48dp"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
+                app:tint="@color/text_colour"
                 android:src="@drawable/ic_heart" />
 
             <!-- 3-dots drop down for logout -->
@@ -63,8 +68,15 @@
                 android:maxHeight="48dp"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_more_vert" />
+                android:src="@drawable/ic_more_vert"
+                app:tint="@color/text_colour"/>
         </LinearLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/text_colour"/>
 
         <!-- Search Section -->
         <LinearLayout
@@ -99,37 +111,39 @@
                 android:src="@drawable/ic_search" />
         </LinearLayout>
 
-        <!-- Profile Picture -->
+        <!-- Profile Picture with circular background edit button -->
         <RelativeLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="104dp"
+            android:layout_height="104dp"
             android:layout_gravity="center"
             android:layout_marginTop="16dp">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profile_picture"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:layout_centerInParent="true"
                 android:src="@drawable/ic_person"
                 android:scaleType="centerCrop"
                 app:strokeWidth="2dp"
+                app:strokeColor="@color/text_colour"
                 app:shapeAppearanceOverlay="@style/CircleShape" />
 
+            <!-- Edit button with circular background -->
             <ImageButton
                 android:id="@+id/editProfilePictureButton"
-                android:layout_width="74dp"
-                android:layout_height="52dp"
-                android:layout_alignParentTop="true"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginTop="56dp"
-                android:layout_marginEnd="-18dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="edit profile picture"
-                android:maxWidth="12dp"
-                android:maxHeight="12dp"
-                android:padding="8dp"
+                android:layout_marginBottom="0dp"
+                android:layout_marginEnd="0dp"
+                android:background="@drawable/circle_background"
+                android:padding="6dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_edit" />
+                android:src="@drawable/ic_edit"
+                app:tint="@color/text_colour"
+                android:contentDescription="edit profile picture" />
         </RelativeLayout>
 
         <!-- Username -->
@@ -165,12 +179,16 @@
                     android:layout_height="wrap_content"
                     android:paddingEnd="8dp"
                     android:text=" "
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="@color/text_colour"
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="@color/text_colour"
                     android:text="Followers"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -188,6 +206,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=" "
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="@color/text_colour"
                     android:textSize="32sp"
                     android:textStyle="bold"
                     android:paddingEnd="8dp" />
@@ -195,6 +215,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="@color/text_colour"
                     android:text="Following"
                     android:textSize="16sp" />
             </LinearLayout>
@@ -206,7 +228,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-            
+
             <!-- subheading -->
             <TextView
                 android:layout_width="0dp"
@@ -216,7 +238,9 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp" />
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/kanitlight"
+                android:textColor="@color/text_colour"/>
 
             <ImageButton
                 android:id="@+id/filterButton"
@@ -226,7 +250,8 @@
                 android:padding="8dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/filter_icon" />
+                android:src="@drawable/filter_icon"
+                app:tint="@color/text_colour"/>
         </LinearLayout>
 
         <!-- RecyclerView for mood list -->

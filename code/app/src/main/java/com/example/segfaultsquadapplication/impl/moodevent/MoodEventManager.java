@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -324,5 +325,51 @@ public class MoodEventManager {
                 }
         );
         DbUtils.operateDocumentById(DbUtils.COLL_MOOD_EVENTS, id, DocumentReference::delete, handler);
+    }
+
+    /**
+     * Updates the mood event with a custom timestamp and saves it to the database.
+     * @param ctx Android context
+     * @param moodEvent Mood event
+     * @param moodType New mood type
+     * @param reason Reason text
+     * @param isPublic Whether the mood event is publicly visible
+     * @param situation Social situation
+     * @param imgUri Optional - image Uri
+     * @param timestamp Custom timestamp to set for the mood event
+     * @param callback Success/failure callback
+     * @throws RuntimeException Exception thrown on invalid data / IO exception
+     */
+    public static void updateMoodEventWithTimestamp(Context ctx, MoodEvent moodEvent, MoodEvent.MoodType moodType,
+                                                    String reason, boolean isPublic, MoodEvent.SocialSituation situation,
+                                                    @Nullable Uri imgUri, Date timestamp, Consumer<Boolean> callback) throws RuntimeException {
+        try {
+            validateMoodEvent(moodType, reason);
+        } catch (RuntimeException e) {
+            callback.accept(false);
+            return;
+        }
+
+        List<Integer> imgBytes = null;
+        try {
+            imgBytes = encodeImg(ctx, imgUri);
+        } catch (Exception ignored) {}
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("moodType", moodType);
+        updates.put("reasonText", reason);
+        // The field is named isPublic but the key in db is "public"; for safety update both.
+        updates.put("isPublic", isPublic);
+        updates.put("public", isPublic);
+        updates.put("SocialSituation", situation);
+
+        // Add the custom timestamp to the updates
+        updates.put("timestamp", timestamp);
+
+        if (imgBytes != null) {
+            updates.put("imageData", imgBytes);
+        }
+
+        updateMoodEventById(moodEvent.getDbFileId(), updates, callback);
     }
 }

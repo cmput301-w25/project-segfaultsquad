@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements NavigationBarView
 
         View item = getBottomNavigationView().findViewById(itemId);
         if (item != null) {
-            item.setBackgroundColor(getResources().getColor(R.color.color_primary));
+            item.setBackgroundColor(getResources().getColor(R.color.TopHeaderBackground));
         }
     }
 

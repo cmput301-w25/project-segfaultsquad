@@ -4,87 +4,68 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/app_background">
 
-    <!-- Header section -->
+    <!-- Header section with title and back button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/TopHeaderBackground"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="8dp">
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
         <ImageButton
             android:id="@+id/buttonBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/back_icon"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"/>
+            android:padding="12dp"/>
 
         <TextView
             android:id="@+id/textViewTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanit"
+            android:layout_marginStart="8dp"
             android:text="Create Mood"
             android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
     </LinearLayout>
+
+    <!-- Divider line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="@color/text_colour"/>
 
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingBottom="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:padding="20dp">
 
             <!-- Current Date and Time -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
-
-                <TextView
-                    android:id="@+id/textDateTime"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:textSize="16sp"/>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Mood Selection -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="How are you feeling?"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp"/>
-
-            <GridLayout
-                android:id="@+id/moodGrid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="4"
-                android:layout_marginBottom="24dp">
-
-                <!-- Mood buttons will be added here using setupMoodGrid() -->
-            </GridLayout>
-
-            <!-- Reason Input -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardBackgroundColor="@color/TopHeaderBackground"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -95,18 +76,104 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Reason (max 200 chars)"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="DATE AND TIME"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:id="@+id/textDateTime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:textSize="16sp"
+                        android:drawableStart="@android:drawable/ic_menu_my_calendar"
+                        android:drawablePadding="12dp"
+                        android:padding="8dp"
+                        android:background="@drawable/rounded_light_background"
+                        android:gravity="center_vertical"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Mood Selection -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="How are you feeling?"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
+
+                    <GridLayout
+                        android:id="@+id/moodGrid"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:columnCount="4"
+                        android:layout_marginBottom="8dp">
+                        <!-- Mood buttons will be added here using setupMoodGrid() -->
+                    </GridLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Reason Input -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="@color/TopHeaderBackground"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="REASON"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Max 200 characters"
+                        android:textSize="12sp"
+                        android:textColor="#757575"
                         android:layout_marginBottom="8dp"/>
 
                     <EditText
                         android:id="@+id/editTextReason"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@null"
-                        android:hint="Reason Text Value"
+                        android:background="@drawable/rounded_light_background"
+                        android:hint="What's making you feel this way?"
                         android:maxLength="200"
-                        android:padding="8dp"/>
+                        android:minHeight="100dp"
+                        android:gravity="top|start"
+                        android:padding="12dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -115,8 +182,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardBackgroundColor="@color/TopHeaderBackground"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -127,37 +195,49 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Add Photo"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="PHOTO"
+                        android:textStyle="bold"
                         android:textSize="16sp"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="12dp"/>
 
-                    <ImageView
-                        android:id="@+id/imageUpload"
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:src="@drawable/camera_icon"
-                        android:background="@drawable/dotted_border"
-                        android:padding="32dp"
-                        android:scaleType="centerInside"/>
+                        android:layout_height="wrap_content">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tap to upload a photo"
-                        android:textAlignment="center"
-                        android:layout_marginTop="8dp"
-                        android:textColor="@android:color/darker_gray"/>
+                        <ImageView
+                            android:id="@+id/imageUpload"
+                            android:layout_width="match_parent"
+                            android:layout_height="180dp"
+                            android:src="@drawable/camera_icon"
+                            android:background="@drawable/dotted_border"
+                            android:padding="32dp"
+                            android:scaleType="centerInside"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tap to upload a photo"
+                            android:fontFamily="@font/kanitlight"
+                            android:textAlignment="center"
+                            android:background="@drawable/rounded_light_background"
+                            android:padding="8dp"
+                            android:layout_gravity="center|bottom"
+                            android:layout_marginBottom="16dp"
+                            android:textColor="@color/text_colour"/>
+                    </FrameLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
 
             <!-- Social Situation -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="8dp">
+                app:cardBackgroundColor="@color/TopHeaderBackground"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -168,43 +248,106 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Social Situation"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="SOCIAL SITUATION"
+                        android:textStyle="bold"
                         android:textSize="16sp"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="12dp"/>
 
-                    <Spinner
-                        android:id="@+id/spinnerSocialSituation"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="8dp"/>
+                        android:background="@drawable/rounded_light_background"
+                        android:padding="4dp">
+
+                        <Spinner
+                            android:id="@+id/spinnerSocialSituation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="8dp"/>
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <Switch
-                android:id="@+id/togglePublicPrivate"
-                android:layout_width="wrap_content"
+            <!-- Visibility toggle -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Public Mood"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/TopHeaderBackground"
+                app:cardElevation="4dp"
+                app:cardCornerRadius="12dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_colour"
+                        android:fontFamily="@font/kanitlight"
+                        android:text="VISIBILITY"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/rounded_light_background"
+                        android:padding="12dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@android:drawable/ic_menu_view"
+                            android:layout_marginEnd="12dp"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Make this mood public"
+                            android:textSize="16sp"/>
+
+                        <Switch
+                            android:id="@+id/togglePublicPrivate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Buttons -->
+    <!-- Bottom Buttons  -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:background="@drawable/elevated_background"
+        android:elevation="8dp">
 
         <Button
             android:id="@+id/buttonConfirm"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanit"
             android:text="Confirm"
+            android:padding="12dp"
             android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/color_primary"/>
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/TopHeaderBackground"/>
 
         <Button
             android:id="@+id/buttonCancel"
@@ -212,7 +355,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Cancel"
+            android:padding="12dp"
             android:layout_marginStart="8dp"
-            android:backgroundTint="@color/color_primary"/>
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanit"
+            app:cornerRadius="12dp"
+            android:backgroundTint="@color/TopHeaderBackground"/>
     </LinearLayout>
 </LinearLayout>

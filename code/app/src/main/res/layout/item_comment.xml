@@ -1,18 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_marginVertical="4dp"
+    android:layout_marginHorizontal="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <TextView
-        android:id="@+id/comment_username"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="bold" />
+        android:orientation="horizontal"
+        android:padding="12dp">
 
-    <TextView
-        android:id="@+id/comment_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout> 
+        <!-- Profile icon with circular background -->
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/circular_background">
+
+            <ImageView
+                android:id="@+id/comment_profile_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_person" />
+        </FrameLayout>
+
+        <!-- Comment content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
+
+            <TextView
+                android:id="@+id/comment_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanitlight"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:text="Username" />
+
+            <TextView
+                android:id="@+id/comment_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/kanitlight"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:lineSpacingExtra="2dp"
+                android:text="Comment text goes here..." />
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
