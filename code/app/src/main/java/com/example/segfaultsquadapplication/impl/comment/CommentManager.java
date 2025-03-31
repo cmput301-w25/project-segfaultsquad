@@ -7,17 +7,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 /**
- * Manager class for handling comments related to mood events.
+ * Manager class for handling comments related to mood events
  */
 public class CommentManager {
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     /**
-     * Fetches comments for a specific mood event.
-     *
-     * @param moodId          The ID of the mood event.
-     * @param comments        The list to populate with comments.
-     * @param commentsAdapter The adapter to notify of data changes.
+     * Fetches comments for a specific mood event
+     * @param moodId ID of the mood event.
+     * @param comments list to populate with comments.
+     * @param commentsAdapter adapter to notify of data changes.
      */
     public static void getCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
         // Fetch comments from Firestore and add to the comments list
@@ -38,10 +37,9 @@ public class CommentManager {
     }
 
     /**
-     * Submits a comment for a specific mood event.
-     *
-     * @param moodId  The ID of the mood event.
-     * @param comment The comment to submit.
+     * submits comment for a specific mood event
+     * @param moodId  ID of the mood event
+     * @param comment comment to submit
      */
     public static void submitComment(String moodId, Comment comment) {
         // Submit the comment to Firestore

@@ -31,18 +31,24 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Fragment responsible for handling the login functionality in the application
+ * Implements login process with validation and feedback to the user.
+ */
 public class LoginFragment extends Fragment {
 
     // attributes
     TextInputEditText emailEditText;
     TextInputEditText passwordEditText;
     private AppCompatButton loginButton;
-    private CheckBox rememberMeCheckbox;
-    private TextView forgotPasswordText;
-    private TextView signUpText;
-    private MaterialButton googleLoginButton;
-    private MaterialButton appleLoginButton;
 
+    /**
+     * inflate the object layout view
+     * @param inflater LayoutInflater object
+     * @param container parent view of UI fragment
+     * @param savedInstanceState previous fragment state for reconstruction
+     * @return inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -53,11 +59,6 @@ public class LoginFragment extends Fragment {
         emailEditText = rootView.findViewById(R.id.editTextEmail);
         passwordEditText = rootView.findViewById(R.id.editTextPassword);
         loginButton = rootView.findViewById(R.id.buttonLogin);
-        rememberMeCheckbox = rootView.findViewById(R.id.checkboxRememberMe);
-        forgotPasswordText = rootView.findViewById(R.id.textForgotPassword);
-        signUpText = rootView.findViewById(R.id.textSignUp);
-        googleLoginButton = rootView.findViewById(R.id.buttonGoogleLogin);
-        appleLoginButton = rootView.findViewById(R.id.buttonAppleLogin);
 
         // Check if user is already logged in
         if (DbUtils.getUser() != null) {
@@ -65,30 +66,13 @@ public class LoginFragment extends Fragment {
             return rootView;
         }
 
-        // Set click listeners
-        forgotPasswordText.setOnClickListener(v -> { // TODO: ask TA what to do in this situation
-            // TODO: Implement forgot password functionality
-        });
-
-        signUpText.setOnClickListener(v -> { // TODO: ask TA if this is necessary
-            // TODO: Navigate to sign up screen
-        });
-
-        googleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
-            // TODO: Implement Google sign-in
-        });
-
-        appleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
-            // TODO: Implement Apple sign-in
-        });
-
         loginButton.setOnClickListener(v -> loginUser()); // login button listener
 
         return rootView;
     }
 
     /**
-     * method ot log usir into the system/app
+     * method to log user into the system/app
      */
     void loginUser() {
         String email = emailEditText.getText().toString().trim();
@@ -120,7 +104,7 @@ public class LoginFragment extends Fragment {
     }
 
     /**
-     * method to navigate to MyMoodHistoryFragment (or whatever the homescreen is)
+     * method to navigate to homescreen
      */
     void navigateToHome() {
         // Navigate to the Home screen (MyMoodHistoryFragment) using the Navigation component

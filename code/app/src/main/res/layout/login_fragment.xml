@@ -94,26 +94,6 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Remember Me and Forgot Password -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="24dp">
-
-        <CheckBox
-            android:id="@+id/checkboxRememberMe"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Remember me"/>
-
-        <TextView
-            android:id="@+id/textForgotPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Forgot password?"
-            android:textColor="@color/color_primary"/>
-    </LinearLayout>
 
     <!-- Sign In Button -->
     <com.google.android.material.button.MaterialButton
@@ -127,90 +107,15 @@
         app:cornerRadius="8dp"/>
 
     <!-- Or Continue With -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:background="@android:color/darker_gray"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Or continue with"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginHorizontal="16dp"/>
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:background="@android:color/darker_gray"/>
-    </LinearLayout>
 
     <!-- Social Login Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="32dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGoogleLogin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="Google"
-            android:textAllCaps="false"
-            app:icon="@drawable/google_icon"
-            app:iconSize="18dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonAppleLogin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Apple"
-            android:textAllCaps="false"
-            app:icon="@drawable/apple_icon"
-            app:iconSize="18dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-    </LinearLayout>
+        android:layout_marginBottom="32dp"/>
 
     <!-- Sign Up Link -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Don't have an account? "/>
-
-        <TextView
-            android:id="@+id/textSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign up"
-            android:textColor="@color/color_primary"
-            android:textStyle="bold"/>
-    </LinearLayout>
 
     <!-- Copyright -->
     <TextView

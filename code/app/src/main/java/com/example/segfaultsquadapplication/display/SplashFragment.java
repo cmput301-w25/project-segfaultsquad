@@ -26,6 +26,10 @@ import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 
+/**
+ * This fragment cycles through set of emojis and displays them upon start of app
+ * navigates to login screen or homescreen based on user login status
+ */
 public class SplashFragment extends Fragment {
     // attributes
     private TextView emojiText; // displayed emoji str
@@ -33,6 +37,13 @@ public class SplashFragment extends Fragment {
     private int currentEmojiIndex = 0; // index of current display emoji
     private final Handler handler = new Handler(Looper.getMainLooper()); // loop handler
 
+    /**
+     * create view for splash screen
+     * @param inflater layoutInflater object
+     * @param container parent container to attached view to
+     * @param savedInstanceState previous fragment state to be reconstructed
+     * @return inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_splash, container, false);
@@ -42,7 +53,7 @@ public class SplashFragment extends Fragment {
     }
 
     /**
-     * Helper method for emoji animation
+     * Helper method for emoji animation, advices on how emojis should appear
      */
     private void startEmojiAnimation() {
         AnimatorSet animatorSet = new AnimatorSet();
@@ -80,11 +91,11 @@ public class SplashFragment extends Fragment {
             }
 
             @Override
-            public void onAnimationCancel(Animator animation) {
+            public void onAnimationCancel(Animator animation) { //no action when animation cancelled
             }
 
             @Override
-            public void onAnimationRepeat(Animator animation) {
+            public void onAnimationRepeat(Animator animation) { //no action when animation repeats
             }
         });
 
@@ -92,9 +103,8 @@ public class SplashFragment extends Fragment {
     }
 
     /**
-     * takes user to the next screen after the initial splash/loading screen. Can
-     * take to either LoginFragment or MoodHistory depending on if user has
-     * previosuly logged in
+     * takes user to the next screen after the initial splash/loading screen.
+     * takes to login or homepage depending on previous login status
      */
     private void navigateToNextScreen() {
         if (DbUtils.getUser() != null) {
@@ -106,6 +116,9 @@ public class SplashFragment extends Fragment {
         }
     }
 
+    /**
+     * removes any pending navigations
+     */
     @Override
     public void onDestroyView() {
         super.onDestroyView();
