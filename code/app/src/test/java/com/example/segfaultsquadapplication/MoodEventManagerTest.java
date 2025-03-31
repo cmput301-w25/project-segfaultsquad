@@ -13,6 +13,7 @@ import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.user.User;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -117,7 +118,7 @@ public class MoodEventManagerTest {
         // Check the mood event!
         ArrayList<MoodEvent> eventHolder = new ArrayList<>();
         MockDb.await( (finishCallback) ->
-                () -> MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.MOST_RECENT_1, eventHolder,
+                () -> MoodEventManager.getAllMoodEvents(UserManager.getUserId(), MoodEventManager.MoodEventFilter.MOST_RECENT_1, eventHolder,
                         isSuccess -> {
                             assertTrue("Could not verify the saved mood event", isSuccess);
                             finishCallback.run();

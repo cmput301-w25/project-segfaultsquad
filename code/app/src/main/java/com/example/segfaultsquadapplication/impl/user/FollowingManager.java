@@ -19,7 +19,7 @@ public class FollowingManager {
      * @param callback consumer boolean for custom callback
      */
     public static void sendFollowRequest(String otherUserId, Consumer<Boolean> callback) {
-        String currentUserId = DbUtils.getUserId();
+        String currentUserId = UserManager.getUserId();
         DbUtils.operateDocumentById(DbUtils.COLL_USERS, otherUserId,
                 docRef -> docRef.update("followRequests",
                         FieldValue.arrayUnion(currentUserId)),
@@ -42,7 +42,7 @@ public class FollowingManager {
      * @param accept True to accept the follow request, false to decline.
      */
     public static void handleFollowRequest(String otherUserId, boolean accept) {
-        String currentUserId = DbUtils.getUserId();
+        String currentUserId = UserManager.getUserId();
         if (accept) {
             makeFollow(otherUserId, currentUserId);
         } else {

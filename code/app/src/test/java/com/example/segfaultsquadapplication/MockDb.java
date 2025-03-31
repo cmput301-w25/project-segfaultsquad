@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import android.content.Context;
 
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -102,7 +103,7 @@ public class MockDb {
                 doAnswer(invoc -> "id" + mail).when( currMockUser ).getUid();
                 return mockTask;
             }).when(mockAuth).signInWithEmailAndPassword(anyString(), anyString());
-            DbUtils.wireMockAuth(mockAuth);
+            UserManager.wireMockAuth(mockAuth);
         }
         // Wire up firestore
         DbUtils.wireMockDb(mockFirestore);

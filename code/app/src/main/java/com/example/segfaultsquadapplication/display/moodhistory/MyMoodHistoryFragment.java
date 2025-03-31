@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -134,11 +133,11 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      */
     private void loadMoods() {
         // debugging
-        Log.d("MoodHistory", "Loading moods for user: " + DbUtils.getUserId());
+        Log.d("MoodHistory", "Loading moods for user: " + UserManager.getUserId());
 
         // get the moods
         ArrayList<MoodEvent> temp = new ArrayList<>();
-        MoodEventManager.getAllMoodEvents(DbUtils.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp,
+        MoodEventManager.getAllMoodEvents(UserManager.getUserId(), MoodEventManager.MoodEventFilter.ALL, temp,
                 isSuccess -> {
                     if (isSuccess) {
                         allMoods.clear(); // Clear previous moods

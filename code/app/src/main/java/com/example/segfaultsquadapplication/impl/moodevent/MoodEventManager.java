@@ -11,6 +11,7 @@ import com.example.segfaultsquadapplication.impl.comment.CommentManager;
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -24,7 +25,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -99,7 +99,7 @@ public class MoodEventManager {
                                     String reason, @Nullable List<Integer> imgBytes,
                                     @Nullable MoodEvent.SocialSituation situation, boolean isPublic,
                                     Consumer<Boolean> callback) {
-        MoodEvent moodEvent = new MoodEvent(DbUtils.getUserId(), moodType, reason, imgBytes, null, isPublic);
+        MoodEvent moodEvent = new MoodEvent(UserManager.getUserId(), moodType, reason, imgBytes, null, isPublic);
         if (situation != null) {
             moodEvent.setSocialSituation(situation);
         }

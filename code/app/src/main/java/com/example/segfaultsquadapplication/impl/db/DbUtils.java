@@ -1,16 +1,24 @@
 package com.example.segfaultsquadapplication.impl.db;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import androidx.annotation.Nullable;
 
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
@@ -40,12 +48,6 @@ public class DbUtils {
         db = firestore;
     }
 
-    // TODO: after merging all branches to main, refactor - inline method
-    @Deprecated
-    public static void wireMockAuth(FirebaseAuth auth) {
-        UserManager.wireMockAuth(auth);
-    }
-
     /**
      * If the database has not been mocked, lazy-initialize it as the default.
      */
@@ -73,43 +75,49 @@ public class DbUtils {
                                                         @Nullable Collection<T> holder,
                                                         DbOpResultHandler<QuerySnapshot> handler) {
         requireDb();
-        specifications.apply( db.collection(collection) )
-                .get()
-                .addOnCompleteListener(task -> {
-                    Exception exception;
-                    if (task.isSuccessful()) {
-                        readDocs:
-                        try {
-                            // Create objects from the documents if needed
-                            if (holder != null) {
-                                List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
-                                ArrayList<T> temp = new ArrayList<>(snapshots.size() + 1);
-                                for (DocumentSnapshot documentSnapshot : snapshots) {
-                                    T obj = documentSnapshot.toObject(tClass);
-                                    if (obj != null) {
-                                        obj.setDbFileId(documentSnapshot.getId());
-                                        temp.add(obj);
-                                    }
-                                    // Exit on one failure
-                                    else {
-                                        exception = new RuntimeException("Failed to convert document content");
-                                        break readDocs;
-                                    }
-                                }
-                                // After the loop, we return the documents.
-                                holder.addAll(temp);
+        Query qry = specifications.apply( db.collection(collection) );
+        OnCompleteListener<QuerySnapshot> listener = task -> {
+            Exception exception;
+            if (task.isSuccessful()) {
+                readDocs:
+                try {
+                    // Create objects from the documents if needed
+                    if (holder != null) {
+                        List<DocumentSnapshot> snapshots = task.getResult().getDocuments();
+                        ArrayList<T> temp = new ArrayList<>(snapshots.size() + 1);
+                        for (DocumentSnapshot documentSnapshot : snapshots) {
+                            T obj = documentSnapshot.toObject(tClass);
+                            if (obj != null) {
+                                obj.setDbFileId(documentSnapshot.getId());
+                                temp.add(obj);
                             }
-                            handler.onSuccess(task.getResult());
-                            return;
-                        } catch (Exception e) {
-                            exception = new RuntimeException("Error parsing document", e);
+                            // Exit on one failure
+                            else {
+                                exception = new RuntimeException("Failed to convert document content");
+                                break readDocs;
+                            }
                         }
-                    } else {
-                        exception = new RuntimeException("Error retrieving documents", task.getException());
+                        // After the loop, we return the documents.
+                        holder.addAll(temp);
                     }
-                    exception.printStackTrace(System.err);
-                    handler.onFailure(exception);
-                });
+                    handler.onSuccess(task.getResult());
+                    return;
+                } catch (Exception e) {
+                    exception = new RuntimeException("Error parsing document", e);
+                }
+            } else {
+                exception = new RuntimeException("Error retrieving documents", task.getException());
+            }
+            exception.printStackTrace(System.err);
+            handler.onFailure(exception);
+        };
+        qry
+                .get()
+                .addOnCompleteListener(listener)
+                .addOnFailureListener((e) ->
+                        qry
+                                .get(Source.CACHE)
+                                .addOnCompleteListener(listener));
     }
 
     /**
@@ -136,7 +144,7 @@ public class DbUtils {
     public static <T extends IDbData> void getObjectByDocId(String collection, String docId,
                                             Class<T> tClass, AtomicReference<T> holder,
                                             DbOpResultHandler<DocumentSnapshot> handler) {
-        DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
+        DbOpResultHandler<DocumentSnapshot> opLogicHandler = new DbOpResultHandler<>(
                 // Success
                 documentSnapshot -> {
                     Exception exception;
@@ -163,7 +171,15 @@ public class DbUtils {
                 // Failure
                 e -> handler.onFailure(new RuntimeException("Error getting document", e))
         );
-        operateDocumentById(collection, docId, DocumentReference::get, opHandler);
+        operateDocumentById(collection, docId, docRef -> docRef.get(), new DbOpResultHandler<>(
+                // Success
+                opLogicHandler::onSuccess,
+                // Failure - try again with local cache.
+                e -> {
+                    opLogicHandler.onFailure(e);
+                    operateDocumentById(collection, docId, docRef -> docRef.get(Source.CACHE), opLogicHandler);
+                }
+        ));
     }
 
     /**
@@ -236,36 +252,35 @@ public class DbUtils {
                 });
     }
 
-    /*
-    // TODO: for methods below, after merging all branches to main, refactor - inline method
-     * USER HELPER FUNCTIONS
+    /**
+     * Pulls everything that is highly relevant to the user from database
+     * I.e. The user and their mood events with comments.
+     * Thease features are considered important and should work offline.
      */
-
-    // TODO: after merging all branches to main, refactor - inline method
-    @Deprecated
-    @Nullable
-    public static FirebaseUser getUser() {
-        return UserManager.getCurrUser();
+    public static void prepareLocalCache() {
+        AtomicReference<User> userHolder = new AtomicReference<>();
+        UserManager.loadUserData(UserManager.getUserId(), userHolder, getCurrUserSucc -> {
+            if (! getCurrUserSucc) return;
+            // Fetch events
+            prepareLocalEventsCache(UserManager.getUserId());
+        });
     }
 
-    // TODO: after merging all branches to main, refactor - inline method
-    @Deprecated
-    @Nullable
-    public static String getUsername(@Nullable FirebaseUser user) {
-        return UserManager.getUsername(user);
-    }
-
-    // TODO: after merging all branches to main, refactor - inline method
-    @Deprecated
-    @Nullable
-    public static String getUserId() {
-        return UserManager.getUserId();
-    }
-
-    // TODO: after merging all branches to main, refactor - inline method
-    @Deprecated
-    @Nullable
-    public static String getUserId(@Nullable FirebaseUser user) {
-        return UserManager.getUserId(user);
+    /**
+     * Helper function for prepareLocalCache
+     * Pulls events & comments from the database.
+     */
+    private static void prepareLocalEventsCache(String uid) {
+        Function<Query, Query> filter = uid.equals(UserManager.getUserId()) ?
+                MoodEventManager.MoodEventFilter.ALL : MoodEventManager.MoodEventFilter.PUBLIC_ONLY;
+        // Load events
+        ArrayList<MoodEvent> evts = new ArrayList<>();
+        MoodEventManager.getAllMoodEvents(uid, filter, evts, isEvtSucc -> {
+            if (!isEvtSucc) return;
+            // Load comments
+            for (MoodEvent evt : evts) {
+                CommentManager.getCommentsForMood(evt.getDbFileId(), new ArrayList<>(), ignored -> {});
+            }
+        });
     }
 }

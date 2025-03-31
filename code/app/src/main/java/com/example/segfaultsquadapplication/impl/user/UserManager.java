@@ -91,6 +91,12 @@ public class UserManager {
      */
     public static void login(String email, String pwd, BiConsumer<Boolean, String> callback) {
         requireAuth();
+        // Prepare local cache on success
+        BiConsumer<Boolean, String> wrappedCallback = callback.andThen((isSuccess, err) -> {
+            if (isSuccess) {
+                DbUtils.prepareLocalCache();
+            }
+        });
         mAuth.signInWithEmailAndPassword(email, pwd)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -98,13 +104,13 @@ public class UserManager {
                         FirebaseUser user = getCurrUser();
                         if (user != null) {
                             System.out.println("User ID: " + user.getUid());
-                            checkUserDocument(user, callback);
+                            checkUserDocument(user, wrappedCallback);
                         } else {
-                            callback.accept(false, "Error during login - please try again");
+                            wrappedCallback.accept(false, "Error during login - please try again");
                         }
                     } else {
                         task.getException().printStackTrace(System.err);
-                        callback.accept(false, "Authentication failed");
+                        wrappedCallback.accept(false, "Authentication failed");
                     }
                 });
     }

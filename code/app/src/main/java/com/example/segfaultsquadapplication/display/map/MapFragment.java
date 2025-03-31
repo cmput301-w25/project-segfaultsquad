@@ -24,13 +24,11 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
@@ -38,7 +36,6 @@ import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.firestore.GeoPoint;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -196,7 +193,7 @@ public class MapFragment extends Fragment {
      * By default, this will display all of the current user's moods.
      */
     private void loadMoodData() {
-        String currentUserId = DbUtils.getUserId();
+        String currentUserId = UserManager.getUserId();
 
         // Debugging log
         Log.d("MoodHistory", "Loading moods for user: " + currentUserId);

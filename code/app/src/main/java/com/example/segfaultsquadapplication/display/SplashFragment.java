@@ -25,6 +25,7 @@ import androidx.navigation.Navigation;
 import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 
 /**
  * This fragment cycles through set of emojis and displays them upon start of app
@@ -107,7 +108,9 @@ public class SplashFragment extends Fragment {
      * takes to login or homepage depending on previous login status
      */
     private void navigateToNextScreen() {
-        if (DbUtils.getUser() != null) {
+        if (UserManager.getCurrUser() != null) {
+            // Prepare local cache of the database here, since skipping login page
+            DbUtils.prepareLocalCache();
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_splash_to_myMoodHistory);
         } else {
