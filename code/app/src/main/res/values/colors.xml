@@ -3,7 +3,7 @@
     <!-- Base colors -->
     <color name="color_primary">#2196F3</color>  <!-- Material Blue 500 -->
     <color name="TopHeaderBackground">#FFFFFF</color>  <!-- White -->
-    
+
     <!-- Chip colors -->
     <color name="chip_selected_background">#2196F3</color>  <!-- Same as primary -->
     <color name="chip_unselected_background">#FFFFFF</color>  <!-- White -->
@@ -11,31 +11,29 @@
     <color name="chip_unselected_text">#2196F3</color>  <!-- Same as primary -->
     <color name="chip_stroke">#2196F3</color>  <!-- Same as primary -->
 
-    <!-- Mood colors -->
-    <color name="mood_anger">#FE0000</color> <!-- Red for anger -->
-    <color name="mood_confusion">#FF8200</color> <!-- Orange for confusion -->
-    <color name="mood_disgust">#D2D755</color> <!-- Olive green for disgust -->
-    <color name="mood_fear">#011EFE</color> <!-- Darker blue for fear -->
-    <color name="mood_happiness">#FEFF02</color> <!-- Yellow for happiness -->
-    <color name="mood_sadness">#003471</color> <!-- Deep blue for sadness -->
-    <color name="mood_shame">#E0457B</color> <!-- Pink for shame -->
-    <color name="mood_surprise">#5F259F</color> <!-- Purple for surprise -->
-    <color name="mood_default">#A9A9A9</color> <!-- Grey for default -->
+    <!-- Improved Mood colors -->
+    <color name="mood_anger">#E63946</color> <!-- Softer red for anger -->
+    <color name="mood_confusion">#F4A261</color> <!-- Muted orange for confusion -->
+    <color name="mood_disgust">#90BE6D</color> <!-- Softer green for disgust -->
+    <color name="mood_fear">#4361EE</color> <!-- Royal blue for fear -->
+    <color name="mood_happiness">#FFBD00</color> <!-- Warm gold for happiness -->
+    <color name="mood_sadness">#2A6F97</color> <!-- Slate blue for sadness -->
+    <color name="mood_shame">#BC6C25</color> <!-- Earthy terracotta for shame -->
+    <color name="mood_surprise">#7F5283</color> <!-- Muted purple for surprise -->
+    <color name="mood_default">#6C757D</color> <!-- Refined grey for default -->
 
-    <!-- Light mood colors (lighter) -->
-    <color name="mood_anger_light">#FF8A8A</color> <!-- Light red for anger -->
-    <color name="mood_confusion_light">#FFC285</color> <!-- Light orange for confusion -->
-    <color name="mood_disgust_light">#E5F4A5</color> <!-- Light green for disgust -->
-    <color name="mood_fear_light">#92C1E9</color> <!-- Light blue for fear -->
-    <color name="mood_happiness_light">#FFFACD</color> <!-- Light yellow for happiness -->
-    <color name="mood_sadness_light">#8094DD</color> <!-- Light deep blue for sadness -->
-    <color name="mood_shame_light">#F5B6CD</color> <!-- Light pink for shame -->
-    <color name="mood_surprise_light">#B884CB</color> <!-- Light purple for surprise -->
-    <color name="mood_default_light">#D3D3D3</color> <!-- Light grey for default -->
+    <!-- Light mood colors -->
+    <color name="mood_anger_light">#F5CAC3</color> <!-- Light salmon for anger -->
+    <color name="mood_confusion_light">#FDE4CF</color> <!-- Soft peach for confusion -->
+    <color name="mood_disgust_light">#D8F3DC</color> <!-- Mint green for disgust -->
+    <color name="mood_fear_light">#BCD4FF</color> <!-- Pale blue for fear -->
+    <color name="mood_happiness_light">#FFF1C1</color> <!-- Pale yellow for happiness -->
+    <color name="mood_sadness_light">#AED9E0</color> <!-- Powder blue for sadness -->
+    <color name="mood_shame_light">#F4D8CD</color> <!-- Soft terracotta for shame -->
+    <color name="mood_surprise_light">#E0C3FC</color> <!-- Lavender for surprise -->
+    <color name="mood_default_light">#E9ECEF</color> <!-- Light grey for default -->
 
     <!-- App Colours -->
     <color name="app_background">#DBEAFE</color>
     <color name="text_colour">#073763</color>
-
-
 </resources>

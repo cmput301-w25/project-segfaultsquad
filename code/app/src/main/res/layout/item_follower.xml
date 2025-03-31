@@ -30,7 +30,7 @@
                 android:src="@drawable/ic_person" />
         </FrameLayout>
 
-        <!-- Username with improved styling -->
+        <!-- Username -->
         <TextView
             android:id="@+id/username"
             android:layout_width="0dp"
@@ -44,7 +44,7 @@
             android:textStyle="bold"
             android:text="Username" />
 
-        <!-- Buttons with improved styling -->
+        <!-- Buttons -->
         <Button
             android:id="@+id/remove_button"
             android:layout_width="wrap_content"

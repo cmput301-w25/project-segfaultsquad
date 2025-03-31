@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="8dp"
+    android:layout_marginHorizontal="8dp"
     app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/app_background"
     app:cardCornerRadius="12dp">
 
     <LinearLayout
@@ -20,61 +22,92 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-            <!-- Profile Picture -->
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/profile_picture"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginEnd="8dp"
-                android:contentDescription="@string/profile_picture"
-                android:scaleType="centerCrop"
-                app:strokeWidth="2dp"
-                app:shapeAppearanceOverlay="@style/CircleShape" />
+            <!-- Profile Picture with circular background -->
+            <FrameLayout
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/circular_background">
 
-            <!-- Username and Post Time -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profile_picture"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/profile_picture"
+                    android:scaleType="centerCrop"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#E0E0E0"
+                    app:shapeAppearanceOverlay="@style/CircleShape" />
+            </FrameLayout>
+
+            <!-- Username and Post Time  -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
                 <TextView
                     android:id="@+id/username"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
+                    android:textColor="@color/text_colour"
+                    android:fontFamily="@font/kanitlight"
                     android:textStyle="bold"/>
+
                 <TextView
                     android:id="@+id/textTimestamp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="12sp"
-                    android:textColor="@android:color/black"/>
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="#757575"/>
             </LinearLayout>
+
         </LinearLayout>
 
-        <!-- Mood Emoji -->
-        <TextView
-            android:id="@+id/moodEmoji"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="48sp"
-            android:layout_gravity="center"/>
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@android:color/black"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Mood Event Details and Comment -->
-        <LinearLayout
+        <!-- Mood Emoji -->
+        <FrameLayout
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/circular_background"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/moodEmoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="48sp"
+                android:layout_gravity="center"/>
+        </FrameLayout>
+
+        <!-- Mood Event Details  -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="bottom">
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F5F5F5">
 
-            <!-- Textual details -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="12dp">
 
                 <!-- Mood Type -->
                 <TextView
@@ -82,47 +115,85 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
+                    android:fontFamily="@font/kanitlight"
+                    android:textColor="@color/text_colour"
                     android:textStyle="bold"
-                    android:layout_marginTop="8dp"/>
+                    android:layout_marginBottom="8dp"/>
 
                 <!-- Reason -->
                 <TextView
                     android:id="@+id/textReason"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@android:color/black"/>
+                    android:textSize="15sp"
+                    android:fontFamily="@font/kanitlight"
+                    android:lineSpacingExtra="3dp"
+                    android:layout_marginBottom="12dp"/>
 
-                <!-- Social Situation -->
-                <TextView
-                    android:id="@+id/textSocialSituation"
-                    android:layout_width="wrap_content"
+                <!-- Tag section for social situation and visibility -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="4dp"/>
+                    android:orientation="horizontal">
 
-                <!-- Mood Private/Public Visibility -->
-                <TextView
-                    android:id="@+id/textMoodVisibility"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginTop="4dp"/>
+                    <!-- Social Situation Tag -->
+                    <TextView
+                        android:id="@+id/textSocialSituation"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_light_background"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:drawableStart="@android:drawable/ic_menu_myplaces"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/kanitlight"
+                        android:layout_marginEnd="8dp"/>
+
+                    <!-- Mood Private/Public Visibility Tag -->
+                    <TextView
+                        android:id="@+id/textMoodVisibility"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/rounded_light_background"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:drawableStart="@android:drawable/ic_menu_view"
+                        android:drawablePadding="4dp"
+                        android:gravity="center_vertical"
+                        android:textSize="12sp"
+                        android:fontFamily="@font/kanitlight"/>
+                </LinearLayout>
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <!-- Comment Icon -->
-            <ImageView
-                android:id="@+id/comment_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_comment"
-                android:contentDescription="Comment"
-                android:layout_marginStart="16dp"
-                android:layout_gravity="bottom"
-                android:visibility="visible"/>
+        <!-- Interaction Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <!-- Comment Button -->
+            <LinearLayout
+                android:id="@+id/comment_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/comment_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_comment"
+                    android:contentDescription="Comment"
+                    app:tint="@color/text_colour"/>
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

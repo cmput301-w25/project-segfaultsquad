@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Header section with title and back button - improved padding and alignment -->
+        <!-- Header section with title and back button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
         </LinearLayout>
 
-        <!-- Divider line - kept the same as requested -->
+        <!-- Divider line -->
         <View
             android:layout_width="match_parent"
             android:layout_height="5dp"
