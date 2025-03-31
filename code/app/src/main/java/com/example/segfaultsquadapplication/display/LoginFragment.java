@@ -12,8 +12,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatButton;
@@ -22,10 +20,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.example.segfaultsquadapplication.R;
-import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -61,7 +57,7 @@ public class LoginFragment extends Fragment {
         loginButton = rootView.findViewById(R.id.buttonLogin);
 
         // Check if user is already logged in
-        if (DbUtils.getUser() != null) {
+        if (UserManager.getCurrUser() != null) {
             navigateToHome();
             return rootView;
         }
