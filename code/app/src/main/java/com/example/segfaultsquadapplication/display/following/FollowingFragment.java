@@ -6,8 +6,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -23,6 +25,10 @@ import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.example.segfaultsquadapplication.impl.comment.Comment;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,7 +38,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import androidx.navigation.Navigation;
-
 
 /**
  * Allow user to see a feed of their followed user's moods (most recent)
@@ -95,7 +100,8 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         AtomicReference<User> currUserHolder = new AtomicReference<>();
         UserManager.loadUserData(currentUserId, currUserHolder,
                 isSuccess -> {
-                    if (! isSuccess) return;
+                    if (!isSuccess)
+                        return;
                     List<String> followingList = currUserHolder.get().getFollowing();
                     // debugging
                     Log.d("FollowingFragment", "followingList: " + followingList);
@@ -111,8 +117,9 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
     /**
      * loads all of the user's followed moods from firebase
+     * 
      * @param followingList
-     * the list of the followed users
+     *                      the list of the followed users
      */
     private void loadFollowedUsersMoods(List<String> followingList) {
         // debugging
@@ -124,7 +131,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
             ArrayList<MoodEvent> eventsHolder = new ArrayList<>(3);
             MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.PUBLIC_MOST_RECENT_3,
                     eventsHolder, isSuccess -> {
-                        if (! isSuccess) {
+                        if (!isSuccess) {
                             if (getContext() != null)
                                 Toast.makeText(getContext(), "Error loading moods", Toast.LENGTH_SHORT).show();
                         } else {
@@ -139,16 +146,87 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
     /**
      * listener to goto mood detals
+     * 
      * @param mood
-     * the mood event clicked on
+     *             the mood event clicked on
      */
     @Override
     public void onMoodClick(MoodEvent mood) {
+        // Navigate to mood details fragment
         Bundle args = new Bundle();
         args.putString("moodId", mood.getDbFileId());
         args.putString("userId", mood.getUserId());
         Navigation.findNavController(requireView())
                 .navigate(R.id.navigation_mood_details, args);
+    }
+
+    @Override
+    public void onCommentClick(MoodEvent mood) {
+        // Show comments bottom sheet
+        showCommentsBottomSheet(mood);
+    }
+
+    /**
+     * Shows a bottom sheet dialog for comments on a mood event.
+     *
+     * @param mood The mood event for which comments are being displayed.
+     */
+    private void showCommentsBottomSheet(MoodEvent mood) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_comments, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        RecyclerView commentsRecyclerView = bottomSheetView.findViewById(R.id.commentsRecyclerView);
+        EditText commentInput = bottomSheetView.findViewById(R.id.commentInput);
+        Button submitCommentButton = bottomSheetView.findViewById(R.id.submitCommentButton);
+
+        List<Comment> comments = new ArrayList<>(); // Fetch comments from Firestore for the mood event
+        CommentsAdapter commentsAdapter = new CommentsAdapter(comments);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        commentsRecyclerView.setAdapter(commentsAdapter);
+
+        // Load comments for the mood event
+        loadCommentsForMood(mood.getDbFileId(), comments, commentsAdapter);
+
+        submitCommentButton.setOnClickListener(v -> {
+            String commentText = commentInput.getText().toString().trim();
+            if (!commentText.isEmpty()) {
+                submitComment(mood.getDbFileId(), commentText);
+                commentInput.setText(""); // Clear input
+            } else {
+                Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    /**
+     * Loads comments for a specific mood event.
+     *
+     * @param moodId          The ID of the mood event.
+     * @param comments        The list to populate with comments.
+     * @param commentsAdapter The adapter to notify of data changes.
+     */
+    private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
+        CommentManager.getCommentsForMood(moodId, comments, commentsAdapter);
+    }
+
+    /**
+     * Submits a comment for a specific mood event.
+     *
+     * @param moodId      The ID of the mood event.
+     * @param commentText The text of the comment.
+     */
+    private void submitComment(String moodId, String commentText) {
+        FirebaseUser currentUser = UserManager.getCurrUser(); // Get the current user
+        if (currentUser != null) {
+            String username = UserManager.getUsername(currentUser); // Get the username
+            Comment comment = new Comment(UserManager.getUserId(), username, commentText);
+            CommentManager.submitComment(moodId, comment);
+        } else {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -254,5 +332,15 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
     private void clearAllFilters() {
         moodAdapter.updateMoods(allMoods);
+    }
+
+    /**
+     * Sets up the click listener for the comment icon.
+     *
+     * @param commentIcon The comment icon view.
+     * @param mood        The mood event associated with the comment icon.
+     */
+    private void setupCommentIconClickListener(ImageView commentIcon, MoodEvent mood) {
+        commentIcon.setOnClickListener(v -> showCommentsBottomSheet(mood));
     }
 }

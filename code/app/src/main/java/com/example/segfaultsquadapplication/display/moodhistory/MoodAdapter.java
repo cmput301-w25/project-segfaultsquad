@@ -53,6 +53,8 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
      */
     public interface OnMoodClickListener {
         void onMoodClick(MoodEvent mood);
+
+        void onCommentClick(MoodEvent mood);
     }
 
     /**
@@ -75,7 +77,8 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         this.listener = listener;
         this.currentUserId = UserManager.getUserId(); // Get current user ID
         this.userCache = new HashMap<>();
-        if (currentUserId != null) fetchCurrentUser(); // Fetch user details
+        if (currentUserId != null)
+            fetchCurrentUser(); // Fetch user details
     }
 
     /**
@@ -158,6 +161,7 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
         private TextView textMoodVisibility;
         private ImageView profilePicture;
         private TextView username;
+        private ImageView commentIcon;
 
         /**
          * constructor
@@ -176,11 +180,19 @@ public class MoodAdapter extends RecyclerView.Adapter<MoodAdapter.MoodViewHolder
             textMoodVisibility = itemView.findViewById(R.id.textMoodVisibility);
             profilePicture = itemView.findViewById(R.id.profile_picture);
             username = itemView.findViewById(R.id.username);
+            commentIcon = itemView.findViewById(R.id.comment_icon);
 
             itemView.setOnClickListener(v -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
                     listener.onMoodClick(moodList.get(position));
+                }
+            });
+
+            commentIcon.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onCommentClick(moodList.get(position));
                 }
             });
         }

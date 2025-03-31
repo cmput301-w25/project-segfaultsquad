@@ -14,7 +14,8 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * This file contains authentication and functionality for loading an user's data from DB.
+ * This file contains authentication and functionality for loading an user's
+ * data from DB.
  * For following-related functions, see FollowingManager.
  */
 public class UserManager {
@@ -32,11 +33,13 @@ public class UserManager {
      * If the auth has not been mocked, lazy-initialize it as the default.
      */
     private static void requireAuth() {
-        if (mAuth == null) mAuth = FirebaseAuth.getInstance();
+        if (mAuth == null)
+            mAuth = FirebaseAuth.getInstance();
     }
 
     /**
      * Gets the current user; returns null if not logged in.
+     * 
      * @return The Firebase User. MIGHT BE NULL if not logged in.
      */
     @Nullable
@@ -47,7 +50,9 @@ public class UserManager {
 
     /**
      * Gets the user's username.
-     * @return The user name for the user.
+     * 
+     * @param user The Firebase user.
+     * @return The username for the user.
      */
     @Nullable
     public static String getUsername(@Nullable FirebaseUser user) {
@@ -56,6 +61,7 @@ public class UserManager {
 
     /**
      * Gets the CURRENT user's id.
+     * 
      * @return The user id for the current user.
      */
     @Nullable
@@ -64,7 +70,9 @@ public class UserManager {
     }
 
     /**
-     * Gets the SPECIFIED user's id. Use this instead of the raw getUid for consistency and null handling.
+     * Gets the SPECIFIED user's id. Use this instead of the raw getUid for
+     * consistency and null handling.
+     * 
      * @param user The user to retrieve the ID from.
      * @return The user id for the specified user.
      */
@@ -75,9 +83,11 @@ public class UserManager {
 
     /**
      * Sign in to a user account in the firebase authentication system.
-     * @param email The user's email
-     * @param pwd The user's password
-     * @param callback The handler for success (true, /) or failure (false, failure reason)
+     * 
+     * @param email    The user's email
+     * @param pwd      The user's password
+     * @param callback The handler for success (true, /) or failure (false, failure
+     *                 reason)
      */
     public static void login(String email, String pwd, BiConsumer<Boolean, String> callback) {
         requireAuth();
@@ -101,8 +111,9 @@ public class UserManager {
 
     /**
      * Method to check for existance otherwise create a user in the db
+     * 
      * @param firebaseUser The user we are checking for
-     * @param callback The handler for the result
+     * @param callback     The handler for the result
      */
     private static void checkUserDocument(FirebaseUser firebaseUser, BiConsumer<Boolean, String> callback) {
         DbOpResultHandler<DocumentSnapshot> opHandler = new DbOpResultHandler<>(
@@ -120,16 +131,16 @@ public class UserManager {
                 e -> {
                     e.printStackTrace(System.err);
                     callback.accept(false, "Error checking user profile");
-                }
-        );
+                });
         DbUtils.operateDocumentById(DbUtils.COLL_USERS, getUserId(firebaseUser),
                 DocumentReference::get, opHandler);
     }
 
     /**
      * Method to create a user in the db
+     * 
      * @param firebaseUser The user we are checking for
-     * @param callback The handler for the result
+     * @param callback     The handler for the result
      */
     private static void createUserDocument(FirebaseUser firebaseUser, BiConsumer<Boolean, String> callback) {
         String uid = getUserId(firebaseUser);
@@ -144,36 +155,40 @@ public class UserManager {
                 e -> {
                     e.printStackTrace(System.err);
                     callback.accept(false, "Error creating user profile");
-                }
-        );
+                });
         DbUtils.operateDocumentById(DbUtils.COLL_USERS, uid,
                 docRef -> docRef.set(newUser), opHandler);
     }
 
-//    // This function is the previous impl. It is more hacky than it should've been.
-//    // If things work well, this can be safely deleted a bit later.
-//    private static void createUserDocument(FirebaseUser firebaseUser, Task<AuthResult> task, TaskResultHandler<AuthResult> handler) {
-//        Map<String, Object> userData = new HashMap<>();
-//        userData.put("username", getUsername(firebaseUser));
-//        userData.put("followers", new ArrayList<String>()); // Initialize as empty
-//        userData.put("following", new ArrayList<String>()); // Initialize as empty
-//
-//        TaskResultHandler<Void> opHandler = new TaskResultHandler<>(
-//                // Success
-//                aVoid -> handler.onSuccess(task.getResult()),
-//                // Failure
-//                e -> handler.onFailure(
-//                        new RuntimeException("Error creating user profile") )
-//        );
-//        DbUtils.operateDocumentById(DbUtils.COLL_USERS, firebaseUser.getUid(),
-//                dr -> dr.set(userData), opHandler);
-//    }
+    // // This function is the previous impl. It is more hacky than it should've
+    // been.
+    // // If things work well, this can be safely deleted a bit later.
+    // private static void createUserDocument(FirebaseUser firebaseUser,
+    // Task<AuthResult> task, TaskResultHandler<AuthResult> handler) {
+    // Map<String, Object> userData = new HashMap<>();
+    // userData.put("username", getUsername(firebaseUser));
+    // userData.put("followers", new ArrayList<String>()); // Initialize as empty
+    // userData.put("following", new ArrayList<String>()); // Initialize as empty
+    //
+    // TaskResultHandler<Void> opHandler = new TaskResultHandler<>(
+    // // Success
+    // aVoid -> handler.onSuccess(task.getResult()),
+    // // Failure
+    // e -> handler.onFailure(
+    // new RuntimeException("Error creating user profile") )
+    // );
+    // DbUtils.operateDocumentById(DbUtils.COLL_USERS, firebaseUser.getUid(),
+    // dr -> dr.set(userData), opHandler);
+    // }
 
     /**
      * Gets the user information from the database.
-     * @param userId The user id.
-     * @param holder The Atomic Reference that is used to hold the result on success.
-     * @param callback Callback function when the function concludes with success(true) or failure(false).
+     * 
+     * @param userId   The user id.
+     * @param holder   The Atomic Reference that is used to hold the result on
+     *                 success.
+     * @param callback Callback function when the function concludes with
+     *                 success(true) or failure(false).
      */
     public static void loadUserData(String userId, AtomicReference<User> holder, Consumer<Boolean> callback) {
         DbUtils.getObjectByDocId(DbUtils.COLL_USERS, userId, User.class, holder,
