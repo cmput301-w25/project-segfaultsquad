@@ -148,6 +148,9 @@ public class MoodAnalyticsFragment extends Fragment {
 
         MoodEventManager.getAllMoodEvents(userId, MoodEventManager.MoodEventFilter.ALL, holder, isSuccess -> {
             if (isSuccess) {
+                // Clear the list to avoid accumulating moods
+                moodEvents.clear();
+
                 for (MoodEvent mood : holder) {
                     Log.d("MoodAnalytics", "Loaded mood: " + mood.getMoodType());
                     moodEvents.add(mood);
