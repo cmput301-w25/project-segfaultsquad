@@ -36,6 +36,10 @@ import java.util.function.UnaryOperator;
  */
 public class MoodEventManager {
     private static final int REASON_LIMIT = 200;
+
+    /**
+     * Define all mood event filters as per user wants
+     */
     public static class MoodEventFilter {
         public static final Function<Query, Query> ALL = UnaryOperator.identity();
         public static final Function<Query, Query> MOST_RECENT_1 = query -> query.limit(1);

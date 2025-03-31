@@ -12,6 +12,10 @@ import com.example.segfaultsquadapplication.impl.db.IDbData;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * This file is to save the details of a user upon retrieval from firebase
+ * Uses getters and setters for user details querying
+ */
 public class User implements IDbData {
     // atteibutes
     private String userId;
@@ -23,6 +27,13 @@ public class User implements IDbData {
     private List<String> followRequests;
 
     // Constructor(s)
+
+    /**
+     * take in user data and assign it to variables for this class
+     * @param userId is the userID of current user
+     * @param username is the username of current user
+     * @param email is the email of current user
+     */
     public User(String userId, String username, String email) {
         this.userId = userId;
         this.username = username;

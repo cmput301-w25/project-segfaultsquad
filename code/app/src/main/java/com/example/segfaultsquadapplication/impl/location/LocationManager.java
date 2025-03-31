@@ -19,6 +19,9 @@ import com.google.firebase.firestore.GeoPoint;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * This file is to manage the location of a user using geopoints upon permission request
+ */
 public class LocationManager {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
@@ -41,6 +44,12 @@ public class LocationManager {
         currActivity = activity;
         firstLocationRequested = false;
     }
+
+    /**
+     * Retrieves the current location of the user and stores in object
+     * @param holder AtomicReference to hold the retrieved location.
+     * @param callback consumer to accept Boolean value indicating success or failure.
+     */
     public static void getLocation(AtomicReference<Location> holder, Consumer<Boolean> callback) {
         if (fusedLocationClient == null) {
             System.out.println("Fused Location Client not initialized");
@@ -78,6 +87,13 @@ public class LocationManager {
                     callback.accept(false);
                 });
     }
+
+    /**
+     * Retrieves the current location as a GeoPoint
+     * converts location into GeoPoints and stores in holder.
+     * @param holder AtomicReference to hold the retrieved geopoint
+     * @param callback consumer to accept Boolean value indicating success or failure.
+     */
     public static void getGeoPoint(AtomicReference<GeoPoint> holder, Consumer<Boolean> callback) {
         AtomicReference<Location> locHolder = new AtomicReference<>();
         getLocation(locHolder, isSuccess -> {

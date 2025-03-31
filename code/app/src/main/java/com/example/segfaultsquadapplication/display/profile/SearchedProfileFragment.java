@@ -24,6 +24,10 @@ import com.example.segfaultsquadapplication.impl.user.UserManager;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This file is for the profile details of the user searched stored in firebase
+ * Uses getters and setters to query profile information for the user searched
+ */
 public class SearchedProfileFragment extends Fragment {
     private ImageView profilePicture;
     private TextView username;
@@ -35,6 +39,13 @@ public class SearchedProfileFragment extends Fragment {
     private boolean currentUserFollowingSearched; //if current user already searched
     private boolean followRequestSent; //if follow request has from current user to searched
 
+    /**
+     * create view and inflate for search profile, init vars
+     * @param inflater The LayoutInflater object that can be used to inflate views.
+     * @param container parent view that the fragment ui should be attached to
+     * @param savedInstanceState fragment is being re-constructed from a previous saved state.
+     * @return root view of the fragment's layout.
+     */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
