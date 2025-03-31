@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Manager class for handling comments related to mood events.
+ * Manager class for handling comments related to mood events
  */
 public class CommentManager {
     /**

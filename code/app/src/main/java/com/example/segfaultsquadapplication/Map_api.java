@@ -14,12 +14,23 @@ import java.net.URLEncoder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * This class interacts with OpenStreetMap API for geolocation coding (geocoding and reverse geocoding)
+ */
 public class Map_api {
+    /**
+     * Listener interface for receiving the results of a geocoding request.
+     */
     public interface GeocodingListener {
         void onLocationFound(double latitude, double longitude);
         void onError(String error);
     }
 
+    /**
+     * Fetches  coordinates (latitude and longitude) for given address using geocoding API
+     * @param address address to search for
+     * @param listener listener to handle the result or error.
+     */
     public static void getCoordinates(String address, GeocodingListener listener) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
@@ -58,11 +69,21 @@ public class Map_api {
             }
         });
     }
+
+    /**
+     * Listener interface for receiving the results of a reverse geocoding request.
+     */
     public interface ReverseGeocodingListener {
         void onAddressFound(String address);
         void onError(String error);
     }
 
+    /**
+     * Fetches address for the given coordinates (latitude and longitude) using reverse geocoding API.
+     * @param latitude Latitude of location
+     * @param longitude Longitude of location
+     * @param listener listener to handle the result or error.
+     */
     public static void getAddress(double latitude, double longitude, ReverseGeocodingListener listener) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());

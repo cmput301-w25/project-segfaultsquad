@@ -3,7 +3,7 @@ package com.example.segfaultsquadapplication.impl.comment;
 import com.example.segfaultsquadapplication.impl.db.IDbData;
 
 /**
- * Class representing a comment on a mood event.
+ * Class representing a comment on a mood event, stores information about comment
  */
 public class Comment implements IDbData {
     private String dbFileId;
@@ -12,6 +12,13 @@ public class Comment implements IDbData {
     private String username;
     private String text;
 
+    /**
+     * create a new comment object with the details
+     * @param eventId the corresponding mood event's id
+     * @param userId userid of user who made comment
+     * @param username username of user who made comment
+     * @param text comment itself
+     */
     public Comment(String eventId, String userId, String username, String text) {
         this.eventId = eventId;
         this.userId = userId;
