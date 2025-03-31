@@ -81,7 +81,7 @@ public class CommentManagerTest {
 
         System.out.println("  - add comment does not crash");
         Comment validEvent = new Comment("1", "uid1", "user1", "valid");
-        CommentManager.submitComment(validEvent);
+        CommentManager.submitComment(validEvent, isSuccess -> {});
 
         System.out.println("  - gets the added comment");
         ArrayList<Comment> cmts = new ArrayList<>();
@@ -99,7 +99,7 @@ public class CommentManagerTest {
 
         System.out.println("  - clear the comments for the mood");
         Comment anotherValidEvent = new Comment("1", "uid1", "user1", "valid another cmt");
-        CommentManager.submitComment(anotherValidEvent);
+        CommentManager.submitComment(anotherValidEvent, isSuccess -> {});
         CommentManager.removeAllComments("1");
         // Check whether they have been all removed
         ArrayList<Comment> commentsAfterRmv = new ArrayList<>();
@@ -120,9 +120,9 @@ public class CommentManagerTest {
     public void createInvalidTest() throws InterruptedException {
         System.out.println("=> invalid comment does not crash");
         Comment invalidEvent = new Comment("-12345", "uid1", "user1", "test!");
-        CommentManager.submitComment(invalidEvent);
+        CommentManager.submitComment(invalidEvent, isSuccess -> {});
         Comment invalidUserId = new Comment("1", "-123uid1", "user1", "test!");
-        CommentManager.submitComment(invalidUserId);
+        CommentManager.submitComment(invalidUserId, isSuccess -> {});
     }
 
     /**

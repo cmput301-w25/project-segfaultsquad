@@ -189,9 +189,6 @@ public class EventCommentTest {
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User1 was here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
-        // Click away then click back to refresh comments
-        pressBack();
-        onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         // Check displayed
         onView(withText("user1")).check(matches(isDisplayed()));
         onView(withText("User1 was here")).check(matches(isDisplayed()));
@@ -233,9 +230,6 @@ public class EventCommentTest {
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User2 was also here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
-        // Click away then click back to refresh comments
-        pressBack();
-        onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         // Check displayed
         onView(withText("user1")).check(matches(isDisplayed()));
         onView(withText("User1 was here")).check(matches(isDisplayed()));

@@ -136,13 +136,17 @@ public class MoodHistoryAndMoodEventTest {
         testMoodFilter();
     }
 
-    // Tests that the mood history only displays one's own moods
+    /**
+     * Tests that the mood history only displays one's own moods
+     */
     private void testOnlyOwnMood() {
         System.out.println("Test Mood List - only displays the user's own moods");
         onView(withText("RRR")).check(doesNotExist());
     }
 
-    // Test that invalid mood events are not added
+    /**
+     * Test that invalid mood events are not added
+     */
     private void testNewMoodInvalid() {
         System.out.println("Test Invalid - Do not select emotion state");
         onView(withId(R.id.fabAddMood)).perform(click());
@@ -176,8 +180,10 @@ public class MoodHistoryAndMoodEventTest {
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
     }
 
-    // Mood event; tests for "proper" new mood, up to optional fields.
-    private void testNewMoodRegular() {
+    /**
+     * Mood event; tests for "proper" new mood, up to optional fields.
+     */
+    private void testNewMoodRegular() throws InterruptedException {
         System.out.println("Test Regular - All fields filled");
         onView(withId(R.id.fabAddMood)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof AddMoodFragment), 20, 500));
@@ -202,6 +208,7 @@ public class MoodHistoryAndMoodEventTest {
         onView(withId(R.id.editTextReason)).perform(typeText("Fury!"));
         onView(withId(R.id.buttonConfirm)).perform(click());
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
+        Thread.sleep(1000);
         onView(withText("Fury!")).perform(scrollTo()).check(matches(isDisplayed()));
 
         System.out.println("Test Regular - cancelled");
@@ -214,8 +221,10 @@ public class MoodHistoryAndMoodEventTest {
         onView(withText("CANCEL!")).check(doesNotExist());
     }
 
-    // Modifies a mood event.
-    // Also validates whether the data saved by add/edit is correct.
+    /**
+     * Modifies a mood event.
+     * Also validates whether the data saved by add/edit is correct.
+     */
     private void testModifyMoodEvent() {
         System.out.println("Test Modify mood event");
         onView(withText("Reason...")).perform(scrollTo()).perform(click());
@@ -267,7 +276,9 @@ public class MoodHistoryAndMoodEventTest {
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 20, 500));
     }
 
-    // Check for filter functionality
+    /**
+     * Check for filter functionality
+     */
     private void testMoodFilter() throws InterruptedException {
         System.out.println("Populate data for filtering later on");
 

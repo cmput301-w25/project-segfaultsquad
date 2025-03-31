@@ -325,7 +325,7 @@ public class MoodEventManagerTest {
         System.out.println("  - deletes the correct document for a valid doc ID");
         // Populate a comment first to test out the comment is removed later
         Comment validEvent = new Comment("5", "uid1", "user1", "valid");
-        CommentManager.submitComment(validEvent);
+        CommentManager.submitComment(validEvent, isSuccess -> {});
         ArrayList<Comment> cmts = new ArrayList<>();
         MockDb.await((finishCallback) ->
                 () ->
