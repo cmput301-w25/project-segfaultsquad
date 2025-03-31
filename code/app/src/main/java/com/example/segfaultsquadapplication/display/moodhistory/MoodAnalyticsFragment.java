@@ -1,6 +1,7 @@
 package com.example.segfaultsquadapplication.display.moodhistory;
 
 import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -29,6 +31,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
@@ -38,12 +42,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Mood Analytics fragment (screen). Displays mood analytics for current user
- * and all users in nice graphics
- *
+ * Mood Analytics fragment that displays mood statistics and visualizations.
+ * This fragment provides visual representations of mood data through pie charts and bar charts,
+ * allowing users to view their personal mood distributions and compare with community data.
+ * It also includes interactive elements like filter chips and an animated emoji rain effect.
  */
 public class MoodAnalyticsFragment extends Fragment {
-    // attributes
+    // Charts and UI elements
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
     private HorizontalBarChart recentMoodsChart;
@@ -52,13 +57,21 @@ public class MoodAnalyticsFragment extends Fragment {
     private Chip myMoodsChip, communityMoodsChip;
     private Chip myRecentMoodsChip, communityRecentMoodsChip;
 
+    /**
+     * Inflates the fragment layout and initializes UI components.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate views
+     * @param container The parent view that the fragment's UI should be attached to
+     * @param savedInstanceState Previously saved state of the fragment
+     * @return The root View of the fragment's layout
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_mood_analytics, container, false);
 
         // Hide bottom navigation
         if (getActivity() != null) {
-            View bottomNav = getActivity().findViewById(R.id.BottomNavBar); // Adjust the ID as necessary
+            View bottomNav = getActivity().findViewById(R.id.BottomNavBar);
             if (bottomNav != null) {
                 bottomNav.setVisibility(View.GONE);
             }
@@ -92,6 +105,12 @@ public class MoodAnalyticsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Called after the view is created. Starts the emoji rain animation.
+     *
+     * @param view The created view
+     * @param savedInstanceState Previously saved state of the fragment
+     */
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -100,8 +119,8 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * listener setup for the chips to toggle between personal and global mood event
-     * data
+     * Sets up listeners for the filter chips to toggle between personal and global mood data.
+     * Each chip triggers a data reload based on the selected filter.
      */
     private void setupChipListeners() {
         myMoodsChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -130,8 +149,8 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * method to load in analytics data (just calls sub methods to load in data and
-     * create graphs)
+     * Loads analytics data and prepares visualizations.
+     * This method serves as an entry point for data loading and visualization initialization.
      */
     private void loadAnalyticsData() {
         // Load personal moods by default
@@ -140,11 +159,10 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * method to load in mood events and create pie chart
-     * 
-     * @param personalOnly
-     *                     bool to load in only current user's (true) or all (false)
-     *                     mood events
+     * Loads mood distribution data for visualization in the pie chart.
+     *
+     * @param personalOnly If true, loads only the current user's mood events;
+     *                    if false, loads all users' mood events
      */
     private void loadMoodDistribution(boolean personalOnly) {
         String userId = personalOnly ? UserManager.getUserId() : null;
@@ -164,11 +182,10 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * method to load in recent mood events for bar chart
-     * 
-     * @param personalOnly
-     *                     bool to load in only current user's (true) or all (false)
-     *                     mood events
+     * Loads recent mood data for visualization in the bar chart.
+     *
+     * @param personalOnly If true, loads only the current user's mood events;
+     *                    if false, loads all users' mood events
      */
     private void loadRecentMoods(boolean personalOnly) {
         String userId = personalOnly ? UserManager.getUserId() : null;
@@ -184,10 +201,10 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * method to update the recent moods count bar chart
-     * 
-     * @param moodEvents
-     *                   list of mood events to be displayed
+     * Updates the bar chart with mood frequency data.
+     * Creates and configures a horizontal bar chart showing the count of each mood type.
+     *
+     * @param moodEvents List of mood events to be visualized
      */
     private void updateBarChart(List<MoodEvent> moodEvents) {
         ArrayList<BarEntry> entries = new ArrayList<>();
@@ -210,9 +227,21 @@ public class MoodAnalyticsFragment extends Fragment {
 
         BarDataSet dataSet = new BarDataSet(entries, "Mood Counts");
         dataSet.setColors(getMoodColors());
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.BLACK);
+        dataSet.setDrawValues(true);
+        dataSet.setHighlightEnabled(true);
+
+        // Add value formatter to show count
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.valueOf((int) value);
+            }
+        });
 
         BarData barData = new BarData(dataSet);
-        recentMoodsChart.setData(barData);
+        barData.setBarWidth(0.8f); // Make bars thicker
 
         // Configure X-axis
         XAxis xAxis = recentMoodsChart.getXAxis();
@@ -221,25 +250,56 @@ public class MoodAnalyticsFragment extends Fragment {
         xAxis.setGranularity(1f);
         xAxis.setLabelRotationAngle(-45);
         xAxis.setDrawGridLines(false);
-        // Add left padding to prevent label cutoff, i dont know why its happening to be
-        // honest
+        xAxis.setTextSize(12f);
+        xAxis.setTextColor(Color.BLACK);
         xAxis.setSpaceMin(0.5f);
+        xAxis.setAxisLineWidth(1.5f);
+        xAxis.setAxisLineColor(Color.BLACK);
 
         // Configure Y-axis
-        recentMoodsChart.getAxisLeft().setAxisMinimum(0f); // Start at 0
-        recentMoodsChart.getAxisRight().setEnabled(false); // Disable right axis
+        recentMoodsChart.getAxisLeft().setAxisMinimum(0f);
+        recentMoodsChart.getAxisLeft().setDrawGridLines(true);
+        recentMoodsChart.getAxisLeft().setGridColor(Color.LTGRAY);
+        recentMoodsChart.getAxisLeft().setGridLineWidth(0.5f);
+        recentMoodsChart.getAxisLeft().setTextSize(12f);
+        recentMoodsChart.getAxisLeft().setAxisLineWidth(1.5f);
+        recentMoodsChart.getAxisLeft().setAxisLineColor(Color.BLACK);
+
+        // Disable right axis
+        recentMoodsChart.getAxisRight().setEnabled(false);
 
         // Other chart settings
+        recentMoodsChart.setData(barData);
+        recentMoodsChart.setFitBars(true);
         recentMoodsChart.setDrawValueAboveBar(true);
-        recentMoodsChart.setDescription(null);
-        recentMoodsChart.setExtraLeftOffset(15f); // Add extra left margin
-        recentMoodsChart.setExtraBottomOffset(10f); // Add extra bottom margin for labels
+        recentMoodsChart.setMaxVisibleValueCount(10);
+        recentMoodsChart.setDrawGridBackground(false);
+        recentMoodsChart.setPinchZoom(false);
+        recentMoodsChart.setDoubleTapToZoomEnabled(false);
+
+        // Remove description
+        recentMoodsChart.getDescription().setEnabled(false);
+
+        // Customize legend
+        recentMoodsChart.getLegend().setEnabled(false);
+
+        // Add margin for better readability
+        recentMoodsChart.setExtraLeftOffset(15f);
+        recentMoodsChart.setExtraBottomOffset(15f);
+        recentMoodsChart.setExtraTopOffset(10f);
+        recentMoodsChart.setExtraRightOffset(15f);
 
         // Animate chart
-        recentMoodsChart.animateY(500);
+        recentMoodsChart.animateY(1000);
         recentMoodsChart.invalidate();
     }
 
+    /**
+     * Retrieves an array of colors corresponding to each mood type.
+     * These colors are used for visual consistency in charts.
+     *
+     * @return Array of integer color values for each mood type
+     */
     private int[] getMoodColors() {
         // Return an array of colors corresponding to each mood type
         MoodEvent.MoodType[] moodTypes = MoodEvent.MoodType.values();
@@ -251,10 +311,9 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * just silly analytics (most frequent mood type. Maight remove later)
+     * Displays mood analytics by setting up the pie chart and fading in views.
      *
-     * @param moodEvents
-     *                   list of this user's mood events
+     * @param moodEvents List of mood events to analyze and visualize
      */
     private void displayAnalytics(List<MoodEvent> moodEvents) {
         setupPieChart(moodEvents);
@@ -262,7 +321,8 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * method to setup and activate the emoji rain animation effect
+     * Creates and animates an emoji rain effect in the background.
+     * Randomly generates emoji elements that fall from the top of the screen.
      */
     private void startEmojiRain() {
         final String[] emojis = MoodEvent.MoodType.getAllEmoticons();
@@ -334,10 +394,10 @@ public class MoodAnalyticsFragment extends Fragment {
     }
 
     /**
-     * Distribution of mood types
+     * Sets up the pie chart to display mood type distribution.
+     * Configures appearance, animations, and data representation.
      *
-     * @param moodEvents
-     *                   list of all of this user's mood events
+     * @param moodEvents List of mood events to analyze for the distribution
      */
     private void setupPieChart(List<MoodEvent> moodEvents) {
         Map<MoodEvent.MoodType, Integer> moodCountMap = new HashMap<>();
@@ -356,33 +416,55 @@ public class MoodAnalyticsFragment extends Fragment {
             MoodEvent moodEvent = moodEvents.stream()
                     .filter(m -> m.getMoodType() == moodType)
                     .findFirst()
-                    .orElse(null); // Get the first MoodEvent with this moodType
+                    .orElse(null);
 
             if (moodEvent != null) {
                 entries.add(new PieEntry(count, moodType.name()));
-                colors.add(moodEvent.getMoodType().getPrimaryColor(requireContext())); // Get the corresponding color
+                colors.add(moodEvent.getMoodType().getPrimaryColor(requireContext()));
             }
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "Mood Distribution");
-        dataSet.setColors(colors); // Set the custom colors
+        dataSet.setColors(colors);
+        dataSet.setValueTextSize(14f);
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setValueLineColor(Color.WHITE);
+        dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+        dataSet.setYValuePosition(PieDataSet.ValuePosition.INSIDE_SLICE);
+        dataSet.setSliceSpace(3f); // Space between slices
+
         PieData pieData = new PieData(dataSet);
+        pieData.setValueFormatter(new PercentFormatter(moodDistributionChart));
 
         // Configure the pie chart
-        moodDistributionChart.setUsePercentValues(true); // Show percentage values
-        moodDistributionChart.setEntryLabelTextSize(12f);
-        // moodDistributionChart.setDrawHole(true); // Create a hole in the middle
-        moodDistributionChart.setHoleRadius(35f); // Size of the hole
-        moodDistributionChart.setTransparentCircleRadius(40f); // Size of the transparent circle
+        moodDistributionChart.setUsePercentValues(true);
+        moodDistributionChart.setEntryLabelTextSize(14f);
+        moodDistributionChart.setEntryLabelColor(Color.BLACK);
+        moodDistributionChart.setHoleRadius(40f);
+        moodDistributionChart.setTransparentCircleRadius(45f);
+        moodDistributionChart.setTransparentCircleColor(Color.WHITE);
+        moodDistributionChart.setTransparentCircleAlpha(110);
+        moodDistributionChart.setCenterText("Mood\nDistribution");
+        moodDistributionChart.setCenterTextSize(18f);
+        moodDistributionChart.setDrawCenterText(true);
+
+        // Remove legend and description
+        moodDistributionChart.getLegend().setEnabled(false);
+        moodDistributionChart.getDescription().setEnabled(false);
+
         moodDistributionChart.setData(pieData);
+        moodDistributionChart.setExtraOffsets(20, 10, 20, 10);
 
         // Add animations
-        moodDistributionChart.animateY(1000, com.github.mikephil.charting.animation.Easing.EaseInOutQuad); // Vertical
-        moodDistributionChart.spin(1000, 0, 360f, com.github.mikephil.charting.animation.Easing.EaseInOutQuad); // Spin
+        moodDistributionChart.animateY(1200, Easing.EaseInOutQuad);
+        moodDistributionChart.spin(1000, 0, 360f, Easing.EaseInOutQuad);
 
         moodDistributionChart.invalidate();
     }
 
+    /**
+     * Fades in the chart views with animation for a smooth visual experience.
+     */
     private void fadeInViews() {
         moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator())
                 .start();

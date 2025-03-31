@@ -1,28 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="8dp">
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    android:background="@color/app_background"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
 
-    <ImageView
-        android:id="@+id/profile_picture"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/ic_person" />
-
-    <TextView
-        android:id="@+id/username"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:text="Username" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp">
 
-    <Button
-        android:id="@+id/following_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Unfollow" />
-</LinearLayout>
+        <!-- Profile Picture with circular background -->
+        <FrameLayout
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/circular_background">
+
+            <ImageView
+                android:id="@+id/profile_picture"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_person" />
+        </FrameLayout>
+
+        <!-- Username with improved styling -->
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanitlight"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:text="Username" />
+
+        <!-- Button with improved styling -->
+        <Button
+            android:id="@+id/following_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unfollow"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanit"
+            android:backgroundTint="@color/app_background"
+            app:cornerRadius="12dp"
+            android:minHeight="40dp"
+            android:paddingHorizontal="16dp"
+            android:textSize="13sp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
