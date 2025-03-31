@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:background="@color/app_background">
 
     <!-- App Name and Info Icon -->
     <LinearLayout
@@ -19,12 +20,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="MoodMap"
+            android:fontFamily="@font/kanit"
+            android:textColor="@color/text_colour"
             android:textSize="20sp"
             android:textStyle="bold"/>
 
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
+            app:tint="@color/text_colour"
             android:src="@drawable/info_icon"/>
     </LinearLayout>
 
@@ -35,13 +39,16 @@
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"
         android:background="@drawable/circle_background"
-
-        android:src="@drawable/lock_icon"/>
+        android:src="@drawable/lock_icon"
+        android:backgroundTint="@color/app_background"
+        app:tint="@color/text_colour" />
 
     <!-- Welcome Text -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/kanitlight"
+        android:textColor="@color/text_colour"
         android:text="Welcome back"
         android:textAlignment="center"
         android:textSize="24sp"
@@ -53,7 +60,8 @@
         android:layout_height="wrap_content"
         android:text="Sign in to your account to continue"
         android:textAlignment="center"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/text_colour"
+        android:fontFamily="@font/kanitlight"
         android:layout_marginBottom="32dp"/>
 
     <!-- Email Input -->
@@ -107,12 +115,6 @@
             android:layout_weight="1"
             android:text="Remember me"/>
 
-        <TextView
-            android:id="@+id/textForgotPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Forgot password?"
-            android:textColor="@color/color_primary"/>
     </LinearLayout>
 
     <!-- Sign In Button -->
@@ -124,7 +126,8 @@
         android:text="Sign in"
         android:textAllCaps="false"
         android:textSize="16sp"
-        app:cornerRadius="8dp"/>
+        app:backgroundTint="@color/text_colour"
+        app:cornerRadius="8dp" />
 
     <!-- Or Continue With -->
     <LinearLayout
@@ -141,75 +144,11 @@
             android:layout_weight="1"
             android:background="@android:color/darker_gray"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Or continue with"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginHorizontal="16dp"/>
-
         <View
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1"
             android:background="@android:color/darker_gray"/>
-    </LinearLayout>
-
-    <!-- Social Login Buttons -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="32dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonGoogleLogin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="Google"
-            android:textAllCaps="false"
-            app:icon="@drawable/google_icon"
-            app:iconSize="18dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/buttonAppleLogin"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Apple"
-            android:textAllCaps="false"
-            app:icon="@drawable/apple_icon"
-            app:iconSize="18dp"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
-    </LinearLayout>
-
-    <!-- Sign Up Link -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Don't have an account? "/>
-
-        <TextView
-            android:id="@+id/textSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Sign up"
-            android:textColor="@color/color_primary"
-            android:textStyle="bold"/>
     </LinearLayout>
 
     <!-- Copyright -->
@@ -219,7 +158,8 @@
         android:layout_weight="1"
         android:gravity="bottom|center"
         android:text="© 2025 MoodMap. All rights reserved."
-        android:textColor="@android:color/darker_gray"
+        android:textColor="@color/text_colour"
+        android:fontFamily="@font/kanitlight"
         android:textSize="12sp"/>
 
 </LinearLayout>

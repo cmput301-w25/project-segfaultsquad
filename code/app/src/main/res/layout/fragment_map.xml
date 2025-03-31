@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,6 +26,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Mood Map"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
             <ImageButton
@@ -33,9 +36,16 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@drawable/filter_icon" />
+                android:src="@drawable/filter_icon"
+                app:tint="@color/text_colour"/>
 
         </LinearLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/text_colour"/>
 
         <FrameLayout
             android:layout_width="match_parent"

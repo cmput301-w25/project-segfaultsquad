@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -32,9 +33,17 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
                 android:text="Edit Mood"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
         </LinearLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/text_colour"/>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -67,6 +76,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/text_colour"
+                    android:fontFamily="@font/kanitlight"
                     android:text="How are you feeling?"
                     android:textSize="18sp"
                     android:layout_marginBottom="16dp"/>
@@ -97,6 +108,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="@color/text_colour"
+                            android:fontFamily="@font/kanitlight"
                             android:text="Reason (max 200 chars)"
                             android:textSize="16sp"
                             android:layout_marginBottom="8dp"/>
@@ -130,6 +143,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="@color/text_colour"
+                            android:fontFamily="@font/kanitlight"
                             android:text="Add Photo"
                             android:textSize="16sp"
                             android:layout_marginBottom="8dp"/>
@@ -147,6 +162,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Tap to upload a photo"
+                            android:fontFamily="@font/kanitlight"
                             android:textAlignment="center"
                             android:layout_marginTop="8dp"
                             android:textColor="@android:color/darker_gray"/>
@@ -170,6 +186,8 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="@color/text_colour"
+                            android:fontFamily="@font/kanitlight"
                             android:text="Social Situation"
                             android:textSize="16sp"
                             android:layout_marginBottom="8dp"/>
@@ -203,9 +221,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
                 android:text="Confirm"
                 android:layout_marginEnd="8dp"
-                android:backgroundTint="#2196F3"/>
+                android:backgroundTint="@color/TopHeaderBackground"/>
 
             <Button
                 android:id="@+id/buttonCancel"
@@ -214,7 +234,9 @@
                 android:layout_weight="1"
                 android:text="Cancel"
                 android:layout_marginStart="8dp"
-                android:backgroundTint="#2196F3"/>
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
+                android:backgroundTint="@color/TopHeaderBackground"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

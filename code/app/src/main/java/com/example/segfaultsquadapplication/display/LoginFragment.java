@@ -54,33 +54,12 @@ public class LoginFragment extends Fragment {
         passwordEditText = rootView.findViewById(R.id.editTextPassword);
         loginButton = rootView.findViewById(R.id.buttonLogin);
         rememberMeCheckbox = rootView.findViewById(R.id.checkboxRememberMe);
-        forgotPasswordText = rootView.findViewById(R.id.textForgotPassword);
-        signUpText = rootView.findViewById(R.id.textSignUp);
-        googleLoginButton = rootView.findViewById(R.id.buttonGoogleLogin);
-        appleLoginButton = rootView.findViewById(R.id.buttonAppleLogin);
 
         // Check if user is already logged in
         if (DbUtils.getUser() != null) {
             navigateToHome();
             return rootView;
         }
-
-        // Set click listeners
-        forgotPasswordText.setOnClickListener(v -> { // TODO: ask TA what to do in this situation
-            // TODO: Implement forgot password functionality
-        });
-
-        signUpText.setOnClickListener(v -> { // TODO: ask TA if this is necessary
-            // TODO: Navigate to sign up screen
-        });
-
-        googleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
-            // TODO: Implement Google sign-in
-        });
-
-        appleLoginButton.setOnClickListener(v -> { // TODO: ask TA if this is actually even needed
-            // TODO: Implement Apple sign-in
-        });
 
         loginButton.setOnClickListener(v -> loginUser()); // login button listener
 

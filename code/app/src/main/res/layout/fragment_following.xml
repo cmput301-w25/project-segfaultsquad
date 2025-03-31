@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,11 +22,14 @@
 
             <TextView
                 android:id="@+id/headingText"
-                android:layout_width="332dp"
-                android:layout_height="55dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="true"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanit"
                 android:text="Following"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-                android:textSize="40sp" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
 
             <ImageButton
                 android:id="@+id/filterButton"
@@ -33,9 +37,16 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@drawable/filter_icon" />
+                android:src="@drawable/filter_icon"
+                app:tint="@color/text_colour"/>
 
         </LinearLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@color/text_colour"/>
 
         <!-- RecyclerView for mood list -->
         <androidx.recyclerview.widget.RecyclerView

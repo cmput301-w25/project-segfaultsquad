@@ -33,6 +33,9 @@
     <color name="mood_surprise_light">#B884CB</color> <!-- Light purple for surprise -->
     <color name="mood_default_light">#D3D3D3</color> <!-- Light grey for default -->
 
+    <!-- App Colours -->
+    <color name="app_background">#DBEAFE</color>
+    <color name="text_colour">#073763</color>
 
 
 </resources>
