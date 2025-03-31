@@ -75,7 +75,7 @@ public class UserFollowingTest {
     // The time to wait for username suggestions
     static final long SUGGESTION_WAIT_TIME = 3000;
     // The time to wait for general suggestions
-    static final long UI_POPULATE_WAIT_TIME = 1000;
+    static final long UI_POPULATE_WAIT_TIME = 3000;
 
     @BeforeClass
     public static void setup(){
