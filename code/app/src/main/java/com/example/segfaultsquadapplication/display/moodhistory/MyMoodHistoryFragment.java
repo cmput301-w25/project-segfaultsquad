@@ -101,7 +101,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     /**
      * setsup (find) filter option elements from layout and calls helper method to
      * implement/activate the specified filter
-     * 
+     *
      * @param view
      *             the view/activity where the filter options will be
      *             inflated/overlayed onto
@@ -163,7 +163,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
 
     /**
      * mood event click listener handling method
-     * 
+     *
      * @param mood
      *             the clicked on MoodEvent object instance
      */
@@ -187,7 +187,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     /**
      * buffer method, probably could have the filter functionality of each filter
      * here, but whatever
-     * 
+     *
      * @param filterType
      *                   its the string value of the filter being applied. "Last
      *                   Week", "By Mood", or "By Reason"
@@ -295,7 +295,7 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     /**
      * * filter functionality for filtering by specified word inside mood
      * desc/reason
-     * 
+     *
      * @param keyword
      *                the keyword to filter by
      */
@@ -342,8 +342,37 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         submitCommentButton.setOnClickListener(v -> {
             String commentText = commentInput.getText().toString().trim();
             if (!commentText.isEmpty()) {
-                submitComment(mood.getDbFileId(), commentText);
-                commentInput.setText(""); // Clear input
+                // Get the current user
+                FirebaseUser currentUser = UserManager.getCurrUser();
+                if (currentUser != null) {
+                    // Create the comment with username obtained properly
+                    Comment comment = new Comment(mood.getDbFileId(), UserManager.getUserId(),
+                            UserManager.getUsername(currentUser), commentText);
+
+                    // Submit with callback
+                    CommentManager.submitComment(comment, isSuccess -> {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (isSuccess) {
+                                    // Add the new comment to the list and refresh the adapter
+                                    comments.add(comment);
+                                    commentsAdapter.notifyDataSetChanged();
+
+                                    // Clear the input field
+                                    commentInput.setText("");
+
+                                    // Show toast message
+                                    Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // Show error message
+                                    Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
             }
@@ -355,7 +384,11 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
         CommentManager.getCommentsForMood(moodId, comments,
                 isSuccess -> {
-                    if (isSuccess) commentsAdapter.notifyDataSetChanged();
+                    if (isSuccess && getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            commentsAdapter.notifyDataSetChanged();
+                        });
+                    }
                 });
     }
 
@@ -364,7 +397,17 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
         if (currentUser != null) {
             String username = UserManager.getUsername(currentUser);
             Comment comment = new Comment(moodId, UserManager.getUserId(), username, commentText);
-            CommentManager.submitComment(comment);
+            CommentManager.submitComment(comment, isSuccess -> {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isSuccess) {
+                            Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }

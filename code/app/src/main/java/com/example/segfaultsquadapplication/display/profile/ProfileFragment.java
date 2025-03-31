@@ -4,6 +4,7 @@
  * Date: March 7, 2025
  * CopyRight Notice: All rights Reserved Suryansh Khranger 2025
  */
+
 package com.example.segfaultsquadapplication.display.profile;
 
 import android.app.AlertDialog;
@@ -52,7 +53,6 @@ import com.example.segfaultsquadapplication.impl.user.UserManager;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -108,7 +108,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
         // Initialize views
@@ -343,7 +343,7 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
 
     /**
      * mood event click listener handling method
-     * 
+     *
      * @param mood
      *             the clicked on MoodEvent object instance
      */
@@ -383,8 +383,30 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         submitCommentButton.setOnClickListener(v -> {
             String commentText = commentInput.getText().toString().trim();
             if (!commentText.isEmpty()) {
-                submitComment(mood.getDbFileId(), commentText);
-                commentInput.setText(""); // Clear input
+                FirebaseUser currentUser = UserManager.getCurrUser();
+                if (currentUser != null) {
+                    String username = UserManager.getUsername(currentUser);
+                    Comment comment = new Comment(mood.getDbFileId(), UserManager.getUserId(), username, commentText);
+
+                    CommentManager.submitComment(comment, isSuccess -> {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (isSuccess) {
+                                    // Show toast message
+                                    Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+
+                                    // Dismiss the bottom sheet dialog
+                                    bottomSheetDialog.dismiss();
+                                } else {
+                                    // Show error message
+                                    Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
             }
@@ -396,7 +418,11 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
     private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
         CommentManager.getCommentsForMood(moodId, comments,
                 isSuccess -> {
-                    if (isSuccess) commentsAdapter.notifyDataSetChanged();
+                    if (isSuccess && getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            commentsAdapter.notifyDataSetChanged();
+                        });
+                    }
                 });
     }
 
@@ -405,7 +431,18 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
         if (currentUser != null) {
             String username = UserManager.getUsername(currentUser);
             Comment comment = new Comment(moodId, UserManager.getUserId(), username, commentText);
-            CommentManager.submitComment(comment);
+
+            CommentManager.submitComment(comment, isSuccess -> {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isSuccess) {
+                            Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }

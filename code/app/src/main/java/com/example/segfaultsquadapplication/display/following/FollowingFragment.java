@@ -117,7 +117,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
     /**
      * loads all of the user's followed moods from firebase
-     * 
+     *
      * @param followingList
      *                      the list of the followed users
      */
@@ -146,7 +146,7 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
 
     /**
      * listener to goto mood detals
-     * 
+     *
      * @param mood
      *             the mood event clicked on
      */
@@ -191,8 +191,32 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         submitCommentButton.setOnClickListener(v -> {
             String commentText = commentInput.getText().toString().trim();
             if (!commentText.isEmpty()) {
-                submitComment(mood.getDbFileId(), commentText);
-                commentInput.setText(""); // Clear input
+                // Create the comment
+                FirebaseUser currentUser = UserManager.getCurrUser();
+                if (currentUser != null) {
+                    String username = UserManager.getUsername(currentUser);
+                    Comment comment = new Comment(mood.getDbFileId(), UserManager.getUserId(), username, commentText);
+
+                    // Submit with callback
+                    CommentManager.submitComment(comment, isSuccess -> {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (isSuccess) {
+                                    // Show toast message
+                                    Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+
+                                    // Dismiss the bottom sheet dialog
+                                    bottomSheetDialog.dismiss();
+                                } else {
+                                    // Show error message
+                                    Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                }
             } else {
                 Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
             }
@@ -211,7 +235,11 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
     private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
         CommentManager.getCommentsForMood(moodId, comments,
                 isSuccess -> {
-                    if (isSuccess) commentsAdapter.notifyDataSetChanged();
+                    if (isSuccess && getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            commentsAdapter.notifyDataSetChanged();
+                        });
+                    }
                 });
     }
 
@@ -226,7 +254,17 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         if (currentUser != null) {
             String username = UserManager.getUsername(currentUser); // Get the username
             Comment comment = new Comment(moodId, UserManager.getUserId(), username, commentText);
-            CommentManager.submitComment(comment);
+            CommentManager.submitComment(comment, isSuccess -> {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (isSuccess) {
+                            Toast.makeText(requireContext(), "Comment added successfully!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to add comment", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }

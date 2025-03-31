@@ -41,11 +41,22 @@ public class CommentManager {
      *
      * @param comment The comment to submit.
      */
-    public static void submitComment(Comment comment) {
+    public static void submitComment(Comment comment, Consumer<Boolean> callback) {
         // Submit the comment to Firestore
         DbUtils.addObjectToCollection(DbUtils.COLL_COMMENTS, comment, new DbOpResultHandler<>(
-                null,
-                e -> e.printStackTrace(System.err)
+                docRef -> {
+                    // Call the callback with success
+                    if (callback != null) {
+                        callback.accept(true);
+                    }
+                },
+                e -> {
+                    e.printStackTrace(System.err);
+                    // Call the callback with failure
+                    if (callback != null) {
+                        callback.accept(false);
+                    }
+                }
         ));
     }
 
