@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 
 import androidx.annotation.Nullable;
 
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.location.LocationManager;
@@ -312,7 +313,10 @@ public class MoodEventManager {
     public static void deleteMoodEventById(String id, Consumer<Boolean> callback) {
         DbOpResultHandler<Void> handler = new DbOpResultHandler<>(
                 // Success
-                Void -> callback.accept(true),
+                Void -> {
+                    CommentManager.removeAllComments(id);
+                    callback.accept(true);
+                },
                 // Failure
                 e -> {
                     e.printStackTrace(System.err);

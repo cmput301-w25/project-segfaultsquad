@@ -29,7 +29,7 @@ import java.util.function.Function;
 public class DbUtils {
     private static FirebaseFirestore db = null;
     public static final String
-            COLL_FOLLOWERS = "followers",
+            COLL_COMMENTS = "moodComments",
             COLL_MOOD_EVENTS = "moods",
             COLL_USERS = "users";
 

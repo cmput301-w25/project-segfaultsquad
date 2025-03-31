@@ -120,9 +120,9 @@ public class MoodDetailsFragment extends Fragment {
         deleteButton = view.findViewById(R.id.deleteButton);
         // Edit/delete only available for own mood events.
         if (!userId.equals(UserManager.getUserId())) {
-            editButton.setActivated(false);
+            editButton.setEnabled(false);
             editButton.setVisibility(View.GONE);
-            deleteButton.setActivated(false);
+            deleteButton.setEnabled(false);
             deleteButton.setVisibility(View.GONE);
         }
     }
@@ -137,7 +137,7 @@ public class MoodDetailsFragment extends Fragment {
         backButton.setOnClickListener(v -> Navigation.findNavController(requireView()).navigateUp());
 
         // No edit / delete for other users' events
-        if (!userId.equals(UserManager.getUserId())) {
+        if (userId.equals(UserManager.getUserId())) {
             // Edit button
             editButton.setOnClickListener(v -> {
                 Bundle args = new Bundle();

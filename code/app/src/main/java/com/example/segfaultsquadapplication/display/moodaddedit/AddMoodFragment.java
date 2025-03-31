@@ -204,6 +204,8 @@ public class AddMoodFragment extends Fragment {
             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
             return;
         }
+        // Disable create button to prevent accidental spam
+        getView().findViewById(R.id.buttonConfirm).setEnabled(false);
         // Create event
         MoodEventManager.createMoodEvent(getContext(), selectedMoodType,
                 reason, isPublicMood, situation,
@@ -213,6 +215,7 @@ public class AddMoodFragment extends Fragment {
                         if (isSuccess) {
                             Toast.makeText(getContext(), "Successfully saved mood event!", Toast.LENGTH_SHORT).show();
                         } else {
+                            getView().findViewById(R.id.buttonConfirm).setEnabled(true);
                             Toast.makeText(getContext(), "Could not save mood event...", Toast.LENGTH_SHORT).show();
                         }
                         navigateBackSafely(); // navigate back if fragment exists

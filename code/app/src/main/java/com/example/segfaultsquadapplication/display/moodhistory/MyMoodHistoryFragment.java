@@ -354,15 +354,18 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
     }
 
     private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
-        CommentManager.getCommentsForMood(moodId, comments, commentsAdapter);
+        CommentManager.getCommentsForMood(moodId, comments,
+                isSuccess -> {
+                    if (isSuccess) commentsAdapter.notifyDataSetChanged();
+                });
     }
 
     private void submitComment(String moodId, String commentText) {
         FirebaseUser currentUser = UserManager.getCurrUser();
         if (currentUser != null) {
             String username = UserManager.getUsername(currentUser);
-            Comment comment = new Comment(UserManager.getUserId(), username, commentText);
-            CommentManager.submitComment(moodId, comment);
+            Comment comment = new Comment(moodId, UserManager.getUserId(), username, commentText);
+            CommentManager.submitComment(comment);
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
