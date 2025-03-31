@@ -78,6 +78,12 @@ public class MoodEvent implements IDbData {
                     .map(MoodType::getEmoticon)
                     .toArray(String[]::new);
         }
+
+        public static String[] getAllTypeNames() {
+            return Arrays.stream(values())
+                    .map(Enum::name)
+                    .toArray(String[]::new);
+        }
     }
 
     // Enum for social situations

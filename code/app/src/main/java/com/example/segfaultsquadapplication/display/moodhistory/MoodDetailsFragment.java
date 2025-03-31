@@ -33,8 +33,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A Fragment that displays detailed information about a specific mood event.
- * This class retrieves a mood event from Firestore using the mood ID passed as an argument,
- * and displays all related information including mood type, date/time, reason text, images,
+ * This class retrieves a mood event from Firestore using the mood ID passed as
+ * an argument,
+ * and displays all related information including mood type, date/time, reason
+ * text, images,
  * social situation, and location.
  */
 public class MoodDetailsFragment extends Fragment {
@@ -50,10 +52,8 @@ public class MoodDetailsFragment extends Fragment {
     private TextView socialSituationTextView;
     private TextView visibilityTextView;
     private TextView locationTextView;
-    private RecyclerView commentRecyclerView;
     private Button editButton;
     private Button deleteButton;
-    private Button commentButton;
 
     // Data
     private String moodId = null;
@@ -64,8 +64,10 @@ public class MoodDetailsFragment extends Fragment {
      * Inflates the mood details layout and initializes the fragment.
      * Retrieves the mood ID from arguments and sets up the UI components.
      *
-     * @param inflater The LayoutInflater object that can be used to inflate views
-     * @param container The parent view that the fragment's UI should be attached to
+     * @param inflater           The LayoutInflater object that can be used to
+     *                           inflate views
+     * @param container          The parent view that the fragment's UI should be
+     *                           attached to
      * @param savedInstanceState Previous state of the fragment if it was saved
      * @return The View for the fragment's UI
      */
@@ -114,12 +116,10 @@ public class MoodDetailsFragment extends Fragment {
         socialSituationTextView = view.findViewById(R.id.socialSituationTextView);
         visibilityTextView = view.findViewById(R.id.mood_visibility);
         locationTextView = view.findViewById(R.id.locationTextView);
-        commentRecyclerView = view.findViewById(R.id.commentRecyclerView);
         editButton = view.findViewById(R.id.editButton);
         deleteButton = view.findViewById(R.id.deleteButton);
-        commentButton = view.findViewById(R.id.commentButton);
         // Edit/delete only available for own mood events.
-        if (! userId.equals(UserManager.getUserId()) ) {
+        if (!userId.equals(UserManager.getUserId())) {
             editButton.setActivated(false);
             editButton.setVisibility(View.GONE);
             deleteButton.setActivated(false);
@@ -134,11 +134,10 @@ public class MoodDetailsFragment extends Fragment {
      */
     private void setupListeners() {
         // Back button
-        backButton.setOnClickListener(v ->
-                Navigation.findNavController(requireView()).navigateUp());
+        backButton.setOnClickListener(v -> Navigation.findNavController(requireView()).navigateUp());
 
-        // No edit / delete for other users' events
-        if (! userId.equals(UserManager.getUserId()) ) {
+        // Only set up edit/delete for own mood events
+        if (userId.equals(UserManager.getUserId())) {
             // Edit button
             editButton.setOnClickListener(v -> {
                 Bundle args = new Bundle();
@@ -150,8 +149,6 @@ public class MoodDetailsFragment extends Fragment {
             // Delete button
             deleteButton.setOnClickListener(v -> confirmDeleteMood());
         }
-
-        // TODO: add comment button
     }
 
     /**
@@ -167,30 +164,9 @@ public class MoodDetailsFragment extends Fragment {
                 result -> {
                     if (result) {
                         populateUI(holder.get());
-                    }
-                    else {
-                        if (getContext() == null) return;
-                        Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
-                        Navigation.findNavController(requireView()).navigateUp();
-                    }
-                });
-    }
-
-    /**
-     * Loads the comments data from Firestore using the mood ID.
-     * When successful, it populates the UI with the retrieved data.
-     * On failure, it shows an error message and navigates back.
-     */
-    private void loadComments() {
-        // The Mood itself
-        AtomicReference<MoodEvent> holder = new AtomicReference<>();
-        MoodEventManager.getMoodEventById(moodId, holder,
-                result -> {
-                    if (result) {
-                        populateUI(holder.get());
-                    }
-                    else {
-                        if (getContext() == null) return;
+                    } else {
+                        if (getContext() == null)
+                            return;
                         Toast.makeText(getContext(), "Error loading mood data", Toast.LENGTH_SHORT).show();
                         Navigation.findNavController(requireView()).navigateUp();
                     }
@@ -199,7 +175,8 @@ public class MoodDetailsFragment extends Fragment {
 
     /**
      * Populates the UI components with data from the MoodEvent object.
-     * This includes setting the mood title, emoji, date/time, reason text and image,
+     * This includes setting the mood title, emoji, date/time, reason text and
+     * image,
      * social situation, and location information.
      * Components are hidden if their corresponding data is not available.
      *
@@ -233,7 +210,6 @@ public class MoodDetailsFragment extends Fragment {
             reasonTextView.setVisibility(View.GONE);
         }
 
-
         // Set reason image
         if (mood.getImageData() != null && !mood.getImageData().isEmpty()) {
             // Convert the List<Integer> back to byte array
@@ -264,7 +240,7 @@ public class MoodDetailsFragment extends Fragment {
             socialSituationTextView.setVisibility(View.GONE);
         }
 
-        if (mood.isPublic()) { //this works and idk why
+        if (mood.isPublic()) { // this works and idk why
             visibilityTextView.setText("Public");
         } else {
             visibilityTextView.setText("Private");
@@ -274,21 +250,22 @@ public class MoodDetailsFragment extends Fragment {
         if (mood.getLocation() != null) {
             GeoPoint locationPoint = mood.getLocation();
 
-            Map_api.getAddress(locationPoint.getLatitude(), locationPoint.getLongitude(), new Map_api.ReverseGeocodingListener() {
-                @Override
-                public void onAddressFound(String address) {
-                    // Update the UI inside this callback
-                    locationTextView.setText(address);
-                    locationTextView.setVisibility(View.VISIBLE);
-                }
+            Map_api.getAddress(locationPoint.getLatitude(), locationPoint.getLongitude(),
+                    new Map_api.ReverseGeocodingListener() {
+                        @Override
+                        public void onAddressFound(String address) {
+                            // Update the UI inside this callback
+                            locationTextView.setText(address);
+                            locationTextView.setVisibility(View.VISIBLE);
+                        }
 
-                @Override
-                public void onError(String error) {
-                    // Handle error (optional: show error text or hide the view)
-                    locationTextView.setText("Address not found");
-                    locationTextView.setVisibility(View.VISIBLE);
-                }
-            });
+                        @Override
+                        public void onError(String error) {
+                            // Handle error (optional: show error text or hide the view)
+                            locationTextView.setText("Address not found");
+                            locationTextView.setVisibility(View.VISIBLE);
+                        }
+                    });
         } else {
             locationTextView.setVisibility(View.GONE);
         }
@@ -316,31 +293,34 @@ public class MoodDetailsFragment extends Fragment {
     private void deleteMood() {
         MoodEventManager.deleteMoodEventById(moodId, isSuccess -> {
             if (isAdded()) {
-                if (getContext() == null) return;
+                if (getContext() == null)
+                    return;
                 if (isSuccess) {
                     Toast.makeText(getContext(), "Mood deleted successfully", Toast.LENGTH_SHORT).show();
                     Navigation.findNavController(requireView()).navigateUp();
                 } else {
                     Toast.makeText(getContext(), "Error deleting mood", Toast.LENGTH_SHORT).show();
                 }
-                navigateBackSafely();//navigate back if fragment exists
+                navigateBackSafely();// navigate back if fragment exists
             }
         });
-        if (!isNetworkAvailable()) { //even if no internet connection, navigate back
-            Toast.makeText(getContext(), "No internet connection. Mood will be deleted upon connection.", Toast.LENGTH_LONG).show();
+        if (!isNetworkAvailable()) { // even if no internet connection, navigate back
+            Toast.makeText(getContext(), "No internet connection. Mood will be deleted upon connection.",
+                    Toast.LENGTH_LONG).show();
             Navigation.findNavController(requireView()).navigateUp(); // navigate back even if offline
         }
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivityManager = (ConnectivityManager) requireContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
+
     private void navigateBackSafely() {
         if (isAdded() && getView() != null) {
             Navigation.findNavController(requireView()).navigateUp();
         }
     }
-
 }

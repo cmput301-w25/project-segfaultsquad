@@ -12,6 +12,8 @@
 package com.example.segfaultsquadapplication.display.moodaddedit;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -43,6 +45,7 @@ import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -64,6 +67,9 @@ public class EditMoodFragment extends Fragment {
     private ImageView imageUpload;
     private Uri selectedImageUri;
     private Switch togglePublicPrivate;
+
+    // Date and time related variables
+    private Calendar selectedDateTime;
 
     // Data
     private String moodId;
@@ -125,6 +131,10 @@ public class EditMoodFragment extends Fragment {
     private void initializeViews(View view) {
         moodGrid = view.findViewById(R.id.moodGrid);
         textDateTime = view.findViewById(R.id.textDateTime);
+
+        // Make the textDateTime clickable to show date/time pickers
+        textDateTime.setOnClickListener(v -> showDateTimePicker());
+
         reasonInput = view.findViewById(R.id.editTextReason);
         reasonInput.setFilters(new InputFilter[] { new InputFilter.LengthFilter(200) }); // Set max length to 200
         socialSituationSpinner = view.findViewById(R.id.spinnerSocialSituation);
@@ -169,6 +179,86 @@ public class EditMoodFragment extends Fragment {
     }
 
     /**
+     * Shows date and time picker dialogs for selecting a custom timestamp.
+     * First shows the date picker, then the time picker sequentially.
+     */
+    private void showDateTimePicker() {
+        // If we haven't initialized the selected date/time yet, use the current mood's timestamp
+        if (selectedDateTime == null) {
+            selectedDateTime = Calendar.getInstance();
+            if (currentMood != null) {
+                selectedDateTime.setTime(currentMood.getTimestampDate());
+            }
+        }
+
+        // Show date picker first
+        showDatePicker();
+    }
+
+    /**
+     * Shows the date picker dialog to select a date.
+     * After date selection, automatically shows the time picker.
+     */
+    private void showDatePicker() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                getContext(),
+                (view, year, month, dayOfMonth) -> {
+                    // Update the selected date
+                    selectedDateTime.set(Calendar.YEAR, year);
+                    selectedDateTime.set(Calendar.MONTH, month);
+                    selectedDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                    // After date is selected, show time picker
+                    showTimePicker();
+                },
+                selectedDateTime.get(Calendar.YEAR),
+                selectedDateTime.get(Calendar.MONTH),
+                selectedDateTime.get(Calendar.DAY_OF_MONTH)
+        );
+        datePickerDialog.show();
+    }
+
+    /**
+     * Shows the time picker dialog to select a time.
+     * After time selection, updates the displayed date/time.
+     */
+    private void showTimePicker() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                getContext(),
+                (view, hourOfDay, minute) -> {
+                    // Update the selected time
+                    selectedDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    selectedDateTime.set(Calendar.MINUTE, minute);
+                    selectedDateTime.set(Calendar.SECOND, 0);
+
+                    // Update the display
+                    updateDateTimeDisplay();
+                },
+                selectedDateTime.get(Calendar.HOUR_OF_DAY),
+                selectedDateTime.get(Calendar.MINUTE),
+                false
+        );
+        timePickerDialog.show();
+    }
+
+    /**
+     * Updates the date/time display with the currently selected date and time.
+     * Also adds visual indication if the date has been modified.
+     */
+    private void updateDateTimeDisplay() {
+        // Format the date/time for display
+        SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
+        textDateTime.setText(sdf.format(selectedDateTime.getTime()));
+
+        if (currentMood != null &&
+                !selectedDateTime.getTime().equals(currentMood.getTimestampDate())) {
+            textDateTime.setTextColor(getResources().getColor(R.color.text_colour));
+        } else {
+            textDateTime.setTextColor(getResources().getColor(android.R.color.black));
+        }
+    }
+
+    /**
      * Loads the current mood data from Firestore.
      * Retrieves the mood document using the provided mood ID.
      */
@@ -199,9 +289,12 @@ public class EditMoodFragment extends Fragment {
         // Set the reason text
         reasonInput.setText(mood.getReasonText());
 
-        // Set the timestamp
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale.getDefault());
-        textDateTime.setText(sdf.format(mood.getTimestampDate()));
+        // Initialize selectedDateTime with the mood's timestamp
+        selectedDateTime = Calendar.getInstance();
+        selectedDateTime.setTime(mood.getTimestampDate());
+
+        // Format and display the date/time
+        updateDateTimeDisplay();
 
         // Set the social situation if available
         if (mood.getSocialSituation() != null) {
@@ -331,6 +424,7 @@ public class EditMoodFragment extends Fragment {
     /**
      * Updates the mood event in Firestore with the user's changes.
      * Validates input data before updating the database.
+     * Includes the custom selected date/time in the update.
      */
     private void updateMood() {
         String reason = reasonInput.getText().toString().trim();
@@ -339,8 +433,18 @@ public class EditMoodFragment extends Fragment {
         if (socialSituationSpinner.getSelectedItem() != null) { // set optional social situation field if provided
             situation = (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem();
         }
-        MoodEventManager.updateMoodEvent(getContext(), currentMood, selectedMoodType, reason,
-                togglePublicPrivate.isChecked(), situation, selectedImageUri, isSuccess -> {
+
+        // Pass the selected date/time to the update method
+        MoodEventManager.updateMoodEventWithTimestamp(
+                getContext(),
+                currentMood,
+                selectedMoodType,
+                reason,
+                togglePublicPrivate.isChecked(),
+                situation,
+                selectedImageUri,
+                selectedDateTime.getTime(), // Pass the new timestamp
+                isSuccess -> {
                     if (isAdded()) {
                         if (isSuccess) {
                             Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
@@ -360,7 +464,7 @@ public class EditMoodFragment extends Fragment {
 
     /**
      * for offline functionality
-     * 
+     *
      * @return
      *         returns bool of if network is avilible
      */

@@ -57,7 +57,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/map_chip_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="16dp"
 
+                android:textColor="@color/chip_unselected_text"
+                android:visibility="visible"
+                app:chipBackgroundColor="@color/chip_unselected_background"
+                app:selectionRequired="true"
+                app:singleSelection="true"
+                app:checkedChip="@id/chip_my_moods">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_my_moods"
+                    style="@style/CustomChipChoice"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/my_own_moods"
+                    android:textAlignment="center" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chip_followed_moods"
+                    style="@style/CustomChipChoice"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/followed_moods"
+                    android:textAlignment="center" />
+
+            </com.google.android.material.chip.ChipGroup>
         </FrameLayout>
     </LinearLayout>
 
@@ -84,21 +114,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="All Followed User Moods" />
+                android:text="Last Week" />
 
             <TextView
                 android:id="@+id/filter2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="My Moods (Default)" />
+                android:text="By Mood" />
 
             <TextView
                 android:id="@+id/filter3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Followed User Moods In 5km" />
+                android:text="By Reason" />
+
+            <TextView
+                android:id="@+id/filter4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Within 5 km" />
+
+            <TextView
+                android:id="@+id/clearFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Clear All Filters" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

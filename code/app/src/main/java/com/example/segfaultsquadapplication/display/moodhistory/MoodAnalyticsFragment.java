@@ -38,10 +38,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Mood Analytics fragment (screen). Displays mood analytics for current user and all users in nice graphics
+ * Mood Analytics fragment (screen). Displays mood analytics for current user
+ * and all users in nice graphics
  *
  */
-public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoodClickListener {
+public class MoodAnalyticsFragment extends Fragment {
     // attributes
     private List<MoodEvent> moodEvents = new ArrayList<>();
     private PieChart moodDistributionChart;
@@ -385,10 +386,5 @@ public class MoodAnalyticsFragment extends Fragment implements MoodAdapter.OnMoo
     private void fadeInViews() {
         moodDistributionChart.animate().alpha(1f).setDuration(800).setInterpolator(new DecelerateInterpolator())
                 .start();
-    }
-
-    @Override
-    public void onMoodClick(MoodEvent mood) {
-        Toast.makeText(getContext(), "Clicked on mood: " + mood.getMoodType().name(), Toast.LENGTH_SHORT).show();
     }
 }

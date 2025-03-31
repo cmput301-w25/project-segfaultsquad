@@ -24,7 +24,7 @@ public class EditMoodFragmentInflater {
      * includes setup of boxes, texts and emojis
      */
     public static void setupMoodGrid(Context ctx, Resources res, View.OnClickListener cardListener,
-            GridLayout moodGrid) {
+                                     GridLayout moodGrid) {
         for (int i = 0; i < MoodEvent.MoodType.values().length; i++) {
             MoodEvent.MoodType type = MoodEvent.MoodType.values()[i];
             MaterialCardView moodCard = new MaterialCardView(ctx);
@@ -37,7 +37,12 @@ public class EditMoodFragmentInflater {
             moodCard.setLayoutParams(params);
             moodCard.setRadius(8);
             moodCard.setStrokeWidth(1);
-            moodCard.setStrokeColor(res.getColor(R.color.color_primary));
+
+            // Set stroke color to the mood's primary color
+            moodCard.setStrokeColor(type.getPrimaryColor(ctx));
+
+            // Set card background to white
+            moodCard.setCardBackgroundColor(res.getColor(android.R.color.white));
 
             // Create vertical layout for emoji and text
             LinearLayout layout = new LinearLayout(ctx);
@@ -50,6 +55,7 @@ public class EditMoodFragmentInflater {
             emojiText.setText(type.getEmoticon());
             emojiText.setTextSize(24);
             emojiText.setGravity(Gravity.CENTER);
+            emojiText.setTextColor(res.getColor(R.color.color_primary)); // Set text color
 
             // Add mood name
             TextView moodText = new TextView(ctx);
@@ -57,6 +63,7 @@ public class EditMoodFragmentInflater {
             moodText.setGravity(Gravity.CENTER);
             moodText.setTextSize(12);
             moodText.setPadding(0, 8, 0, 0);
+            moodText.setTextColor(res.getColor(R.color.color_primary)); // Set text color
 
             layout.addView(emojiText);
             layout.addView(moodText);
@@ -71,7 +78,7 @@ public class EditMoodFragmentInflater {
 
     /**
      * helper mehtod to setup dropdown options dynamically
-     * 
+     *
      * @param ctx
      *                               context
      * @param socialSituationSpinner

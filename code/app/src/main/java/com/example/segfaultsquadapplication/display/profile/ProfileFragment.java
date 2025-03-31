@@ -21,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -38,14 +39,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.segfaultsquadapplication.R;
+import com.example.segfaultsquadapplication.display.following.CommentsAdapter;
 import com.example.segfaultsquadapplication.display.moodhistory.MoodAdapter;
+import com.example.segfaultsquadapplication.impl.comment.Comment;
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
 import com.example.segfaultsquadapplication.impl.db.DbOpResultHandler;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
 import com.example.segfaultsquadapplication.impl.user.User;
 import com.example.segfaultsquadapplication.impl.user.UserManager;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -349,6 +356,58 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                 .navigate(R.id.action_to_moodDetails, args);
     }
 
+    @Override
+    public void onCommentClick(MoodEvent mood) {
+        // Show comments bottom sheet
+        showCommentsBottomSheet(mood);
+    }
+
+    private void showCommentsBottomSheet(MoodEvent mood) {
+        // Implement the logic to show the comments bottom sheet
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_comments, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        RecyclerView commentsRecyclerView = bottomSheetView.findViewById(R.id.commentsRecyclerView);
+        EditText commentInput = bottomSheetView.findViewById(R.id.commentInput);
+        Button submitCommentButton = bottomSheetView.findViewById(R.id.submitCommentButton);
+
+        List<Comment> comments = new ArrayList<>();
+        CommentsAdapter commentsAdapter = new CommentsAdapter(comments);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        commentsRecyclerView.setAdapter(commentsAdapter);
+
+        // Load comments for the mood event
+        loadCommentsForMood(mood.getDbFileId(), comments, commentsAdapter);
+
+        submitCommentButton.setOnClickListener(v -> {
+            String commentText = commentInput.getText().toString().trim();
+            if (!commentText.isEmpty()) {
+                submitComment(mood.getDbFileId(), commentText);
+                commentInput.setText(""); // Clear input
+            } else {
+                Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
+        CommentManager.getCommentsForMood(moodId, comments, commentsAdapter);
+    }
+
+    private void submitComment(String moodId, String commentText) {
+        FirebaseUser currentUser = UserManager.getCurrUser();
+        if (currentUser != null) {
+            String username = UserManager.getUsername(currentUser);
+            Comment comment = new Comment(UserManager.getUserId(), username, commentText);
+            CommentManager.submitComment(moodId, comment);
+        } else {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void navigateToFollowersList() {
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
         navController.navigate(R.id.action_to_followers_list); // Ensure this action exists in your nav_graph.xml
@@ -415,7 +474,8 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                             e -> {
                                 Log.e("ProfileFragment", "Error updating profile picture", e);
                                 if (getContext() != null) {
-                                    Toast.makeText(getContext(), "Error updating profile picture", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "Error updating profile picture", Toast.LENGTH_SHORT)
+                                            .show();
                                 }
                             }));
         } catch (Exception e) {
@@ -572,9 +632,9 @@ public class ProfileFragment extends Fragment implements MoodAdapter.OnMoodClick
                         result -> {
                             if (!holder.isEmpty()) {
                                 navigateToSearchedProfile(holder.get(0));
-                            }
-                            else if (getContext() != null) {
-                                Toast.makeText(getContext(), "The searched user does not exist", Toast.LENGTH_LONG).show();
+                            } else if (getContext() != null) {
+                                Toast.makeText(getContext(), "The searched user does not exist", Toast.LENGTH_LONG)
+                                        .show();
                             }
                         },
                         e -> {

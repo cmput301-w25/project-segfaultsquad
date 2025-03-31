@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/app_background">
 
     <!-- Header section -->
     <LinearLayout
@@ -26,9 +27,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:fontFamily="@font/kanit"
+            android:textColor="@color/text_colour"
             android:text="Profile"
             android:textAppearance="@style/TextAppearance.AppCompat.Display2" />
     </LinearLayout>
+
+    <!-- Divider line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="@color/text_colour"/>
 
     <!-- Profile Picture -->
     <RelativeLayout
@@ -77,12 +86,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="8dp"
+                android:fontFamily="@font/kanitlight"
+                android:textColor="@color/text_colour"
                 android:textSize="32sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/kanitlight"
+                android:textColor="@color/text_colour"
                 android:text="Followers"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -99,12 +112,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingEnd="8dp"
+                android:fontFamily="@font/kanitlight"
+                android:textColor="@color/text_colour"
                 android:textSize="32sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/kanitlight"
+                android:textColor="@color/text_colour"
                 android:text="Following"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -125,7 +142,8 @@
             android:layout_margin="10dp"
             android:layout_marginTop="20dp"
             android:layout_weight="1"
-            android:backgroundTint="#252E7E"
+            android:backgroundTint="@color/TopHeaderBackground"
+            android:textColor="@color/text_colour"
             android:text="Follow" />
     </LinearLayout>
-</LinearLayout> 
+</LinearLayout>

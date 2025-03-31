@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -22,12 +23,19 @@ import com.example.segfaultsquadapplication.R;
 import com.example.segfaultsquadapplication.impl.db.DbUtils;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEvent;
 import com.example.segfaultsquadapplication.impl.moodevent.MoodEventManager;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import com.example.segfaultsquadapplication.impl.comment.Comment;
+import com.example.segfaultsquadapplication.impl.comment.CommentManager;
+import com.example.segfaultsquadapplication.display.following.CommentsAdapter;
+import com.example.segfaultsquadapplication.impl.user.UserManager;
 
 /**
  * Mood History fragment (Not really, just loads of startup)
@@ -307,5 +315,56 @@ public class MyMoodHistoryFragment extends Fragment implements MoodAdapter.OnMoo
      */
     private void clearAllFilters() {
         moodAdapter.updateMoods(allMoods); // Reset to show all moods
+    }
+
+    @Override
+    public void onCommentClick(MoodEvent mood) {
+        // Show comments bottom sheet
+        showCommentsBottomSheet(mood);
+    }
+
+    private void showCommentsBottomSheet(MoodEvent mood) {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
+        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_comments, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        RecyclerView commentsRecyclerView = bottomSheetView.findViewById(R.id.commentsRecyclerView);
+        EditText commentInput = bottomSheetView.findViewById(R.id.commentInput);
+        Button submitCommentButton = bottomSheetView.findViewById(R.id.submitCommentButton);
+
+        List<Comment> comments = new ArrayList<>();
+        CommentsAdapter commentsAdapter = new CommentsAdapter(comments);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        commentsRecyclerView.setAdapter(commentsAdapter);
+
+        // Load comments for the mood event
+        loadCommentsForMood(mood.getDbFileId(), comments, commentsAdapter);
+
+        submitCommentButton.setOnClickListener(v -> {
+            String commentText = commentInput.getText().toString().trim();
+            if (!commentText.isEmpty()) {
+                submitComment(mood.getDbFileId(), commentText);
+                commentInput.setText(""); // Clear input
+            } else {
+                Toast.makeText(requireContext(), "Comment cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        bottomSheetDialog.show();
+    }
+
+    private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
+        CommentManager.getCommentsForMood(moodId, comments, commentsAdapter);
+    }
+
+    private void submitComment(String moodId, String commentText) {
+        FirebaseUser currentUser = UserManager.getCurrUser();
+        if (currentUser != null) {
+            String username = UserManager.getUsername(currentUser);
+            Comment comment = new Comment(UserManager.getUserId(), username, commentText);
+            CommentManager.submitComment(moodId, comment);
+        } else {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 }

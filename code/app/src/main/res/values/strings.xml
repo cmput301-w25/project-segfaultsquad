@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Segfault Squad Application</string>
     <string name="my_mood_history">My Mood History</string>
+    <string name="my_own_moods">My Own Moods</string>
     <string name="followed_moods">Followed Moods</string>
     <string name="local_moods">Local Moods</string>
     <string name="profile_picture">profile picture</string>
