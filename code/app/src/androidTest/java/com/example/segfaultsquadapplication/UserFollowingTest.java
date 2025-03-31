@@ -73,9 +73,9 @@ import java.util.Objects;
 @LargeTest
 public class UserFollowingTest {
     // The time to wait for username suggestions
-    private static final long SUGGESTION_WAIT_TIME = 3000;
+    static final long SUGGESTION_WAIT_TIME = 3000;
     // The time to wait for general suggestions
-    private static final long UI_POPULATE_WAIT_TIME = 1000;
+    static final long UI_POPULATE_WAIT_TIME = 1000;
 
     @BeforeClass
     public static void setup(){

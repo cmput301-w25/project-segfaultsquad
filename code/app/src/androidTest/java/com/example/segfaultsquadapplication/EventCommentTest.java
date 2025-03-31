@@ -1,6 +1,7 @@
 package com.example.segfaultsquadapplication;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.action.ViewActions.typeText;
@@ -10,6 +11,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.example.segfaultsquadapplication.TestLoginUtil.waitUntil;
+import static com.example.segfaultsquadapplication.UserFollowingTest.SUGGESTION_WAIT_TIME;
+import static com.example.segfaultsquadapplication.UserFollowingTest.UI_POPULATE_WAIT_TIME;
 import static com.example.segfaultsquadapplication.UserFollowingTest.clickCousinViewWithId;
 import static com.example.segfaultsquadapplication.UserFollowingTest.handleRequests;
 import static com.example.segfaultsquadapplication.UserFollowingTest.loginAs;
@@ -63,9 +66,6 @@ import java.util.Objects;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class EventCommentTest {
-    // The time to wait for username suggestions
-    private static final long SUGGESTION_WAIT_TIME = 3000;
-
     @BeforeClass
     public static void setup(){
         // Specific address for emulated device to access our localHost
@@ -186,18 +186,19 @@ public class EventCommentTest {
         assertTrue(waitUntil(scenario, (f) -> (f instanceof MyMoodHistoryFragment), 5, 500));
         // Click on event 3's comment
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
-        onView(withId(R.id.commentsRecyclerView)).check(matches(isDisplayed()));
+        Thread.sleep(UI_POPULATE_WAIT_TIME);
+        onView(withId(R.id.commentsTitle)).check(matches(isDisplayed()));
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User1 was here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
         // Click away then click back to refresh comments
-        onView(withId(R.id.headingText)).perform(click());
+        pressBack();
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         // Check displayed
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("user1"))).check(matches(isDisplayed()));
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("User1 was here"))).check(matches(isDisplayed()));
+        onView(withText("user1")).check(matches(isDisplayed()));
+        onView(withText("User1 was here")).check(matches(isDisplayed()));
         // Go back
-        onView(withId(R.id.headingText)).perform(click());
+        pressBack();
     }
 
     /**
@@ -230,19 +231,19 @@ public class EventCommentTest {
 
         // Click on event 3's comment
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
-        onView(withId(R.id.commentsRecyclerView)).check(matches(isDisplayed()));
+        onView(withId(R.id.commentsTitle)).check(matches(isDisplayed()));
         // Add one comment
         onView(withId(R.id.commentInput)).perform(typeText("User2 was also here"));
         onView(withId(R.id.submitCommentButton)).perform(click());
         // Click away then click back to refresh comments
-        onView(withId(R.id.headingText)).perform(click());
+        pressBack();
         onView(withText("u1E3")).perform(clickCousinViewWithId(R.id.comment_icon));
         // Check displayed
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("user1"))).check(matches(isDisplayed()));
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("User1 was here"))).check(matches(isDisplayed()));
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("user2"))).check(matches(isDisplayed()));
-        onView(allOf(withParent(withId(R.id.commentsRecyclerView)), withText("User2 was also here"))).check(matches(isDisplayed()));
+        onView(withText("user1")).check(matches(isDisplayed()));
+        onView(withText("User1 was here")).check(matches(isDisplayed()));
+        onView(withText("user2")).check(matches(isDisplayed()));
+        onView(withText("User2 was also here")).check(matches(isDisplayed()));
         // Go back
-        onView(withId(R.id.headingText)).perform(click());
+        pressBack();
     }
 }
