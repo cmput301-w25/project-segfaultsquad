@@ -1,36 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
 
-    <TextView
-        android:id="@+id/commentsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Comments"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/commentsRecyclerView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:nestedScrollingEnabled="false" />
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@color/app_background">
 
-    <EditText
-        android:id="@+id/commentInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Add a comment"
-        android:layout_marginTop="8dp" />
+        <!-- Comments header with icon -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-    <Button
-        android:id="@+id/submitCommentButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Submit"
-        android:layout_gravity="end" />
-</LinearLayout> 
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_edit"
+                android:layout_marginEnd="8dp"
+                app:tint="@color/text_colour" />
+
+            <TextView
+                android:id="@+id/commentsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COMMENTS"
+                android:textColor="@color/text_colour"
+                android:fontFamily="@font/kanitlight"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Divider line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Comments list -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/commentsRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:nestedScrollingEnabled="false" />
+
+        <!-- Add comment section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ADD YOUR COMMENT"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanitlight"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/commentInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="What are your thoughts?"
+            android:background="@drawable/rounded_light_background"
+            android:padding="12dp"
+            android:minHeight="80dp"
+            android:gravity="top|start"
+            android:inputType="textMultiLine"
+            android:fontFamily="@font/kanitlight"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/submitCommentButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Submit"
+            android:textColor="@color/text_colour"
+            android:fontFamily="@font/kanit"
+            android:backgroundTint="@color/TopHeaderBackground"
+            app:cornerRadius="12dp"
+            android:paddingHorizontal="16dp"
+            android:layout_gravity="end" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

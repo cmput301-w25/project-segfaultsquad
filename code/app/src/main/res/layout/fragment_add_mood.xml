@@ -225,7 +225,7 @@
                             android:padding="8dp"
                             android:layout_gravity="center|bottom"
                             android:layout_marginBottom="16dp"
-                            android:textColor="@android:color/white"/>
+                            android:textColor="@color/text_colour"/>
                     </FrameLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -327,7 +327,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Buttons - improved styling -->
+    <!-- Bottom Buttons  -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
