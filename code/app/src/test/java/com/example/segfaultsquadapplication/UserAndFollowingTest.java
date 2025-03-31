@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class UserAndFollowingTest {
     @Before
     public void setup() throws InterruptedException {
-        new MockDb(DbUtils.COLL_MOOD_EVENTS, DbUtils.COLL_USERS);
+        new MockDb(DbUtils.COLL_MOOD_EVENTS, DbUtils.COLL_USERS, DbUtils.COLL_COMMENTS);
         MockDb.await(finishCallback ->
                 () -> UserManager.login(
                         "user1@gmail.com",

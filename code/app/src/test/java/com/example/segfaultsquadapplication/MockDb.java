@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -243,6 +244,20 @@ public class MockDb {
             return wrapTask(null);
         }).when(docRef).set(any());
 
+        // Normal field updates
+        doAnswer(invoc -> {
+            Map<String, Object> updateMap = invoc.getArgument(0);
+            Object dataObj = getObjFromDocRef(mockColl, docId);
+            for (String key : updateMap.keySet()) {
+                try {
+                    Field fieldDataArr = dataObj.getClass().getDeclaredField(key);
+                    fieldDataArr.setAccessible(true);
+                    fieldDataArr.set(dataObj, updateMap.get(key));
+                } catch (Exception ignored) {}
+            }
+            return wrapTask(null);
+        }).when(docRef).update(any());
+        // Array union / remove updates
         doAnswer(invoc -> {
             String fieldVal = invoc.getArgument(0);
             Object update = invoc.getArgument(1);
@@ -270,9 +285,9 @@ public class MockDb {
                 fieldDataArr.setAccessible(true);
                 ((Collection<Object>) fieldDataArr.get(dataObj)).addAll(addElements);
             }
-            // Other updates irrelevant, not mocked.
+            // Other updates is not relevant in this project.
             else {
-                throw new RuntimeException("Unsupported mock update type");
+                throw new RuntimeException("Unsupported update type");
             }
             return wrapTask(null);
         }).when(docRef).update(anyString(), any());
