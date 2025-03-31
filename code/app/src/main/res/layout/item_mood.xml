@@ -71,7 +71,7 @@
 
             <!-- Textual details -->
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
@@ -79,38 +79,38 @@
                 <!-- Mood Type -->
                 <TextView
                     android:id="@+id/textMoodType"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp"/>
+                    android:textStyle="bold" />
 
                 <!-- Reason -->
                 <TextView
                     android:id="@+id/textReason"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
                     android:layout_marginTop="4dp"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp" />
 
                 <!-- Social Situation -->
                 <TextView
                     android:id="@+id/textSocialSituation"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
                     android:textColor="@android:color/black"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="12sp" />
 
                 <!-- Mood Private/Public Visibility -->
                 <TextView
                     android:id="@+id/textMoodVisibility"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
                     android:textColor="@android:color/black"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <!-- Comment Icon -->
@@ -122,7 +122,8 @@
                 android:contentDescription="Comment"
                 android:layout_marginStart="16dp"
                 android:layout_gravity="bottom"
-                android:visibility="visible"/>
+                android:visibility="visible"
+                android:layout_marginEnd="40dp"/>
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

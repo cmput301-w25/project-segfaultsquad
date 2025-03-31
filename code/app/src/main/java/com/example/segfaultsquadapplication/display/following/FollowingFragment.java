@@ -209,7 +209,10 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
      * @param commentsAdapter The adapter to notify of data changes.
      */
     private void loadCommentsForMood(String moodId, List<Comment> comments, CommentsAdapter commentsAdapter) {
-        CommentManager.getCommentsForMood(moodId, comments, commentsAdapter);
+        CommentManager.getCommentsForMood(moodId, comments,
+                isSuccess -> {
+                    if (isSuccess) commentsAdapter.notifyDataSetChanged();
+                });
     }
 
     /**
@@ -222,8 +225,8 @@ public class FollowingFragment extends Fragment implements MoodAdapter.OnMoodCli
         FirebaseUser currentUser = UserManager.getCurrUser(); // Get the current user
         if (currentUser != null) {
             String username = UserManager.getUsername(currentUser); // Get the username
-            Comment comment = new Comment(UserManager.getUserId(), username, commentText);
-            CommentManager.submitComment(moodId, comment);
+            Comment comment = new Comment(moodId, UserManager.getUserId(), username, commentText);
+            CommentManager.submitComment(comment);
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
